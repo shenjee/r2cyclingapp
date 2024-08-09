@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
 
-
-class R2FlatButton extends FlatButton {
-  final String label;
-  final Color color;
-  final Color textColor;
+class R2FlatButton extends StatelessWidget {
+  final String text;
   final VoidCallback onPressed;
 
-  const R2FlatButton({
-    Key key,
-    this.label,
-    this.color,
-    this.textColor,
-    this.onPressed,
-  }) : super(key: key);
+  R2FlatButton({required this.text, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
-      child: Text(label, style: TextStyle(fontSize: 20),),
-      color: Color(0x539765),
-      textColor: textColor,
+    return TextButton(
+      style: const ButtonStyle(
+        minimumSize: WidgetStatePropertyAll(Size(340, 57)),
+        textStyle: WidgetStatePropertyAll(
+          TextStyle(
+            fontSize: 18.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: WidgetStatePropertyAll(Color(0xFF539765)),
+        foregroundColor: WidgetStatePropertyAll(Colors.white),
+      ),
       onPressed: onPressed,
+      child: Text(text),
     );
   }
 }

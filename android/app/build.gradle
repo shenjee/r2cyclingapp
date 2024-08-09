@@ -51,6 +51,18 @@ android {
             signingConfig = signingConfigs.debug
         }
     }
+
+    // add for kotlin duplicated problem, when use flutter_ractive_ble
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    // add for kotlin duplicated problem, when use flutter_ractive_ble
+    configurations.all {
+        resolutionStrategy {
+            force "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+            force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+        }
+    }
 }
 
 flutter {

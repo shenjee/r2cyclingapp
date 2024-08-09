@@ -1,3 +1,16 @@
+// add for kotlin duplicated problem, when use flutter_ractive_ble
+buildscript {
+    ext.kotlin_version = '1.8.21' // Specify the version you want to use
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:8.0.2"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
 allprojects {
     repositories {
         google()
