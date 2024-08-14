@@ -39,16 +39,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
         future: _account?.getAvatar(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) {
-            return const CircleAvatar(
-              backgroundImage: AssetImage('assets/images/default_avatar.png'),
+            return ClipOval(
+              child: SizedBox(
+                width: 70.0,  // Set the desired width
+                height: 70.0, // Set the desired height
+                child: Image.asset(
+                  'assets/images/default_avatar.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
             );
           }
-          return CircleAvatar(
-            backgroundImage: snapshot.data?.image,
+          return ClipOval(
+            child: SizedBox(
+              width: 70.0,  // Set the desired width
+              height: 70.0, // Set the desired height
+              child: snapshot.data!,
+            ),
           );
         },
       ),
-      title: Text(_account?.nickname ?? 'User', style: const TextStyle(fontSize: 20.0),),
+      title: Text(_account?.nickname ?? 'User', style: const TextStyle(fontSize: 24.0),),
       onTap: () {
         Navigator.push(
           context,
