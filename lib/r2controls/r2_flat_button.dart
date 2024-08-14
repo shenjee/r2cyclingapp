@@ -1,27 +1,41 @@
 import 'package:flutter/material.dart';
 
 class R2FlatButton extends StatelessWidget {
-  final String text;
-  final VoidCallback onPressed;
+  final String _text;
+  final VoidCallback _onPressed;
+  final Color _backgroundColor;
+  final double _width;
+  final double _height;
 
-  R2FlatButton({required this.text, required this.onPressed});
+  const R2FlatButton({
+    super.key,  // Include the Key parameter here
+    required String text,
+    required VoidCallback onPressed,
+    Color? backgroundColor,
+    double? width,
+    double? height,})
+      : _text = text,
+        _onPressed = onPressed,
+        _backgroundColor = backgroundColor?? const Color(0xFF539765),
+        _width = width?? 340.0,
+        _height = height?? 57.0;
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      style: const ButtonStyle(
-        minimumSize: WidgetStatePropertyAll(Size(340, 57)),
-        textStyle: WidgetStatePropertyAll(
+      style: ButtonStyle(
+        minimumSize: WidgetStatePropertyAll(Size(_width, _height)),
+        textStyle: const WidgetStatePropertyAll(
           TextStyle(
             fontSize: 18.0,
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: WidgetStatePropertyAll(Color(0xFF539765)),
-        foregroundColor: WidgetStatePropertyAll(Colors.white),
+        backgroundColor: WidgetStatePropertyAll(_backgroundColor),
+        foregroundColor: const WidgetStatePropertyAll(Colors.white),
       ),
-      onPressed: onPressed,
-      child: Text(text),
+      onPressed: _onPressed,
+      child: Text(_text),
     );
   }
 }
