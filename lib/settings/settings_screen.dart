@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import "package:r2cyclingapp/database/r2_db_helper.dart";
 import "package:r2cyclingapp/database/r2_account.dart";
 import 'package:r2cyclingapp/database/r2_token_storage.dart';
+import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
 
-import 'user_info_screen.dart';
+import 'user_profile_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -37,7 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       leading: FutureBuilder<Image>(
         future: _account?.getAvatar(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) {
             return const CircleAvatar(
               backgroundImage: AssetImage('assets/images/default_avatar.png'),
             );
@@ -51,7 +52,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => UserInfoScreen()),
+          MaterialPageRoute(builder: (context) => UserProfileScreen()),
         );
       },
     );
@@ -153,17 +154,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _versionWidget(context),
             const SizedBox(height: 10.0),
             // 4. Logout Button
-            Center(
-              child: ElevatedButton(
-                onPressed: () async {
-                  await R2DBHelper().deleteAccount(_account?.account ?? '');
-                  await R2TokenStorage.deleteToken();
-                  Navigator.of(context).pop();
-                },
-                child: const Text('退出登录'),
+            Expanded(
+              child:Center(
+                child: R2FlatButton(
+                  text: '退出登录',
+                  onPressed: () async {
+                    await R2DBHelper().deleteAccount(_account?.account ?? '');
+                    await R2TokenStorage.deleteToken();
+                    Navigator.of(context).pop(true);
+                    },
+                  backgroundColor: Colors.red,
+                ),
               ),
             ),
-            const Spacer(),
             // 5. Company Info and Copyright
             Center(child:_copyrightWidget(context)),
           ],

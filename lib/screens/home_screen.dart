@@ -12,7 +12,6 @@ import 'package:r2cyclingapp/emergency/r2_sos_sender.dart';
 import 'package:r2cyclingapp/permission/permission_dialog.dart';
 import 'package:r2cyclingapp/login/user_register_screen.dart';
 import 'package:r2cyclingapp/group/group_intercom_screen.dart';
-import 'package:r2cyclingapp/group/group_list_screen.dart';
 
 import 'helmet_screen.dart';
 
@@ -38,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // what the hell WidgetsBinding is ? study it later
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _grantPermissions();
-      _checkToken();
+      _checkLoginStatus();
     });
     _checkBondedDevice();
     _loadEmergencyContactStatus();
@@ -67,9 +66,11 @@ class _HomeScreenState extends State<HomeScreen> {
    * let the user register/login to get the token;
    * if the token expires, request and newer the it.
    */
-  Future<void> _checkToken() async {
+  Future<void> _checkLoginStatus() async {
     final token = await R2TokenStorage.getToken();
-    if (token == null) {
+    final db = R2DBHelper();
+    final account = await db.getLocalAccount();
+    if (token == null || account == null) {
       _registerScreen();
     }
   }
@@ -351,8 +352,11 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings, size: 34.0,),
-            onPressed: () {
-              Navigator.pushNamed(context, '/settings');
+            onPressed: () async {
+              final _isLoggedOut = await Navigator.pushNamed(context, '/settings');
+              if (true == _isLoggedOut) {
+                _checkLoginStatus();
+              }
             },
           ),
         ],
