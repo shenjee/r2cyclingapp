@@ -1,5 +1,4 @@
 import 'package:flutter_background/flutter_background.dart';
-//import 'package:sms_advanced/sms_advanced.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
@@ -10,10 +9,19 @@ class R2BackgroundService {
   final R2DBHelper _dbHelper = R2DBHelper();
 
   Future<void> startService() async {
-    await FlutterBackground.enableBackgroundExecution();
-    _bluetoothModel.startListening((data) async {
-      await _sendSms(data);
-    });
+    final device = await R2DBHelper().getDevice();
+    if (device != null) {
+      // Connect to the bonded device
+      await _bluetoothModel.connectDevice(device.id,);
+
+      await FlutterBackground.enableBackgroundExecution();
+      _bluetoothModel.startListening(
+          device.id,
+              (data) async {
+            await _sendSms(data);
+          }
+      );
+    }
   }
 
   Future<void> stopService() async {
@@ -30,6 +38,7 @@ class R2BackgroundService {
     String message = 'Emergency! Location: ${position.latitude}, ${position.longitude}. Data: $data';
     List<Map<String, dynamic>> contacts = await _dbHelper.getContacts();
     List<String> recipients = contacts.map((contact) => contact['phone'] as String).toList();
+    print('back service() sms: $contacts');
 /*
     SmsSender sender = SmsSender();
     for (String recipient in recipients) {

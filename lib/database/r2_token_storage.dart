@@ -1,6 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class TokenStorage {
+class R2TokenStorage {
   static final _storage = FlutterSecureStorage();
 
   static Future<void> saveToken(String token) async {

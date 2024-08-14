@@ -4,10 +4,12 @@ import 'package:crypto/crypto.dart';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:r2cyclingapp/database/r2_account.dart';
 import 'package:r2cyclingapp/login/password_recover_screen.dart';
 import 'package:r2cyclingapp/login/user_register_screen.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
 import 'package:r2cyclingapp/database/r2_token_storage.dart';
+import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_response.dart';
 
 import 'package:r2cyclingapp/screens/home_screen.dart';
@@ -38,7 +40,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
     final String _phonenumber = _phone_controller.text;
     final String _password = _password_controller.text;
 
-    final t = await TokenStorage.getToken();
+    final t = await R2TokenStorage.getToken();
     print('get token: ${t}');
 
     String? combined;
@@ -76,11 +78,17 @@ class _UserLoginScreenState extends LoginBaseScreenState {
         final Map<String, dynamic> data = r.result;
         final token = data['token'];
         final need_set_passwd = data['defaultPassword'];
+        final db = R2DBHelper();
+        final account = R2Account(account: _phonenumber);
+
         print('  parse result:');
         print('    token:\n ${token}');
         print('    need_set_passwd: ${need_set_passwd}');
 
-        await TokenStorage.saveToken(token);
+        // save account
+        db.saveAccount(account);
+        // save token
+        await R2TokenStorage.saveToken(token);
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen()),

@@ -58,7 +58,7 @@ class R2BluetoothModel {
         );
   }
 
-  Future<void> sendDataToHelmet(String deviceId, List<int> data) async {
+  Future<void> sendData(String deviceId, List<int> data) async {
     try {
       await _reactiveBle.writeCharacteristicWithoutResponse(
           QualifiedCharacteristic(
@@ -75,21 +75,21 @@ class R2BluetoothModel {
   /*
    *
    */
-  void startListening(Function(String) onDataReceived) {
-    _reactiveBle.scanForDevices(withServices: [Uuid.parse(_readServcieID)]).listen((device) {
-      _reactiveBle.connectToDevice(id: device.id).listen((connectionState) {
-        if (connectionState.connectionState == DeviceConnectionState.connected) {
-          _reactiveBle.subscribeToCharacteristic(QualifiedCharacteristic(
-            serviceId: Uuid.parse(_readServcieID),
-            characteristicId: Uuid.parse(_readCharacteristicID),
-            deviceId: device.id,
-          )).listen((data) {
-            final receivedData = String.fromCharCodes(data);
-            onDataReceived(receivedData);
-          });
-        }
-      });
+  void startListening(String deviceId, Function(String) onDataReceived) {
+    final c = QualifiedCharacteristic(
+      serviceId: Uuid.parse(_readServcieID),
+      characteristicId: Uuid.parse(_readCharacteristicID),
+      deviceId: deviceId,
+    );
+    _reactiveBle.subscribeToCharacteristic(c).listen((data) {
+      //final receivedData = String.fromCharCodes(data);
+      final receivedData = _bytesToHex(data);
+      onDataReceived(receivedData);
     });
+  }
+
+  String _bytesToHex(List<int> bytes) {
+    return bytes.map((byte) => byte.toRadixString(16).padLeft(2, '0')).join('');
   }
 
   void dispose() {

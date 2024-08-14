@@ -6,7 +6,7 @@ class R2HttpRequest {
   final String _baseUrl = 'http://r2cycling.imai.site/api/';
 
   // Method to send the POST request.
-  Future<R2HttpResponse> sendRequest({String? token, required String api, required Map<String, String> body}) async {
+  Future<R2HttpResponse> sendRequest({String? token, required String api, Map<String, String>? body}) async {
     final String url = '$_baseUrl$api'; // Construct the full URL.
 
     // Initialize headers with content type.
@@ -20,12 +20,20 @@ class R2HttpRequest {
     }
 
     try {
+      http.Response response;
       // Send the POST request.
-      final response = await http.post(
-        Uri.parse(url),
-        headers: headers,
-        body: body,
-      );
+      if (null == body) {
+        response = await http.post(
+          Uri.parse(url),
+          headers: headers,
+        );
+      } else {
+        response = await http.post(
+          Uri.parse(url),
+          headers: headers,
+          body: body,
+        );
+      }
 
       // Convert the HTTP response to R2HttpResponse.
       if (response.statusCode == 200) {

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flash/flash.dart';
 import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
+import 'package:r2cyclingapp/database/r2_account.dart';
+import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'dart:convert';
 
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
@@ -43,8 +45,8 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
 
   Future<void> _setPassword() async {
     if (_password_controller.text == _confirm_controller.text) {
-      final t = await TokenStorage.getToken();
-      print('Passwrod Setting:');
+      final t = await R2TokenStorage.getToken();
+      print('Password Setting:');
       print('  get token: ${t}');
 
       if (null != t) {
@@ -77,6 +79,10 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
           print('stackTracke: ${r.stackTracke}');
           print('Result: ${r.result}');
           if (true == r.success) {
+            final db = R2DBHelper();
+            final account = R2Account(account: _phoneNumber??'');
+
+            db.saveAccount(account);
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => HomeScreen()),
@@ -93,9 +99,9 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
   @override
   Widget topWidget(BuildContext context) {
     return Padding(
-        padding: EdgeInsets.fromLTRB(40.0, 40.0, 40.0, 20.0),
+        padding: const EdgeInsets.fromLTRB(40.0, 40.0, 40.0, 20.0),
         child:Text(
-            style: TextStyle(fontSize: 46, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 46, fontWeight: FontWeight.bold),
             _title ??'设置密码'
         ),
     );
@@ -109,11 +115,11 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
           Container (
             width: 340,
             alignment: Alignment.centerLeft,
-            child:Text('密码至少6位，包含数字和字母\n'),
+            child: const Text('密码至少6位，包含数字和字母\n'),
           ),
           // text field for entering phone number
           R2UserTextField(
-            prefixWidget: Text(
+            prefixWidget: const Text(
               '[***]',
               style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -123,14 +129,14 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
             controller: _password_controller,
             keyboardType: TextInputType.phone,
           ),
-          SizedBox(height:20),
+          const SizedBox(height:20),
           // text field for entering password
           R2UserTextField(
-            prefixWidget: Text(
+            prefixWidget: const Text(
               '[***]',
               style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 20),
+                  fontSize: 18.0),
             ),
             hintText: '再次确认',
             controller: _confirm_controller,

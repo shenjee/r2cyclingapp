@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:r2cyclingapp/connection/bt/r2_bluetooth_model.dart';
 import 'package:r2cyclingapp/database/r2_token_storage.dart';
-import 'package:r2cyclingapp/permission/permission_dialog.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_device.dart';
+import 'package:r2cyclingapp/emergency/r2_sos_sender.dart';
 
+import 'package:r2cyclingapp/permission/permission_dialog.dart';
 import 'package:r2cyclingapp/login/user_register_screen.dart';
 import 'package:r2cyclingapp/group/group_intercom_screen.dart';
 import 'package:r2cyclingapp/group/group_list_screen.dart';
-import 'package:r2cyclingapp/service/r2_background_service.dart';
 
 import 'helmet_screen.dart';
 
@@ -21,18 +23,21 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _bleModel = R2BluetoothModel();
-  final _backgroundService = R2BackgroundService();
   R2Device? _connectedDevice;
   bool _isUnbindMode = false;
   String emergencyContactStatus = '已关闭';
   Color emergencyContactColor = Colors.grey;
+
+  // temporary usage to simulate the detection of a fall
+  String? _strLast;
+  String? _strCurr;
 
   @override
   void initState() {
     super.initState();
     // what the hell WidgetsBinding is ? study it later
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkPermission();
+      _grantPermissions();
       _checkToken();
     });
     _checkBondedDevice();
@@ -40,51 +45,32 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   /*
-   * Check the permissons granted by user
+   * When launch the app at the first time ,
+   * ask the user to grant the permissons.
    */
-  void _checkPermission() async {
-    bool isGranted = false;
-    if (!isGranted) {
-      bool result = await showDialog(
+  void _grantPermissions() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
+    if (false == isFirstLaunch) {
+      await prefs.setBool('isFirstLaunch', false);
+      await showDialog(
         context: context,
         builder: (BuildContext context) => PermissionDialog(),
       );
     }
   }
 
+  /*
+   * check the user token is available or not.
+   * if it is available, do nothing;
+   * if there is no token or the token is damaged, pop up registration screen to
+   * let the user register/login to get the token;
+   * if the token expires, request and newer the it.
+   */
   Future<void> _checkToken() async {
-    final token = await TokenStorage.getToken();
+    final token = await R2TokenStorage.getToken();
     if (token == null) {
       _registerScreen();
-    }
-  }
-
-  Future<void> _loadEmergencyContactStatus() async {
-    final setting = await R2DBHelper().getSetting();
-    setState(() {
-      if (setting != null && setting['emergencyContactEnabled'] == 1) {
-        emergencyContactStatus = '已开启';
-        emergencyContactColor = const Color(0xFF539765);
-        _backgroundService.startService();
-      } else {
-        emergencyContactStatus = '已关闭';
-        emergencyContactColor = Colors.grey;
-        _backgroundService.stopService();
-      }
-    });
-  }
-
-  Future<void> _checkBondedDevice() async {
-    final device = await R2DBHelper().getDevice();
-    if (device != null) {
-      // Connect to the bonded device
-      final connectedDevice = await _bleModel.connectDevice(device.id,);
-      setState(() {
-        _connectedDevice = R2Device(brand: device.brand, id: device.id, name: device.name);
-      });
-      _backgroundService.startService();
-    } else {
-      _backgroundService.stopService();
     }
   }
 
@@ -101,6 +87,31 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> _loadEmergencyContactStatus() async {
+    final setting = await R2DBHelper().getSetting();
+    setState(() {
+      if (setting != null && setting['emergencyContactEnabled'] == 1) {
+        emergencyContactStatus = '已开启';
+        emergencyContactColor = const Color(0xFF539765);
+      } else {
+        emergencyContactStatus = '已关闭';
+        emergencyContactColor = Colors.grey;
+      }
+    });
+  }
+
+  Future<void> _checkBondedDevice() async {
+    final device = await R2DBHelper().getDevice();
+    if (device != null) {
+      // Connect to the bonded device
+      await _bleModel.connectDevice(device.id,);
+      setState(() {
+        _connectedDevice = R2Device(brand: device.brand, id: device.id, name: device.name);
+      });
+      _startListen();
+    }
+  }
+
   /*
    * callback for Bluetooth Paring Screen
    * when BLE's connected, it will be executed.
@@ -113,7 +124,44 @@ class _HomeScreenState extends State<HomeScreen> {
       _connectedDevice = r2Device;
     });
     await R2DBHelper().saveDevice(r2Device);
-    _backgroundService.startService();
+    _startListen();
+  }
+
+  void _startListen() {
+    if (null != _connectedDevice) {
+      _bleModel.sendData(_connectedDevice!.id, [0x55, 0xB1, 0x03, 0x09, 0x00, 0x01, 0x10]);
+      _bleModel.startListening(_connectedDevice!.id, _onHelmetNotify);
+    }
+  }
+
+  /*
+   * received the notification and handle it
+   */
+  void _onHelmetNotify(String data) {
+    // "-" :0x55a10601000401483879
+    // "‣︎" :0x55a1060100020149387e
+    // "+" :0x55a10601000401493878
+    // "<" :0x55a10601000801483875
+    // "✆" :0x55a1060100100148386d
+    // ">" :0x55a1060100200149385c
+    // "end" :0x55a1060100000149387d
+    print('_onHelmetNotify(): $data');
+    if (data != '55a1060100000149387c') {
+      _strCurr = data;
+      print('_strLast: $_strLast (length: ${_strLast?.trim().length})');
+      print('_strCurr: $_strCurr (length: ${_strCurr?.trim().length})');
+      if (_strLast == '55a10601000401493878' && _strCurr == '55a10601000801493874') {
+        print('Condition met: Sending SMS');
+        final sr = R2SosSender();
+        sr.sendSos(data);
+      } else {
+        print('Condition not met.');
+      }
+
+      _strLast = _strCurr;
+    } else {
+      print('Ignored data: $data');
+    }
   }
 
   /*
@@ -157,7 +205,6 @@ class _HomeScreenState extends State<HomeScreen> {
         _isUnbindMode = false;
       });
     }
-    _backgroundService.stopService();
   }
 
   /*
@@ -322,7 +369,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const Divider(),
                 _listItem(
                     Icons.group, '骑行对讲', '',
-                        (){
+                        () async {
                       bool isUserInGroup = false;
                       if (isUserInGroup) {
                             // If user is in a group, navigate to GroupIntercomScreen
@@ -330,11 +377,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               MaterialPageRoute(builder: (context) => GroupIntercomScreen()),
                             );
                           } else {
-                            // If user is not in a group, navigate to GroupListScreen
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (context) => GroupListScreen()),
-                            );
-                          }
+                        // If user is not in a group, navigate to GroupListScreen
+                        await Navigator.pushNamed(context, '/groupList');
+                      }
                     }
                     ),
                 const Divider(),
@@ -342,6 +387,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         () async {
                           await Navigator.pushNamed(context, '/emergencyContact');
                           _loadEmergencyContactStatus();
+                          await Permission.sms.request();
+
                         },
                   subtitleColor: emergencyContactColor,
                 ),

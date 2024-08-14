@@ -28,17 +28,17 @@ class _HelmetScreenState extends State<HelmetScreen> {
   void _sendDataAppConnection() {
     // App sends 0x55B10309000110
     // Left Light 0x55B10301000110
-    widget.bleModel.sendDataToHelmet(widget.device.id, [0x55, 0xB1, 0x03, 0x09, 0x00, 0x01, 0x10]);
+    widget.bleModel.sendData(widget.device.id, [0x55, 0xB1, 0x03, 0x09, 0x00, 0x01, 0x10]);
   }
 
   void _sendDataLeftLight() {
     // Right Light 0x55B10301000118
-    widget.bleModel.sendDataToHelmet(widget.device.id, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x01, 0x18]);
+    widget.bleModel.sendData(widget.device.id, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x01, 0x18]);
   }
 
   void _sendDataRightLight() {
     // Right Light 0x55B1030100D0C9
-    widget.bleModel.sendDataToHelmet(widget.device.id, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x02, 0x1b]);
+    widget.bleModel.sendData(widget.device.id, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x02, 0x1b]);
   }
 
   @override

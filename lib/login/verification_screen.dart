@@ -115,7 +115,7 @@ class VerificationScreenState extends LoginBaseScreenState {
         print('    token: ${token}');
         print('    need_set_passwd: ${need_set_passwd}');
 
-        await TokenStorage.saveToken(token);
+        await R2TokenStorage.saveToken(token);
 
         is_token_handled(phonenumber,need_set_passwd);
       }

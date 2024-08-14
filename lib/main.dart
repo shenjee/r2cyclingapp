@@ -4,7 +4,9 @@ import 'package:flutter_background/flutter_background.dart';
 import 'package:r2cyclingapp/emergency/emergency_contact_screen.dart';
 import 'package:r2cyclingapp/screens/home_screen.dart';
 import 'package:r2cyclingapp/screens/bluetooth_pairing_screen.dart';
+import 'package:r2cyclingapp/group/group_list_screen.dart';
 import 'package:r2cyclingapp/login/user_register_screen.dart';
+import 'package:r2cyclingapp/settings/settings_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,7 +48,9 @@ class R2CyclingApp extends StatelessWidget {
       routes: {
         '/':(context) => HomeScreen(),
         '/register':(context) => UserRegisterScreen(),
+        '/groupList':(context) => GroupListScreen(),
         '/emergencyContact':(context) => EmergencyContactScreen(),
+        '/settings':(context) => SettingsScreen(),
       }
     );
   }

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class R2PermissionModels {
@@ -23,6 +22,7 @@ class R2PermissionModels {
       Permission.bluetoothConnect,
       //Permission.microphone,
       Permission.location,
+      Permission.sms,
     ].request();
 
     return statuses.values.every((status) => status.isGranted);

@@ -1,19 +1,30 @@
 import 'dart:convert';
 
 class R2HttpResponse {
-  final bool success;
-  final String message;
-  final int code;
-  final String? stackTracke;
-  final dynamic result;
+  final bool _success;
+  final String _message;
+  final int _code;
+  final String? _stackTracke;
+  final dynamic _result;
 
   R2HttpResponse({
-    required this.success,
-    required this.message,
-    required this.code,
-    this.stackTracke,
-    required this.result
-  });
+    required bool success,
+    required String message,
+    required int code,
+    String? stackTracke,
+    required dynamic result
+  }) : _success = success,
+        _message = message,
+        _code = code,
+        _stackTracke = stackTracke,
+        _result = result;
+
+  // Getters
+  bool get success => _success;
+  String get message => _message;
+  int get code => _code;
+  String? get stackTracke => _stackTracke;
+  dynamic get result => _result;
 
   static dynamic _parseResult(dynamic result) {
     if (result is String) {
@@ -23,7 +34,7 @@ class R2HttpResponse {
           return decoded;
         }
       } catch (e) {
-        // 如果解析失败，保留原始字符串
+        // If parsing fails, retain the original string.
       }
     }
     return result;
