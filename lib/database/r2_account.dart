@@ -83,7 +83,7 @@ class R2Account {
     return {
       'account': _account,
       'nickname': _nickname,
-      'iconPath': _avatarPath,
+      'avatarPath': _avatarPath,
     };
   }
 
@@ -91,6 +91,6 @@ class R2Account {
   factory R2Account.fromMap(Map<String, dynamic> map) {
     return R2Account(account: map['account'])
       ..nickname = map['nickname']
-      ..avatarPath = map['iconPath'];
+      ..avatarPath = map['avatarPath'];
   }
 }

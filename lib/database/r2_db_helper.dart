@@ -27,7 +27,7 @@ class R2DBHelper {
       version: 2, // Increment the version number to handle schema changes
       onCreate: (db, version) async {
         await db.execute(
-          'CREATE TABLE accounts(account TEXT PRIMARY KEY, nickname TEXT, iconPath INTEGER)',
+          'CREATE TABLE accounts(account TEXT PRIMARY KEY, nickname TEXT, avatarPath INTEGER)',
         );
         await db.execute(
           'CREATE TABLE devices(id TEXT PRIMARY KEY, brand TEXT, name TEXT)',
@@ -50,7 +50,7 @@ class R2DBHelper {
         }
         if (oldVersion < 3) {
           await db.execute(
-            'CREATE TABLE accounts(account TEXT PRIMARY KEY, nickname TEXT, icon INTEGER)',
+            'CREATE TABLE accounts(account TEXT PRIMARY KEY, nickname TEXT, avatarPath INTEGER)',
           );
         }
       },
