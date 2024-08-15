@@ -78,7 +78,8 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
         if (!isEmergencyContactEnabled)
           const Padding(padding: EdgeInsets.fromLTRB(40.0, 10.0, 40.0, 0.0),
             child:Text(
-              '开启SOS紧急联络，您在骑行过程中若摔倒，将自动将您的位置信息以短信方式发给您的紧急联系人，并尝试拨打紧急联系人的电话。',
+              '开启SOS紧急联络，您在骑行过程中若摔倒，'
+                  '将自动将您的位置信息以短信方式发给您的紧急联系人，并尝试拨打紧急联系人的电话。',
               style: TextStyle(
                 fontSize: 16.0,
                 color: Colors.grey,

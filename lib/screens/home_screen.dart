@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:r2cyclingapp/connection/bt/r2_bluetooth_model.dart';
+import 'package:r2cyclingapp/connection/bt/r2_ble_command.dart';
 import 'package:r2cyclingapp/database/r2_token_storage.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_device.dart';
@@ -28,8 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Color emergencyContactColor = Colors.grey;
 
   // temporary usage to simulate the detection of a fall
-  String? _strLast;
-  String? _strCurr;
+  int? _strLast;
+  int? _strCurr;
 
   @override
   void initState() {
@@ -147,11 +148,13 @@ class _HomeScreenState extends State<HomeScreen> {
     // ">" :0x55a1060100200149385c
     // "end" :0x55a1060100000149387d
     print('_onHelmetNotify(): $data');
-    if (data != '55a1060100000149387c') {
-      _strCurr = data;
-      print('_strLast: $_strLast (length: ${_strLast?.trim().length})');
-      print('_strCurr: $_strCurr (length: ${_strCurr?.trim().length})');
-      if (_strLast == '55a10601000401493878' && _strCurr == '55a10601000801493874') {
+    R2BLECommand command = decodeBLEData(data);
+    print('_onHelmetNotify(): ${command.toString()}');
+    if (0 != command.instruction) {
+      _strCurr = command.instruction;
+      print('last instruction: $_strLast');
+      print('current instruction: $_strCurr');
+      if (4 == _strLast && 8 == _strCurr) {
         print('Condition met: Sending SMS');
         final sr = R2SosSender();
         sr.sendSos(data);

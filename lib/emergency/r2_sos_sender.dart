@@ -1,10 +1,35 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
+import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
+import 'package:r2cyclingapp/database/r2_token_storage.dart';
 
 import 'r2_sms.dart';
 
 class R2SosSender {
   final R2DBHelper _dbHelper = R2DBHelper();
+
+  Future<String?> _requestShortAddress(double longitude, double latitude) async {
+    String? address;
+    final token = await R2TokenStorage.getToken();
+    final r2request = R2HttpRequest();
+    final r2response = await r2request.sendRequest(
+      token: token,
+      api: 'locationEvent/fallDownReport',
+      body: {
+        'eventLat': '$latitude',
+        'eventLon': '$longitude',
+      },
+    );
+
+    if (true == r2response.success) {
+      String resultData = r2response.result;
+      address = 'http://r2cycling.imai.site/t/$resultData';
+    } else {
+      print('Failed to request group code: $r2response');
+    }
+
+    return address;
+  }
 
   Future<void> sendSos(String data) async {
     const LocationSettings locationSettings = LocationSettings(
@@ -12,11 +37,21 @@ class R2SosSender {
       distanceFilter: 100,
     );
 
-    Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
-    String message = '【R2 Cycling】您的好友骑行时摔倒了，位置：${position.longitude},${position.latitude}';
-    //String message = 'https://m.amap.com/navi/?dest=${position.longitude},${position.latitude}&destName=摔倒位置&hideRouteIcon=1&key=5aae26e3d543c89c1bfadf92925d4407&jscode=5b354fd17361c1a37d888a7a0ddf28cd';
+    Position position = await Geolocator.getCurrentPosition(
+        locationSettings: locationSettings);
+    final address = await _requestShortAddress(
+        position.longitude, position.latitude);
+    String message;
+    if (null == address) {
+      message = '【R2 Cycling】您的好友骑行时摔倒了，点击查看位置：${position
+          .longitude},${position.latitude}';
+    } else {
+      message = '【R2 Cycling】您的好友骑行时摔倒了，点击查看位置：$address';
+    }
+
     List<Map<String, dynamic>> contacts = await _dbHelper.getContacts();
-    List<String> recipients = contacts.map((contact) => contact['phone'] as String).toList();
+    List<String> recipients = contacts.map((
+        contact) => contact['phone'] as String).toList();
 
     for (String recipient in recipients) {
       print('send $recipient : $message');
