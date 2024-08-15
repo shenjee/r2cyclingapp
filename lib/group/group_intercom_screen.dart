@@ -1,23 +1,205 @@
 import 'package:flutter/material.dart';
 
-class GroupIntercomScreen extends StatelessWidget {
+import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
+import 'package:r2cyclingapp/database/r2_token_storage.dart';
+import 'package:r2cyclingapp/database/r2_db_helper.dart';
+import 'package:r2cyclingapp/database/r2_account.dart';
+
+class GroupIntercomScreen extends StatefulWidget {
+  GroupIntercomScreen({super.key});
+
+  @override
+  _GroupIntercomScreenState createState() => _GroupIntercomScreenState();
+}
+
+class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
+  String? _groupCode;
+  final List<R2Account> _members = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _requestGroupCode();
+    _loadLocalUser();
+  }
+
+  void _loadLocalUser() async {
+    final db = R2DBHelper();
+    final account = await db.getLocalAccount();
+    if (account != null && _members.length < 8) {
+      setState(() {
+        _members.add(account);
+      });
+    }
+  }
+
+  void _decodeMemberList(Map<String, dynamic> result) {
+    List<dynamic> mlist = result['memberList']; // 获取memberList字段
+    final account = _members.first;
+
+    for (var memberData in mlist) {
+      if (memberData['loginId'] != account.account) {
+        R2Account account = R2Account(
+            account: memberData['userMobile'] ?? memberData['loginId'])
+          ..nickname = memberData['userName'] ?? 'Unknown'
+          ..avatarPath = memberData['userAvatar'] ?? ''; // 使用默认值或null
+
+        // 添加到成员列表
+        if (_members.length < 8) {
+          setState(() {
+            _members.add(account);
+          });
+        }
+      }
+    }
+  }
+
+  void _requestGroupCode() async {
+    final token = await R2TokenStorage.getToken();
+    final r2request = R2HttpRequest();
+    final r2response = await r2request.sendRequest(
+      token: token,
+      api: 'cyclingGroup/getMyGroup',
+    );
+
+    if (true == r2response.success) {
+      print('Request succeeded: ${r2response.message}');
+      print('Response code: ${r2response.code}');
+      print('Result: ${r2response.result}');
+
+      Map<String, dynamic> resultData = r2response.result;
+      int groupNum = resultData['groupNum'];
+      String formattedString = groupNum.toString().padLeft(4, '0'); // Convert to 4-digit string
+      print('Formatted Result: $formattedString');
+      setState(() {
+        _groupCode = formattedString;
+      });
+      _decodeMemberList(resultData);
+    } else {
+      print('Failed to request group code: $r2response');
+    }
+  }
+
+  void _leaveGroup() async {
+    final token = await R2TokenStorage.getToken();
+    final r2request = R2HttpRequest();
+    final r2response = await r2request.sendRequest(
+      token: token,
+      api: 'cyclingGroup/leaveGroup',
+    );
+
+    if (true == r2response.success) {
+      print('Request succeeded: ${r2response.message}');
+      print('Response code: ${r2response.code}');
+      print('Result: ${r2response.result}');
+    } else {
+      print('Failed to request group code: $r2response');
+    }
+  }
+
+  Widget _groupNumberWidget(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        const SizedBox(height: 20.0,),
+        const Text('让身边的骑友输入下方四位编号，'),
+        const Text('加入同一个骑行组，'),
+        const SizedBox(height: 20.0,),
+        Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  Text(
+                    _groupCode??'- - - -',
+                    style: const TextStyle(
+                      fontSize: 48.0,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF539765),
+                    ),
+                  ),
+                ]
+            ),
+            const Positioned(
+              left:  80,
+              child: Text('组编号：'),
+            ),
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget _groupMemberWidget(BuildContext context) {
+    return GridView.builder (
+      shrinkWrap: true, // 在Column中使用时，确保GridView不会扩展以占据整个空间
+      physics: const NeverScrollableScrollPhysics(), // 禁用GridView滚动，避免与外部滚动冲突
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4, // 每行4个成员
+        childAspectRatio: 1, // 正方形的子项
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
+      itemCount: _members.length,
+      itemBuilder: (context, index) {
+        final member  = _members[index];
+        return Column(
+          children: [
+            FutureBuilder<Image>(
+              future: member.getAvatar(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircleAvatar(
+                    radius: 30,
+                    child: CircularProgressIndicator(),
+                  );
+                } else if (snapshot.hasError || !snapshot.hasData) {
+                  return const CircleAvatar(
+                    radius: 30,
+                    child: Icon(Icons.error),
+                  );
+                } else {
+                  return CircleAvatar(
+                    radius: 30,
+                    backgroundImage: snapshot.data?.image,
+                  );
+                }
+              },
+            ),
+            const SizedBox(height: 5),
+            Text(member.nickname),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Group Intercom'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Group Intercom',
-              style: TextStyle(fontSize: 24),
-            ),
-            // Add intercom functionality here
-          ],
+        title: const Text('骑行对讲'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            _leaveGroup();
+            Navigator.of(context).pop();
+          },
         ),
+      ),
+      body: Column (
+        children: <Widget>[
+          Center(child: _groupNumberWidget(context),),
+          _groupMemberWidget(context),
+          ElevatedButton(
+            onPressed: () {
+
+            },
+            child: const Text('Intercom'),
+          ),
+        ],
       ),
     );
   }

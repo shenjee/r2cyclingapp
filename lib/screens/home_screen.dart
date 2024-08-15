@@ -140,13 +140,13 @@ class _HomeScreenState extends State<HomeScreen> {
    * received the notification and handle it
    */
   void _onHelmetNotify(String data) {
-    // "-" :0x55a10601000401483879
-    // "‣︎" :0x55a1060100020149387e
-    // "+" :0x55a10601000401493878
-    // "<" :0x55a10601000801483875
-    // "✆" :0x55a1060100100148386d
-    // ">" :0x55a1060100200149385c
-    // "end" :0x55a1060100000149387d
+    // "-" :0x0004
+    // "‣︎" :0x0002
+    // "+" :0x0004
+    // "<" :0x0008
+    // "✆" :0x0010
+    // ">" :0x0020
+    // "end" :0x0000
     print('_onHelmetNotify(): $data');
     R2BLECommand command = decodeBLEData(data);
     print('_onHelmetNotify(): ${command.toString()}');
@@ -161,7 +161,6 @@ class _HomeScreenState extends State<HomeScreen> {
       } else {
         print('Condition not met.');
       }
-
       _strLast = _strCurr;
     } else {
       print('Ignored data: $data');
@@ -377,15 +376,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 _listItem(
                     Icons.group, '骑行对讲', '',
                         () async {
-                      bool isUserInGroup = false;
-                      if (isUserInGroup) {
-                            // If user is in a group, navigate to GroupIntercomScreen
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (context) => GroupIntercomScreen()),
-                            );
-                          } else {
+                      final prefs = await SharedPreferences.getInstance();
+                      final _groupNumber = await prefs.getString('groupNumber');
+                      if (null == _groupNumber) {
                         // If user is not in a group, navigate to GroupListScreen
                         await Navigator.pushNamed(context, '/groupList');
+                      } else {
+                        // If user is in a group, navigate to GroupIntercomScreen
+                        await Navigator.pushNamed(context, '/intercom');
                       }
                     }
                     ),

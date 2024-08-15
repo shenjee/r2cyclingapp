@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/database/r2_token_storage.dart';
@@ -54,6 +55,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       int id = resultData['id'];
       String formattedString = groupNum.toString().padLeft(4, '0'); // Convert to 4-digit string
       print('Formatted Result: $formattedString');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('groupNumber', formattedString);
       setState(() {
         _groupCode = formattedString;
       });
