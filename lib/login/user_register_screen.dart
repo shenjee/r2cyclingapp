@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:r2cyclingapp/database/r2_account.dart';
+import 'package:r2cyclingapp/database/r2_db_helper.dart';
+
 import 'verification_screen.dart';
 import 'user_login_screen.dart';
 import 'password_setting_screen.dart';
@@ -92,6 +95,10 @@ class _UserRegisterScreenState extends VerificationScreenState {
               phoneNumber: phone_number, title: '设置密码',)),
       );
     } else {
+      // save the account
+      final db = R2DBHelper();
+      final account = R2Account(account: phone_number??'');
+      db.saveAccount(account);
       Navigator.pop(context);
     }
   }
