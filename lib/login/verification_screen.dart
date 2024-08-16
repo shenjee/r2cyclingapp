@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
-import 'package:r2cyclingapp/connection/http/r2_http_response.dart';
+import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/database/r2_token_storage.dart';
 
 import 'login_base_screen.dart';
@@ -14,9 +15,6 @@ class VerificationScreen extends LoginBaseScreen {
 }
 
 class VerificationScreenState extends LoginBaseScreenState {
-  // uuid of http service, named after ASCII of R2C which is 82 50 67
-  final String sid = '825067';
-
   final TextEditingController _phone_controller = TextEditingController();
   final TextEditingController _vcode_controller = TextEditingController();
   bool _is_code_requested = false;
@@ -47,15 +45,21 @@ class VerificationScreenState extends LoginBaseScreenState {
   /*
    * request v-code (verification code) from R2Cloud with correct phone number fed.
    */
-  Future<void> _request_vcode() async {
+  Future<void> _requestVcode() async {
+    // get uuid as session id
+    final prefs = await SharedPreferences.getInstance();
+    String? sid = prefs.getString('sessionId');
+    if (null == sid) {
+      var uuid = const Uuid();
+      sid = uuid.v4();
+      await prefs.setString('sessionId', sid);
+    }
+
     // request code via http
     final String userMobile = _phone_controller.text;
-
-    final response = await http.post(
-      Uri.parse('http://r2cycling.imai.site/api/common/sendAuthCode'),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+    final r2request = R2HttpRequest();
+    final r2response = await r2request.sendRequest(
+      api: 'common/sendAuthCode',
       body: {
         'sid': sid,
         'userMobile': userMobile,
@@ -66,31 +70,35 @@ class VerificationScreenState extends LoginBaseScreenState {
     _secondsRemaining = 60;
     _startTimer();
 
-    if (200 == response.statusCode) {
-      final r = R2HttpResponse.fromJson(response.body);
+    if (true == r2response.success) {
       print('Verification code sent successfully');
-      print('Success: ${r.success}');
-      print('Message: ${r.message}');
-      print('Code: ${r.code}');
-      print('stackTracke: ${r.stackTracke}');
-      print('Result: ${r.result}');
+      print('Success: ${r2response.success}');
+      print('Message: ${r2response.message}');
+      print('Code: ${r2response.code}');
+      print('Result: ${r2response.result}');
     } else {
-      print('Failed to send verification code: ${response.body}');
+      print('Failed to send verification code: ${r2response.code}');
     }
   }
 
   /*
    * request authorization token with phone number and v-code fed.
    */
-  Future<void> _request_token() async {
+  Future<void> _requestToken() async {
+    // get uuid
+    final prefs = await SharedPreferences.getInstance();
+    String? sid = prefs.getString('sessionId');
+    if (null == sid) {
+      var uuid = const Uuid();
+      sid = uuid.v4();
+      await prefs.setString('sessionId', sid);
+    }
+    // get phone number and v-code
     final String phonenumber = _phone_controller.text;
     final String vcode = _vcode_controller.text;
-
-    final response = await http.post(
-      Uri.parse('http://r2cycling.imai.site/api/common/mobileLogin'),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+    final r2request = R2HttpRequest();
+    final r2response = await r2request.sendRequest(
+      api: 'common/mobileLogin',
       body: {
         'sid': sid,
         'userMobile': phonenumber,
@@ -98,31 +106,20 @@ class VerificationScreenState extends LoginBaseScreenState {
       },
     );
 
-    if (200 == response.statusCode) {
-      final r = R2HttpResponse.fromJson(response.body);
+    if (true == r2response.success) {
       print('Response of token request by phonenumber + password');
-      print('  Success: ${r.success}');
-      print('  Message: ${r.message}');
-      print('  Code: ${r.code}');
-      print('  stackTracke: ${r.stackTracke}');
-      print('  result: ${r.result}');
-      if (true == r.success && 200 == r.code) {
-        // retrieve the token and password-setting indicator
-        final Map<String, dynamic> data = r.result;
-        final token = data['token'];
-        final need_set_passwd = data['defaultPassword'];
-        print('  Parse result');
-        print('    token: ${token}');
-        print('    need_set_passwd: ${need_set_passwd}');
+      print('  Message: ${r2response.message}');
+      print('  Code: ${r2response.code}');
+      print('  result: ${r2response.result}');
 
-        await R2TokenStorage.saveToken(token);
+      final Map<String, dynamic> data = r2response.result;
+      final token = data['token'];
+      final need_set_passwd = data['defaultPassword'];
 
-        is_token_handled(phonenumber,need_set_passwd);
-      }
-    } else if (500 == response.statusCode) {
-      print('verification code expired: ${response.body}');
+      await R2TokenStorage.saveToken(token);
+      is_token_handled(phonenumber,need_set_passwd);
     } else {
-      print('Failed to send verification code: ${response.body}');
+      print('Failed to send verification code: ${r2response.code}');
       Navigator.of(context).pop();
     }
   }
@@ -137,7 +134,7 @@ class VerificationScreenState extends LoginBaseScreenState {
     } else {
       return TextButton(
         child: Text('获取验证码'),
-        onPressed: _request_vcode,
+        onPressed: _requestVcode,
       );
     }
   }
@@ -214,6 +211,6 @@ class VerificationScreenState extends LoginBaseScreenState {
   @override
   void main_button_clicked() {
     // TODO: override
-    _request_token();
+    _requestToken();
   }
 }

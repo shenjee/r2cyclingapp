@@ -1,16 +1,17 @@
 import 'dart:convert';
 import 'dart:core';
 import 'package:crypto/crypto.dart';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
+
 import 'package:r2cyclingapp/database/r2_account.dart';
 import 'package:r2cyclingapp/login/password_recover_screen.dart';
 import 'package:r2cyclingapp/login/user_register_screen.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
 import 'package:r2cyclingapp/database/r2_token_storage.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
-import 'package:r2cyclingapp/connection/http/r2_http_response.dart';
+import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 
 import 'package:r2cyclingapp/screens/home_screen.dart';
 import 'login_base_screen.dart';
@@ -36,12 +37,21 @@ class _UserLoginScreenState extends LoginBaseScreenState {
     return digest.toString();
   }
 
-  Future<void> _login() async {
+  Future<void> _requestLogin() async {
+    // get uuid as session id
+    final prefs = await SharedPreferences.getInstance();
+    String? sid = prefs.getString('sessionId');
+    if (null == sid) {
+      var uuid = const Uuid();
+      sid = uuid.v4();
+      await prefs.setString('sessionId', sid);
+    }
+
     final String _phonenumber = _phone_controller.text;
     final String _password = _password_controller.text;
 
     final t = await R2TokenStorage.getToken();
-    print('get token: ${t}');
+    print('get token: $t');
 
     String? combined;
     String? hashed_combined;
@@ -51,61 +61,53 @@ class _UserLoginScreenState extends LoginBaseScreenState {
     print('  combined: ${combined}');
     print('  hashed_combined: ${hashed_combined}');
 
-    final response = await http.post(
-      Uri.parse('http://r2cycling.imai.site/api/common/passwordLogin'),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'apiToken': '$t',
-      },
+    final request = R2HttpRequest();
+    final response = await request.sendRequest(
+      api: 'common/passwordLogin',
+      token: t,
       body: {
-        'sid': '825067',
+        'sid': sid,
         'loginId': _phonenumber,
         'userPsw': hashed_combined,
         'validateCode':''
       },
     );
 
-    if (200 == response.statusCode) {
-      final r = R2HttpResponse.fromJson(response.body);
-      print('Login by phonenumber + password');
-      print('  Success: ${r.success}');
-      print('  Message: ${r.message}');
-      print('  Code: ${r.code}');
-      print('  stackTracke: ${r.stackTracke}');
-      print('  Result: ${r.result}');
-      if (true == r.success) {
-        // retrieve the token and password-setting indicator
-        final Map<String, dynamic> data = r.result;
-        final token = data['token'];
-        final need_set_passwd = data['defaultPassword'];
-        final db = R2DBHelper();
-        final account = R2Account(account: _phonenumber);
+    if (true == response.success) {
+      print('Login by phone number + password');
+      print('  Message: ${response.message}');
+      print('  Code: ${response.code}');
+      print('  Result: ${response.result}');
 
-        print('  parse result:');
-        print('    token:\n ${token}');
-        print('    need_set_passwd: ${need_set_passwd}');
+      // retrieve the token and password-setting indicator
+      final Map<String, dynamic> data = response.result;
+      final token = data['token'];
+      final need_set_passwd = data['defaultPassword'];
+      final db = R2DBHelper();
+      final account = R2Account(account: _phonenumber);
 
-        // save account
-        db.saveAccount(account);
-        // save token
-        await R2TokenStorage.saveToken(token);
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
-              (Route<dynamic> route) => false,
-        );
-      }
-    } else if (500 == response.statusCode) {
-      print('wrong user/password: ${response.body}');
+      print('  parse result:');
+      print('    token:\n $token');
+      print('    need_set_passwd: $need_set_passwd');
+
+      // save account
+      db.saveAccount(account);
+      // save token
+      await R2TokenStorage.saveToken(token);
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+            (Route<dynamic> route) => false,
+      );
     } else {
-      print('Failed to login: ${response.body}');
+      print('Failed to login: ${response.code}');
     }
   }
 
   @override
   Widget topWidget(BuildContext context) {
     return Padding(
-        padding: EdgeInsets.all(40.0),
+        padding: const EdgeInsets.all(40.0),
         child:Image.asset('assets/images/r2cycling_logo.png')
     );
   }
@@ -117,7 +119,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
       children:<Widget> [
         // text field for entering phone number
         R2UserTextField(
-          prefixWidget: Text(
+          prefixWidget: const Text(
             '+86',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -127,10 +129,10 @@ class _UserLoginScreenState extends LoginBaseScreenState {
           controller: _phone_controller,
           keyboardType: TextInputType.phone,
         ),
-        SizedBox(height:20),
+        const SizedBox(height:20),
         // text field for entering password
         R2UserTextField(
-          prefixWidget: Text(
+          prefixWidget: const Text(
             '[***]',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -140,7 +142,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
           controller: _password_controller,
           keyboardType: TextInputType.number,
         ),
-        SizedBox(height:30),
+        const SizedBox(height:30),
         Container (
           width: 340,
           alignment: Alignment.centerRight,
@@ -151,7 +153,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
                 MaterialPageRoute(builder: (context) => UserRegisterScreen()),
               );
               },
-            child: Text('验证码登录'),
+            child: const Text('验证码登录'),
           ),
         )
       ]
@@ -163,14 +165,14 @@ class _UserLoginScreenState extends LoginBaseScreenState {
     // TODO: implement main_button_clicked
     super.main_button_clicked();
     print('main button clicked');
-    _login();
+    _requestLogin();
   }
 
   @override
   Widget bottomWidget(BuildContext context) {
     return Container (
         width: 340,
-        padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
+        padding: const EdgeInsets.fromLTRB(0, 30, 0, 0),
         alignment: Alignment.topRight,
         child: TextButton(
         onPressed: () {
@@ -179,7 +181,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
             MaterialPageRoute(builder: (context) => PasswordRecoverScreen()),
           );
           },
-          child: Text('忘记密码？'),
+          child: const Text('忘记密码？'),
         )
     );
   }

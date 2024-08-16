@@ -12,11 +12,12 @@ import 'package:r2cyclingapp/emergency/r2_sos_sender.dart';
 
 import 'package:r2cyclingapp/permission/permission_dialog.dart';
 import 'package:r2cyclingapp/login/user_register_screen.dart';
-import 'package:r2cyclingapp/group/group_intercom_screen.dart';
 
 import 'helmet_screen.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -46,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /*
    * When launch the app at the first time ,
-   * ask the user to grant the permissons.
+   * ask the user to grant the permissions.
    */
   void _grantPermissions() async {
     final prefs = await SharedPreferences.getInstance();

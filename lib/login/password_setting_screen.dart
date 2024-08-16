@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flash/flash.dart';
-import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
+
 import 'package:r2cyclingapp/database/r2_account.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
-import 'dart:convert';
-
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
-import 'package:r2cyclingapp/connection/http/r2_http_response.dart';
+import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/database/r2_token_storage.dart';
 import 'package:r2cyclingapp/screens/home_screen.dart';
 import 'login_base_screen.dart';
@@ -23,9 +24,8 @@ class PasswordSettingScreen extends LoginBaseScreen {
 }
 
 class _PasswordSettingScreenState extends LoginBaseScreenState {
-  final TextEditingController _password_controller = TextEditingController();
-  final TextEditingController _confirm_controller = TextEditingController();
-  bool _is_password_confirmed = false;
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmController = TextEditingController();
   String? _phoneNumber;
   String? _title;
 
@@ -44,53 +44,55 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
   }
 
   Future<void> _setPassword() async {
-    if (_password_controller.text == _confirm_controller.text) {
+    if (_passwordController.text == _confirmController.text) {
+      // get uuid as session id
+      final prefs = await SharedPreferences.getInstance();
+      String? sid = prefs.getString('sessionId');
+      if (null == sid) {
+        var uuid = const Uuid();
+        sid = uuid.v4();
+        await prefs.setString('sessionId', sid);
+      }
+
       final t = await R2TokenStorage.getToken();
       print('Password Setting:');
-      print('  get token: ${t}');
+      print('  get token: $t');
 
       if (null != t) {
         String? combined;
         String? hashed_combined;
 
-        combined = '${_phoneNumber}${_password_controller.text}';
+        combined = '${_phoneNumber}${_passwordController.text}';
         hashed_combined = _hashPassword(combined);
-        print('combined: ${combined}');
-        print('hashed_combined: ${hashed_combined}');
+        print('combined: $combined');
+        print('hashed_combined: $hashed_combined');
 
-        final response = await http.post(
-          Uri.parse('http://r2cycling.imai.site/api/user/modUserPass'),
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'apiToken': '$t',
-          },
+        final request = R2HttpRequest();
+        final response = await request.sendRequest(
+          api: 'user/modUserPass',
+          token: t,
           body: {
-            'sid': '825067',
+            'sid': sid,
             'modPassword': hashed_combined,
           },
         );
 
-        if (200 == response.statusCode) {
-          final r = R2HttpResponse.fromJson(response.body);
+        if (true == response.success) {
           print('Password sent successfully');
-          print('Success: ${r.success}');
-          print('Message: ${r.message}');
-          print('Code: ${r.code}');
-          print('stackTracke: ${r.stackTracke}');
-          print('Result: ${r.result}');
-          if (true == r.success) {
-            final db = R2DBHelper();
-            final account = R2Account(account: _phoneNumber??'');
+          print('Message: ${response.message}');
+          print('Code: ${response.code}');
+          print('Result: ${response.result}');
 
-            db.saveAccount(account);
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => HomeScreen()),
-                  (Route<dynamic> route) => false,
-            );
-          }
+          final db = R2DBHelper();
+          final account = R2Account(account: _phoneNumber??'');
+          db.saveAccount(account);
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => HomeScreen()),
+                (Route<dynamic> route) => false,
+          );
         } else {
-          print('Failed to set password: ${response.body}');
+          print('Failed to set password: ${response.code}');
         }
       }
     }
@@ -126,7 +128,7 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
                   fontSize: 20),
             ),
             hintText: '输入新密码',
-            controller: _password_controller,
+            controller: _passwordController,
             keyboardType: TextInputType.phone,
           ),
           const SizedBox(height:20),
@@ -139,11 +141,11 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
                   fontSize: 18.0),
             ),
             hintText: '再次确认',
-            controller: _confirm_controller,
+            controller: _confirmController,
             keyboardType: TextInputType.phone,
           ),
-          SizedBox(height: 30.0),
-          SizedBox(height: 48.0),
+          const SizedBox(height: 30.0),
+          const SizedBox(height: 48.0),
         ]
     );
   }
@@ -190,13 +192,12 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
     int is_same = 0;
 
     super.main_button_clicked();
-    is_same = _password_controller.text.compareTo(_confirm_controller.text);
-    print('1st:${_password_controller.text} 2nd:${_confirm_controller.text} same?${is_same}');
+    is_same = _passwordController.text.compareTo(_confirmController.text);
+    print('1st:${_passwordController.text} 2nd:${_confirmController.text} same?${is_same}');
     if (0 == is_same) {
-      _is_password_confirmed = false;
       _setPassword();
     } else {
-      _showBasicFlash(duration:Duration(seconds: 3));
+      _showBasicFlash(duration:const Duration(seconds: 3));
     }
     print('main button clicked');
   }
