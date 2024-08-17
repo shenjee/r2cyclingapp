@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/database/r2_token_storage.dart';
@@ -6,7 +7,7 @@ import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_account.dart';
 
 class GroupIntercomScreen extends StatefulWidget {
-  GroupIntercomScreen({super.key});
+  const GroupIntercomScreen({super.key});
 
   @override
   _GroupIntercomScreenState createState() => _GroupIntercomScreenState();
@@ -15,12 +16,13 @@ class GroupIntercomScreen extends StatefulWidget {
 class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   String? _groupCode;
   final List<R2Account> _members = [];
+  bool _isPressed = false;
 
   @override
   void initState() {
     super.initState();
-    _requestGroupCode();
     _loadLocalUser();
+    _requestGroupCode();
   }
 
   void _loadLocalUser() async {
@@ -76,7 +78,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
       });
       _decodeMemberList(resultData);
     } else {
-      print('Failed to request group code: $r2response');
+      print('Failed to request group code: ${r2response.code}');
     }
   }
 
@@ -92,9 +94,32 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
       print('Request succeeded: ${r2response.message}');
       print('Response code: ${r2response.code}');
       print('Result: ${r2response.result}');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('groupNumber');
+      Navigator.of(context).pop();
     } else {
       print('Failed to request group code: $r2response');
     }
+  }
+
+  void _onIntercomTapDown(TapDownDetails details) {
+    setState(() {
+      _isPressed = true;
+    });
+  }
+
+  void _onIntercomTapUp(TapUpDetails details) {
+    setState(() {
+      _isPressed = false;
+    });
+    // 在此处添加启动或停止对讲的逻辑
+    print("Intercom button tapped");
+  }
+
+  void _onIntercomTapCancel() {
+    setState(() {
+      _isPressed = false;
+    });
   }
 
   Widget _groupNumberWidget(BuildContext context) {
@@ -176,6 +201,33 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
     );
   }
 
+  Widget _intercomButton() {
+    return GestureDetector(
+      onTapDown: _onIntercomTapDown,
+      onTapUp: _onIntercomTapUp,
+      onTapCancel: _onIntercomTapCancel,
+      child: Container(
+        width: 200.0,
+        height: 200.0,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.greenAccent, width: 4),
+          boxShadow: _isPressed
+              ? const [BoxShadow(color: Colors.grey, blurRadius: 10, offset: Offset(0, 4))]
+              : [],
+        ),
+        child: Center(
+          child: Text(
+            _isPressed ? '正在对讲' : '',
+            style: const TextStyle(color: Colors.black, fontSize: 16),
+          ),
+        ),
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -184,21 +236,35 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            _leaveGroup();
             Navigator.of(context).pop();
           },
         ),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'quit') {
+                _leaveGroup();
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return [
+                const PopupMenuItem<String>(
+                  value: 'quit',
+                  child: Text('退出骑行组', style: TextStyle(color: Colors.white)),
+                ),
+              ];
+            },
+            icon: const Icon(Icons.more_vert),
+            color: Colors.black, // 菜单背景设置为黑色
+          ),
+        ],
       ),
       body: Column (
         children: <Widget>[
           Center(child: _groupNumberWidget(context),),
           _groupMemberWidget(context),
-          ElevatedButton(
-            onPressed: () {
-
-            },
-            child: const Text('Intercom'),
-          ),
+          const SizedBox(height: 20),
+          _intercomButton(),
         ],
       ),
     );

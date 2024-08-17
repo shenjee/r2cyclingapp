@@ -52,7 +52,6 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
       Map<String, dynamic> resultData = r2response.result;
       int groupNum = resultData['groupNum'];
-      int id = resultData['id'];
       String formattedString = groupNum.toString().padLeft(4, '0'); // Convert to 4-digit string
       print('Formatted Result: $formattedString');
       final prefs = await SharedPreferences.getInstance();
@@ -77,6 +76,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       print('Request succeeded: ${r2response.message}');
       print('Response code: ${r2response.code}');
       print('Result: ${r2response.result}');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('groupNumber');
     } else {
       print('Failed to request group code: $r2response');
     }
