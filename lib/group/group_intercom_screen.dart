@@ -5,26 +5,32 @@ import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/database/r2_token_storage.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_account.dart';
+import 'package:r2cyclingapp/intercom/r2_intercom_engine.dart';
 
 class GroupIntercomScreen extends StatefulWidget {
   const GroupIntercomScreen({super.key});
 
   @override
-  _GroupIntercomScreenState createState() => _GroupIntercomScreenState();
+  State<GroupIntercomScreen> createState() => _GroupIntercomScreenState();
 }
 
 class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   String? _groupCode;
   final List<R2Account> _members = [];
   bool _isPressed = false;
+  final _r2intercom = R2IntercomEngine();
 
   @override
   void initState() {
     super.initState();
     _loadLocalUser();
-    _requestGroupCode();
+    _requestMyGroup();
   }
 
+  /*
+   * load local user and put it to the intercom member list
+   *  as the leading role.
+   */
   void _loadLocalUser() async {
     final db = R2DBHelper();
     final account = await db.getLocalAccount();
@@ -35,8 +41,11 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
     }
   }
 
+  /*
+   * decode the response of group to build the member list
+   */
   void _decodeMemberList(Map<String, dynamic> result) {
-    List<dynamic> mlist = result['memberList']; // 获取memberList字段
+    List<dynamic> mlist = result['memberList'];
     final account = _members.first;
 
     for (var memberData in mlist) {
@@ -46,7 +55,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
           ..nickname = memberData['userName'] ?? 'Unknown'
           ..avatarPath = memberData['userAvatar'] ?? ''; // 使用默认值或null
 
-        // 添加到成员列表
+        // add to member list
         if (_members.length < 8) {
           setState(() {
             _members.add(account);
@@ -56,7 +65,11 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
     }
   }
 
-  void _requestGroupCode() async {
+  /*
+   * request the group which the local user has joined,
+   * including group number, name and members.
+   */
+  void _requestMyGroup() async {
     final token = await R2TokenStorage.getToken();
     final r2request = R2HttpRequest();
     final r2response = await r2request.sendRequest(
@@ -65,24 +78,24 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
     );
 
     if (true == r2response.success) {
-      print('Request succeeded: ${r2response.message}');
-      print('Response code: ${r2response.code}');
-      print('Result: ${r2response.result}');
+      debugPrint('Request succeeded: ${r2response.message}');
+      debugPrint('Response code: ${r2response.code}');
+      debugPrint('Result: ${r2response.result}');
 
       Map<String, dynamic> resultData = r2response.result;
       int groupNum = resultData['groupNum'];
       String formattedString = groupNum.toString().padLeft(4, '0'); // Convert to 4-digit string
-      print('Formatted Result: $formattedString');
+      debugPrint('Formatted Result: $formattedString');
       setState(() {
         _groupCode = formattedString;
       });
       _decodeMemberList(resultData);
     } else {
-      print('Failed to request group code: ${r2response.code}');
+      debugPrint('Failed to request my group: ${r2response.code}');
     }
   }
 
-  void _leaveGroup() async {
+  void _leaveMyGroup() async {
     final token = await R2TokenStorage.getToken();
     final r2request = R2HttpRequest();
     final r2response = await r2request.sendRequest(
@@ -91,37 +104,80 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
     );
 
     if (true == r2response.success) {
-      print('Request succeeded: ${r2response.message}');
-      print('Response code: ${r2response.code}');
-      print('Result: ${r2response.result}');
+      debugPrint('Request succeeded: ${r2response.message}');
+      debugPrint('Response code: ${r2response.code}');
+      debugPrint('Result: ${r2response.result}');
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('groupNumber');
       Navigator.of(context).pop();
     } else {
-      print('Failed to request group code: $r2response');
+      debugPrint('Failed to leave group code: ${r2response.code}');
     }
   }
 
+  /*
+   * callback of rtc engine,
+   * handle tasks right after local user is a member of rtc group.
+   * uid: local user id allocated by Agora
+   */
+  void _onLocalJoined(int uid) {
+    // TODO: implementation
+  }
+
+  /*
+   * handle tasks right after a member entering rtc group.
+   * uid: user id allocated by Agora
+   */
+  void _onMemberJoined(int uid) {
+    // TODO: implementation
+  }
+
+  /*
+   * callback of rtc engine,
+   * handle tasks right after a member leaving rtc group.
+   * uid: user id allocated by Agora
+   */
+  void _onMemberLeft(int uid) {
+    // TODO: implementation
+  }
+
+  /*
+   * callback responds to down tapped intercom button
+   */
   void _onIntercomTapDown(TapDownDetails details) {
+    debugPrint('$runtimeType: _isPressed $_isPressed');
+    if (false == _isPressed) {
+      _r2intercom.initAgora();
+    }
     setState(() {
       _isPressed = true;
     });
   }
 
+  /*
+   * callback responds to released intercom button
+   */
   void _onIntercomTapUp(TapUpDetails details) {
     setState(() {
       _isPressed = false;
     });
     // 在此处添加启动或停止对讲的逻辑
-    print("Intercom button tapped");
+    debugPrint("$runtimeType: Intercom button tapped");
   }
 
+  /*
+   * callback responds to stop tapping intercom button
+   */
   void _onIntercomTapCancel() {
     setState(() {
       _isPressed = false;
     });
+    _r2intercom.stopIntercom();
   }
 
+  /*
+   * show the number of the intercom group.
+   */
   Widget _groupNumberWidget(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -157,6 +213,12 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
     );
   }
 
+  /*
+   * show the members of the intercom group.
+   * there are no more than 8 members and organized in two rows,
+   * 4 members per row.
+   * an avatar and a nickname of user represents him/her.
+   */
   Widget _groupMemberWidget(BuildContext context) {
     return GridView.builder (
       shrinkWrap: true, // 在Column中使用时，确保GridView不会扩展以占据整个空间
@@ -201,6 +263,9 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
     );
   }
 
+  /*
+   * a rounded button that start intercom when it is tapped down.
+   */
   Widget _intercomButton() {
     return GestureDetector(
       onTapDown: _onIntercomTapDown,
@@ -237,13 +302,15 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.of(context).pop();
+            _r2intercom.stopIntercom();
           },
         ),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'quit') {
-                _leaveGroup();
+                _leaveMyGroup();
+                _r2intercom.stopIntercom();
               }
             },
             itemBuilder: (BuildContext context) {
