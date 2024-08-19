@@ -109,7 +109,6 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
       debugPrint('Result: ${r2response.result}');
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('groupNumber');
-      Navigator.of(context).pop();
     } else {
       debugPrint('Failed to leave group code: ${r2response.code}');
     }
@@ -311,6 +310,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
               if (value == 'quit') {
                 _leaveMyGroup();
                 _r2intercom.stopIntercom();
+                Navigator.of(context).pop();
               }
             },
             itemBuilder: (BuildContext context) {
