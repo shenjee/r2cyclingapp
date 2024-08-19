@@ -19,7 +19,7 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -122,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _helmetConnected(DiscoveredDevice device) async {
     // later, it should analyze the brand name from id and name
     final r2Device = R2Device(brand: 'na', id: device.id, name: device.name);
-    print('HomeScreen() _helmetConnected device : ${device.id}-${device.name}');
+    debugPrint('HomeScreen() _helmetConnected device : ${device.id}-${device.name}');
     setState(() {
       _connectedDevice = r2Device;
     });
@@ -148,23 +148,23 @@ class _HomeScreenState extends State<HomeScreen> {
     // "✆" :0x0010
     // ">" :0x0020
     // "end" :0x0000
-    print('_onHelmetNotify(): $data');
+    debugPrint('_onHelmetNotify(): $data');
     R2BLECommand command = decodeBLEData(data);
-    print('_onHelmetNotify(): ${command.toString()}');
+    debugPrint('_onHelmetNotify(): ${command.toString()}');
     if (0 != command.instruction) {
       _strCurr = command.instruction;
-      print('last instruction: $_strLast');
-      print('current instruction: $_strCurr');
+      debugPrint('last instruction: $_strLast');
+      debugPrint('current instruction: $_strCurr');
       if (4 == _strLast && 8 == _strCurr) {
-        print('Condition met: Sending SMS');
+        debugPrint('Condition met: Sending SMS');
         final sr = R2SosSender();
         sr.sendSos(data);
       } else {
-        print('Condition not met.');
+        debugPrint('Condition not met.');
       }
       _strLast = _strCurr;
     } else {
-      print('Ignored data: $data');
+      debugPrint('Ignored data: $data');
     }
   }
 
@@ -203,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _unbindDevice() async {
     if (_connectedDevice != null) {
-      //await R2DBHelper().removeDevice(_connectedDevice!);
+      await R2DBHelper().deleteDevice();
       setState(() {
         _connectedDevice = null;
         _isUnbindMode = false;
@@ -378,8 +378,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     Icons.group, '骑行对讲', '',
                         () async {
                       final prefs = await SharedPreferences.getInstance();
-                      final _groupNumber = await prefs.getString('groupNumber');
-                      if (null == _groupNumber) {
+                      final gn = await prefs.getString('groupNumber');
+                      if (null == gn) {
                         // If user is not in a group, navigate to GroupListScreen
                         await Navigator.pushNamed(context, '/groupList');
                       } else {

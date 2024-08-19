@@ -108,6 +108,11 @@ class R2DBHelper {
     return result.isNotEmpty ? R2Device.fromMap(result.first) : null;
   }
 
+  Future<int> deleteDevice() async {
+    final db = await database;
+    return await db.delete('devices');
+  }
+
   // operation for emergency contacts
   Future<int> saveContact(Map<String, dynamic> contact) async {
     final db = await database;
