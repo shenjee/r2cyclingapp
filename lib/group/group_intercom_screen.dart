@@ -25,6 +25,8 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
     super.initState();
     _loadLocalUser();
     _requestMyGroup();
+    _r2intercom.initAgora();
+    _r2intercom.pauseSpeak(true);
   }
 
   /*
@@ -146,7 +148,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   void _onIntercomTapDown(TapDownDetails details) {
     debugPrint('$runtimeType: _isPressed $_isPressed');
     if (false == _isPressed) {
-      _r2intercom.initAgora();
+      _r2intercom.pauseSpeak(false);
     }
     setState(() {
       _isPressed = true;
@@ -159,6 +161,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   void _onIntercomTapUp(TapUpDetails details) {
     setState(() {
       _isPressed = false;
+      _r2intercom.pauseSpeak(true);
     });
     // 在此处添加启动或停止对讲的逻辑
     debugPrint("$runtimeType: Intercom button tapped");
