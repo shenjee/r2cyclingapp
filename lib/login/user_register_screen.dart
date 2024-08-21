@@ -8,9 +8,10 @@ import 'user_login_screen.dart';
 import 'password_setting_screen.dart';
 
 class UserRegisterScreen extends VerificationScreen {
+  const UserRegisterScreen({super.key});
 
   @override
-  _UserRegisterScreenState createState() => _UserRegisterScreenState();
+  VerificationScreenState createState() => _UserRegisterScreenState();
 }
 
 class _UserRegisterScreenState extends VerificationScreenState {
@@ -25,10 +26,10 @@ class _UserRegisterScreenState extends VerificationScreenState {
    * when it is tapped.
    */
   @override
-  PreferredSizeWidget wigetAppBar(BuildContext context) {
+  PreferredSizeWidget widgetAppBar(BuildContext context) {
     return AppBar(
       leading: IconButton(
-        icon: Icon(Icons.close, size: 34.0,),
+        icon: const Icon(Icons.close, size: 34.0,),
         onPressed: () {
           Navigator.pop(context);
         },
@@ -42,7 +43,7 @@ class _UserRegisterScreenState extends VerificationScreenState {
   @override
   Widget topWidget(BuildContext context) {
     return Padding(
-        padding: EdgeInsets.all(40.0),
+        padding: const EdgeInsets.all(40.0),
         child:Image.asset('assets/images/r2cycling_logo.png')
     );
   }
@@ -64,7 +65,7 @@ class _UserRegisterScreenState extends VerificationScreenState {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => UserLoginScreen()),
+                  MaterialPageRoute(builder: (context) => const UserLoginScreen()),
                 );
               },
               child: const Text('密码登录'),
@@ -86,18 +87,18 @@ class _UserRegisterScreenState extends VerificationScreenState {
   }
 
   @override
-  void is_token_handled(String phone_number, bool void_password) {
-    if (true == void_password) {
+  void onTokenHandled(String phoneNumber, bool needSetPassword) {
+    if (true == needSetPassword) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) =>
             PasswordSettingScreen(
-              phoneNumber: phone_number, title: '设置密码',)),
+              phoneNumber: phoneNumber, title: '设置密码',)),
       );
     } else {
       // save the account
       final db = R2DBHelper();
-      final account = R2Account(account: phone_number??'');
+      final account = R2Account(account: phoneNumber??'');
       db.saveAccount(account);
       Navigator.pop(context);
     }

@@ -17,13 +17,15 @@ import 'package:r2cyclingapp/screens/home_screen.dart';
 import 'login_base_screen.dart';
 
 class UserLoginScreen extends LoginBaseScreen {
+  const UserLoginScreen({super.key});
+
   @override
-  _UserLoginScreenState createState() => _UserLoginScreenState();
+  LoginBaseScreenState createState() => _UserLoginScreenState();
 }
 
 class _UserLoginScreenState extends LoginBaseScreenState {
-  final TextEditingController _phone_controller = TextEditingController();
-  final TextEditingController _password_controller = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   void initState() {
@@ -47,60 +49,58 @@ class _UserLoginScreenState extends LoginBaseScreenState {
       await prefs.setString('sessionId', sid);
     }
 
-    final String _phonenumber = _phone_controller.text;
-    final String _password = _password_controller.text;
+    final String phonenumber = _phoneController.text;
+    final String password = _passwordController.text;
 
     final t = await R2TokenStorage.getToken();
-    print('get token: $t');
-
     String? combined;
-    String? hashed_combined;
-    combined = '${_phonenumber}${_password}';
-    hashed_combined = _hashPassword(combined);
-    print('Phone number and password combined:');
-    print('  combined: ${combined}');
-    print('  hashed_combined: ${hashed_combined}');
+    String? hashedCombined;
+    combined = '$phonenumber$password';
+    hashedCombined = _hashPassword(combined);
+    debugPrint('Phone number and password combined:');
+    debugPrint('  combined: $combined');
+    debugPrint('  hashed_combined: $hashedCombined');
 
     final request = R2HttpRequest();
     final response = await request.sendRequest(
-      api: 'common/passwordLogin',
+      api: 'common/r2passwordLogin',
       token: t,
       body: {
         'sid': sid,
-        'loginId': _phonenumber,
-        'userPsw': hashed_combined,
+        'loginId': phonenumber,
+        'userPsw': hashedCombined,
         'validateCode':''
       },
     );
 
     if (true == response.success) {
-      print('Login by phone number + password');
-      print('  Message: ${response.message}');
-      print('  Code: ${response.code}');
-      print('  Result: ${response.result}');
+      debugPrint('Login by phone number + password');
+      debugPrint('  Message: ${response.message}');
+      debugPrint('  Code: ${response.code}');
+      debugPrint('  Result: ${response.result}');
 
       // retrieve the token and password-setting indicator
       final Map<String, dynamic> data = response.result;
       final token = data['token'];
-      final need_set_passwd = data['defaultPassword'];
       final db = R2DBHelper();
-      final account = R2Account(account: _phonenumber);
+      final account = R2Account(account: phonenumber);
 
-      print('  parse result:');
-      print('    token:\n $token');
-      print('    need_set_passwd: $need_set_passwd');
+      debugPrint('$runtimeType :  parse result:');
+      debugPrint('$runtimeType :    token:\n $token');
 
       // save account
       db.saveAccount(account);
       // save token
       await R2TokenStorage.saveToken(token);
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-            (Route<dynamic> route) => false,
-      );
-    } else {
-      print('Failed to login: ${response.code}');
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+              (Route<dynamic> route) => false,
+        );
+      } else {
+        debugPrint('Failed to request login: ${response.code}');
+      }
     }
   }
 
@@ -126,7 +126,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
                 fontSize: 20),
           ),
           hintText: '请输入手机号',
-          controller: _phone_controller,
+          controller: _phoneController,
           keyboardType: TextInputType.phone,
         ),
         const SizedBox(height:20),
@@ -139,7 +139,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
                 fontSize: 20),
           ),
           hintText: '请输入密码',
-          controller: _password_controller,
+          controller: _passwordController,
           keyboardType: TextInputType.number,
         ),
         const SizedBox(height:30),
@@ -150,7 +150,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => UserRegisterScreen()),
+                MaterialPageRoute(builder: (context) => const UserRegisterScreen()),
               );
               },
             child: const Text('验证码登录'),
@@ -161,10 +161,10 @@ class _UserLoginScreenState extends LoginBaseScreenState {
   }
 
   @override
-  void main_button_clicked() {
+  void mainButtonClicked() {
     // TODO: implement main_button_clicked
-    super.main_button_clicked();
-    print('main button clicked');
+    super.mainButtonClicked();
+    debugPrint('$runtimeType : main button clicked');
     _requestLogin();
   }
 
@@ -178,7 +178,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => PasswordRecoverScreen()),
+            MaterialPageRoute(builder: (context) => const PasswordRecoverScreen()),
           );
           },
           child: const Text('忘记密码？'),

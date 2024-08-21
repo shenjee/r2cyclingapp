@@ -1,13 +1,11 @@
-//import 'dart:nativewrappers/_internal/vm/lib/core_patch.dart';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
 
 class LoginBaseScreen extends StatefulWidget {
   final String? mainButtonTitle;
 
-  LoginBaseScreen({
+  const LoginBaseScreen({
+    super.key,
     this.mainButtonTitle
   });
 
@@ -21,15 +19,15 @@ class LoginBaseScreenState extends State<LoginBaseScreen> {
   // 2. the 2nd one for username/password input
   // 3. the 3rd one is button
   // 4. the bottom area  for notice
-  String? _main_button_title;
+  String? _mainButtonTitle;
 
   // setter for button name
   set mainButtonTitle(String v) {
-    _main_button_title = v;
+    _mainButtonTitle = v;
   }
 
   // protected method
-  PreferredSizeWidget wigetAppBar(BuildContext context) {
+  PreferredSizeWidget widgetAppBar(BuildContext context) {
     return AppBar();
   }
 
@@ -48,41 +46,41 @@ class LoginBaseScreenState extends State<LoginBaseScreen> {
     return Container();
   }
 
-  void main_button_clicked() {
+  void mainButtonClicked() {
     // TODO: override
   }
 
   // private method
-  Widget _build_top_widget(BuildContext context) {
+  Widget _buildTopWidget(BuildContext context) {
     Widget w;
     //w = Container(color: Colors.red, child: topWidget(context),);
     w = Padding(
-      padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
       child: topWidget(context),
     );
     
     return w;
   }
 
-  Widget _build_center_widget(BuildContext context) {
+  Widget _buildCenterWidget(BuildContext context) {
     Widget w;
     //w = Container(color: Colors.yellow, child: centerWidget(context),);
     w = Padding(
-      padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
       child: centerWidget(context),
     );
 
     return w;
   }
 
-  Widget _build_main_button(BuildContext context) {
+  Widget _buildMainButton(BuildContext context) {
     return R2FlatButton (
-      text: _main_button_title??'',
-      onPressed: main_button_clicked,
+      text: _mainButtonTitle??'',
+      onPressed: mainButtonClicked,
     );
   }
 
-  Widget _build_bottom_widget(BuildContext context) {
+  Widget _buildBottomWidget(BuildContext context) {
     Widget w;
     w = Expanded(
       child: bottomWidget(context),
@@ -94,7 +92,7 @@ class LoginBaseScreenState extends State<LoginBaseScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar:wigetAppBar(context),
+        appBar:widgetAppBar(context),
         // when text field tapped, keyboard slides up and it resizes
         // the widget, making the fixed-sized child widget exceeds its
         // parent widget and leading to RenderFlex overflow.
@@ -105,10 +103,10 @@ class LoginBaseScreenState extends State<LoginBaseScreen> {
         body:Column(
           mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              _build_top_widget(context), // top area
-              _build_center_widget(context), // 2nd area
-              _build_main_button(context), // 3rd area
-              _build_bottom_widget(context), // bottom area
+              _buildTopWidget(context), // top area
+              _buildCenterWidget(context), // 2nd area
+              _buildMainButton(context), // 3rd area
+              _buildBottomWidget(context), // bottom area
             ]
         )
     );

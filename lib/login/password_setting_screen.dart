@@ -17,10 +17,14 @@ class PasswordSettingScreen extends LoginBaseScreen {
   final String? phoneNumber;
   final String? title;
 
-  PasswordSettingScreen({@required this.phoneNumber, @required this.title});
+  const PasswordSettingScreen({
+    super.key,
+    @required this.phoneNumber,
+    @required this.title
+  });
 
   @override
-  _PasswordSettingScreenState createState() => _PasswordSettingScreenState();
+  LoginBaseScreenState createState() => _PasswordSettingScreenState();
 }
 
 class _PasswordSettingScreenState extends LoginBaseScreenState {
@@ -55,17 +59,16 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
       }
 
       final t = await R2TokenStorage.getToken();
-      print('Password Setting:');
-      print('  get token: $t');
+      debugPrint('$runtimeType : get token: $t');
 
       if (null != t) {
         String? combined;
-        String? hashed_combined;
+        String? hashedCombined;
 
-        combined = '${_phoneNumber}${_passwordController.text}';
-        hashed_combined = _hashPassword(combined);
-        print('combined: $combined');
-        print('hashed_combined: $hashed_combined');
+        combined = '$_phoneNumber${_passwordController.text}';
+        hashedCombined = _hashPassword(combined);
+        debugPrint('combined: $combined');
+        debugPrint('hashedCombined: $hashedCombined');
 
         final request = R2HttpRequest();
         final response = await request.sendRequest(
@@ -73,26 +76,28 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
           token: t,
           body: {
             'sid': sid,
-            'modPassword': hashed_combined,
+            'modPassword': hashedCombined,
           },
         );
 
         if (true == response.success) {
-          print('Password sent successfully');
-          print('Message: ${response.message}');
-          print('Code: ${response.code}');
-          print('Result: ${response.result}');
+          debugPrint('$runtimeType : Password sent successfully');
+          debugPrint('$runtimeType : Message: ${response.message}');
+          debugPrint('$runtimeType : Code: ${response.code}');
+          debugPrint('$runtimeType : Result: ${response.result}');
 
           final db = R2DBHelper();
           final account = R2Account(account: _phoneNumber??'');
           db.saveAccount(account);
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => HomeScreen()),
-                (Route<dynamic> route) => false,
-          );
+          if (mounted) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+                  (Route<dynamic> route) => false,
+            );
+          }
         } else {
-          print('Failed to set password: ${response.code}');
+          debugPrint('Failed to set password: ${response.code}');
         }
       }
     }
@@ -169,8 +174,8 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
           reverseAnimationCurve: Curves.bounceIn,
           position: FlashPosition.top,
           behavior: flashStyle,
-          contentTextStyle:TextStyle(fontSize: 20, color:Colors.red),
-          content: Center(child:Text('两次密码输入不一致')),
+          contentTextStyle: const TextStyle(fontSize: 20, color:Colors.red),
+          content: const Center(child:Text('两次密码输入不一致')),
         );
         },
     );
@@ -187,18 +192,18 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
    */
 
   @override
-  void main_button_clicked() {
+  void mainButtonClicked() {
     // TODO: implement main_button_clicked
-    int is_same = 0;
+    int isSame = 0;
 
-    super.main_button_clicked();
-    is_same = _passwordController.text.compareTo(_confirmController.text);
-    print('1st:${_passwordController.text} 2nd:${_confirmController.text} same?${is_same}');
-    if (0 == is_same) {
+    super.mainButtonClicked();
+    isSame = _passwordController.text.compareTo(_confirmController.text);
+    debugPrint('1st:${_passwordController.text} 2nd:${_confirmController.text} same? $isSame');
+    if (0 == isSame) {
       _setPassword();
     } else {
       _showBasicFlash(duration:const Duration(seconds: 3));
     }
-    print('main button clicked');
+    debugPrint('$runtimeType : main button clicked');
   }
 }

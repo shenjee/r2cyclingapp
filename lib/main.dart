@@ -12,6 +12,7 @@ import 'package:r2cyclingapp/settings/user_profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  /*
   await FlutterBackground.initialize(
     androidConfig: const FlutterBackgroundAndroidConfig(
       notificationTitle: "Background Service",
@@ -19,6 +20,7 @@ void main() async {
       notificationImportance: AndroidNotificationImportance.Default,
     ),
   );
+   */
   runApp(const R2CyclingApp());
 }
 

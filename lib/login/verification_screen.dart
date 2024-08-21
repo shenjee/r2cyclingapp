@@ -10,14 +10,16 @@ import 'package:r2cyclingapp/database/r2_token_storage.dart';
 import 'login_base_screen.dart';
 
 class VerificationScreen extends LoginBaseScreen {
+  const VerificationScreen({super.key});
+
   @override
   VerificationScreenState createState() => VerificationScreenState();
 }
 
 class VerificationScreenState extends LoginBaseScreenState {
-  final TextEditingController _phone_controller = TextEditingController();
-  final TextEditingController _vcode_controller = TextEditingController();
-  bool _is_code_requested = false;
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _vcodeController = TextEditingController();
+  bool _isVcodeRequested = false;
   int _secondsRemaining = 0;
   Timer? _timer;
 
@@ -38,7 +40,7 @@ class VerificationScreenState extends LoginBaseScreenState {
    * there are two values of the response, one is token, the other is bool value
    * which indicates the user is a new register and must set the password.
    */
-  void is_token_handled(String phone_number, bool void_password) {
+  void onTokenHandled(String phoneNumber, bool needSetPassword) {
     // TODO: implementaion
   }
 
@@ -56,7 +58,7 @@ class VerificationScreenState extends LoginBaseScreenState {
     }
 
     // request code via http
-    final String userMobile = _phone_controller.text;
+    final String userMobile = _phoneController.text;
     final r2request = R2HttpRequest();
     final r2response = await r2request.sendRequest(
       api: 'common/sendAuthCode',
@@ -71,13 +73,9 @@ class VerificationScreenState extends LoginBaseScreenState {
     _startTimer();
 
     if (true == r2response.success) {
-      print('Verification code sent successfully');
-      print('Success: ${r2response.success}');
-      print('Message: ${r2response.message}');
-      print('Code: ${r2response.code}');
-      print('Result: ${r2response.result}');
+      debugPrint('$runtimeType : Verification code sent successfully');
     } else {
-      print('Failed to send verification code: ${r2response.code}');
+      debugPrint('$runtimeType : Failed to request verification code: ${r2response.code}');
     }
   }
 
@@ -94,11 +92,11 @@ class VerificationScreenState extends LoginBaseScreenState {
       await prefs.setString('sessionId', sid);
     }
     // get phone number and v-code
-    final String phonenumber = _phone_controller.text;
-    final String vcode = _vcode_controller.text;
+    final String phonenumber = _phoneController.text;
+    final String vcode = _vcodeController.text;
     final r2request = R2HttpRequest();
     final r2response = await r2request.sendRequest(
-      api: 'common/mobileLogin',
+      api: 'common/r2mobileLogin',
       body: {
         'sid': sid,
         'userMobile': phonenumber,
@@ -107,20 +105,22 @@ class VerificationScreenState extends LoginBaseScreenState {
     );
 
     if (true == r2response.success) {
-      print('Response of token request by phonenumber + password');
-      print('  Message: ${r2response.message}');
-      print('  Code: ${r2response.code}');
-      print('  result: ${r2response.result}');
+      debugPrint('$runtimeType : Response of token request by phonenumber + password');
+      debugPrint('$runtimeType :  Message: ${r2response.message}');
+      debugPrint('$runtimeType :  Code: ${r2response.code}');
+      debugPrint('$runtimeType :  result: ${r2response.result}');
 
       final Map<String, dynamic> data = r2response.result;
       final token = data['token'];
-      final need_set_passwd = data['defaultPassword'];
+      final setPassword = data['defaultPassword'];
 
       await R2TokenStorage.saveToken(token);
-      is_token_handled(phonenumber,need_set_passwd);
+      onTokenHandled(phonenumber,setPassword);
     } else {
-      print('Failed to send verification code: ${r2response.code}');
-      Navigator.of(context).pop();
+      debugPrint('$runtimeType : Failed to request token: ${r2response.code}');
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
     }
   }
 
@@ -128,13 +128,13 @@ class VerificationScreenState extends LoginBaseScreenState {
    * button for request v-code with phone number fed
    * once it is tapped and v-code received, it starts timer for 60s countdown
    */
-  Widget _request_vcode_button() {
-    if (true == _is_code_requested) {
+  Widget _requestVcodeButton() {
+    if (true == _isVcodeRequested) {
       return Text('${_secondsRemaining}s');
     } else {
       return TextButton(
-        child: Text('获取验证码'),
         onPressed: _requestVcode,
+        child: const Text('获取验证码'),
       );
     }
   }
@@ -144,15 +144,15 @@ class VerificationScreenState extends LoginBaseScreenState {
    * e.g. "_secondsRemaining = 6" starts a 60 seconds countdown.
    */
   void _startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (_secondsRemaining > 0) {
           _secondsRemaining--;
-          _is_code_requested = true;
+          _isVcodeRequested = true;
         } else {
           _timer?.cancel();
-          _is_code_requested = false;
-          print("timer finished ${_secondsRemaining}");
+          _isVcodeRequested = false;
+          debugPrint("$runtimeType : timer finished $_secondsRemaining");
         }
       });
     });
@@ -161,7 +161,7 @@ class VerificationScreenState extends LoginBaseScreenState {
   @override
   Widget topWidget(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(40.0),
+      padding: const EdgeInsets.all(40.0),
       child:Image.asset('assets/images/r2cycling_logo.png')
     );
   }
@@ -176,31 +176,31 @@ class VerificationScreenState extends LoginBaseScreenState {
         children: <Widget>[
           // text field for entering phone number
           R2UserTextField(
-            prefixWidget: Text(
+            prefixWidget: const Text(
               '+86',
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20),
             ),
             hintText: '请输入手机号',
-            controller: _phone_controller,
+            controller: _phoneController,
             keyboardType: TextInputType.phone,
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           // text field for entering password
           R2UserTextField(
-            prefixWidget: Text(
+            prefixWidget: const Text(
               '[•••]',
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20),
             ),
             hintText: '请输入验证码',
-            suffixWidget: _request_vcode_button(),
-            controller: _vcode_controller,
+            suffixWidget: _requestVcodeButton(),
+            controller: _vcodeController,
             keyboardType: TextInputType.number,
           ),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
         ]
     );
   }
@@ -209,7 +209,7 @@ class VerificationScreenState extends LoginBaseScreenState {
    * register and login
    */
   @override
-  void main_button_clicked() {
+  void mainButtonClicked() {
     // TODO: override
     _requestToken();
   }
