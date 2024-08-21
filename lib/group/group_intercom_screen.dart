@@ -15,20 +15,25 @@ class GroupIntercomScreen extends StatefulWidget {
 }
 
 class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
+  int? _groupID;
+  int? _userID;
   String? _groupCode;
   final List<R2Account> _members = [];
   bool _isPressed = false;
-  final _r2intercom = R2IntercomEngine();
+  R2IntercomEngine? _r2intercom;
 
   @override
   void initState() {
     super.initState();
     _loadLocalUser();
     _requestMyGroup();
-    _r2intercom.initAgora();
-    _r2intercom.pauseSpeak(true);
   }
 
+  _initR2Intercom() {
+    final account = _members.first;
+    _r2intercom = R2IntercomEngine(groupID: _groupID!, userID:int.parse(account.account));
+    _r2intercom!.initAgora();
+  }
   /*
    * load local user and put it to the intercom member list
    *  as the leading role.
@@ -71,7 +76,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
    * request the group which the local user has joined,
    * including group number, name and members.
    */
-  void _requestMyGroup() async {
+  Future<void> _requestMyGroup() async {
     final token = await R2TokenStorage.getToken();
     final r2request = R2HttpRequest();
     final r2response = await r2request.sendRequest(
@@ -86,12 +91,15 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
 
       Map<String, dynamic> resultData = r2response.result;
       int groupNum = resultData['groupNum'];
+      _groupID = resultData['id'];
+      _userID = resultData['userId'];
       String formattedString = groupNum.toString().padLeft(4, '0'); // Convert to 4-digit string
       debugPrint('Formatted Result: $formattedString');
       setState(() {
         _groupCode = formattedString;
       });
       _decodeMemberList(resultData);
+      _initR2Intercom();
     } else {
       debugPrint('Failed to request my group: ${r2response.code}');
     }
@@ -148,7 +156,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   void _onIntercomTapDown(TapDownDetails details) {
     debugPrint('$runtimeType: _isPressed $_isPressed');
     if (false == _isPressed) {
-      _r2intercom.pauseSpeak(false);
+      _r2intercom!.pauseSpeak(false);
     }
     setState(() {
       _isPressed = true;
@@ -161,7 +169,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   void _onIntercomTapUp(TapUpDetails details) {
     setState(() {
       _isPressed = false;
-      _r2intercom.pauseSpeak(true);
+      _r2intercom!.pauseSpeak(true);
     });
     // 在此处添加启动或停止对讲的逻辑
     debugPrint("$runtimeType: Intercom button tapped");
@@ -174,7 +182,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
     setState(() {
       _isPressed = false;
     });
-    _r2intercom.stopIntercom();
+    _r2intercom!.stopIntercom();
   }
 
   /*
@@ -304,7 +312,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.of(context).pop();
-            _r2intercom.stopIntercom();
+            _r2intercom!.stopIntercom();
           },
         ),
         actions: [
@@ -312,7 +320,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
             onSelected: (value) {
               if (value == 'quit') {
                 _leaveMyGroup();
-                _r2intercom.stopIntercom();
+                _r2intercom!.stopIntercom();
                 Navigator.of(context).pop();
               }
             },
