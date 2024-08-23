@@ -20,9 +20,14 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.WAKE_LOCK"/> <!-- for background service -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
-    <uses-permission android:name="android.permission.SEND_SMS" /> <!-- for sos message -->
+    <!-- for sos message -->
+    <uses-permission android:name="android.permission.SEND_SMS" />
     <!-- for the image-cropping -->
     <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- Declare that telephony is optional -->
+    <uses-feature android:name="android.hardware.telephony" android:required="false"/>
+    <!-- Declare that camera is optional -->
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
