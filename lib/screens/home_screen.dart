@@ -5,7 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:r2cyclingapp/connection/bt/r2_bluetooth_model.dart';
 import 'package:r2cyclingapp/connection/bt/r2_ble_command.dart';
-import 'package:r2cyclingapp/database/r2_token_storage.dart';
+import 'package:r2cyclingapp/database/r2_storage.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_device.dart';
 import 'package:r2cyclingapp/emergency/r2_sos_sender.dart';
@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
    * if the token expires, request and newer the it.
    */
   Future<void> _checkLoginStatus() async {
-    final token = await R2TokenStorage.getToken();
+    final token = await R2Storage.getToken();
     final db = R2DBHelper();
     final account = await db.getLocalAccount();
     if (token == null || account == null) {

@@ -3,28 +3,54 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 class R2Account {
-  final String _account; // User's phone number or email address
-  String _nickname; // User's nickname
-  String _avatarPath; // User's icon
+  final int _id;
+  String _account; // User's phone number or email address
+  String _nickname;
+  String _phoneNumber;
+  String _email;
+  String _avatarPath; //
 
-  R2Account({required String account})
-      : _account = account,
-        _nickname = _generateDefaultNickname(account),
+  R2Account({
+    required int id,
+    String? account,
+    String? phoneNumber,
+    String? email,
+  }) : _id = id,
+        _account = account ?? '',
+        _phoneNumber = phoneNumber ?? '',
+        _email = email ?? '',
+        _nickname = _generateDefaultNickname(account ?? ''),
         _avatarPath = '';
+
+  // Getter for id
+  int get id => _id;
 
   // Getter for account (cannot be modified)
   String get account => _account;
+  set account(String value) {
+    _account = account;
+  }
+
+  // Getter for phone number (cannot be modified)
+  String get phoneNumber => _phoneNumber;
+  set phoneNumber(String value) {
+    _phoneNumber = phoneNumber;
+  }
+
+  // Getter for email (cannot be modified)
+  String get email => _email;
+  set email(String value) {
+    _email = email;
+  }
 
   // Getter and Setter for nickname
   String get nickname => _nickname;
-
   set nickname(String value) {
     _nickname = value;
   }
 
   // Getter and Setter for avatarPath
   String get avatarPath => _avatarPath;
-
   set avatarPath(String value) {
     _avatarPath = value;
   }
@@ -81,7 +107,10 @@ class R2Account {
   // Convert R2Account to Map
   Map<String, dynamic> toMap() {
     return {
+      'id': _id,
       'account': _account,
+      'phoneNumber': _phoneNumber,
+      'email': _email,
       'nickname': _nickname,
       'avatarPath': _avatarPath,
     };
@@ -89,7 +118,7 @@ class R2Account {
 
   // Create R2Account from Map
   factory R2Account.fromMap(Map<String, dynamic> map) {
-    return R2Account(account: map['account'])
+    return R2Account(id: map['id'], account: map['account'])
       ..nickname = map['nickname']
       ..avatarPath = map['avatarPath'];
   }

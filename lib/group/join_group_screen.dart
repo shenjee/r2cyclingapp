@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:r2cyclingapp/database/r2_token_storage.dart';
+import 'package:r2cyclingapp/database/r2_storage.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 
 import 'group_intercom_screen.dart';
@@ -10,7 +10,7 @@ class JoinGroupScreen extends StatefulWidget {
   const JoinGroupScreen({super.key});
 
   @override
-  _JoinGroupScreenState createState() => _JoinGroupScreenState();
+  State<JoinGroupScreen> createState() => _JoinGroupScreenState();
 }
 
 class _JoinGroupScreenState extends State<JoinGroupScreen> {
@@ -25,7 +25,7 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
   }
 
   void _requestJoinGroup(String? group) async {
-    final token = await R2TokenStorage.getToken();
+    final token = await R2Storage.getToken();
     final r2request = R2HttpRequest();
     final r2response = await r2request.sendRequest(
       token: token,

@@ -5,11 +5,9 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:r2cyclingapp/database/r2_account.dart';
-import 'package:r2cyclingapp/database/r2_db_helper.dart';
+import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
-import 'package:r2cyclingapp/database/r2_token_storage.dart';
 import 'package:r2cyclingapp/screens/home_screen.dart';
 import 'login_base_screen.dart';
 
@@ -58,10 +56,9 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
         await prefs.setString('sessionId', sid);
       }
 
-      final t = await R2TokenStorage.getToken();
-      debugPrint('$runtimeType : get token: $t');
-
-      if (null != t) {
+      final manager = R2UserManager();
+      final token = await manager.readToken();
+      if (null != token) {
         String? combined;
         String? hashedCombined;
 
@@ -73,7 +70,7 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
         final request = R2HttpRequest();
         final response = await request.sendRequest(
           api: 'user/modUserPass',
-          token: t,
+          token: token,
           body: {
             'sid': sid,
             'modPassword': hashedCombined,
@@ -86,9 +83,6 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
           debugPrint('$runtimeType : Code: ${response.code}');
           debugPrint('$runtimeType : Result: ${response.result}');
 
-          final db = R2DBHelper();
-          final account = R2Account(account: _phoneNumber??'');
-          db.saveAccount(account);
           if (mounted) {
             Navigator.pushAndRemoveUntil(
               context,

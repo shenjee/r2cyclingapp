@@ -1,16 +1,19 @@
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
-import 'package:r2cyclingapp/database/r2_token_storage.dart';
+import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 
 import 'r2_sms.dart';
 
 class R2SosSender {
-  final R2DBHelper _dbHelper = R2DBHelper();
+  final _dbHelper = R2DBHelper();
+  final _manager = R2UserManager();
 
   Future<String?> _requestShortAddress(double longitude, double latitude) async {
     String? address;
-    final token = await R2TokenStorage.getToken();
+    final token = await _manager.readToken();
     final r2request = R2HttpRequest();
     final r2response = await r2request.sendRequest(
       token: token,
@@ -25,7 +28,7 @@ class R2SosSender {
       String resultData = r2response.result;
       address = 'http://r2cycling.imai.site/t/$resultData';
     } else {
-      print('Failed to request group code: $r2response');
+      debugPrint('Failed to request group code: $r2response');
     }
 
     return address;
@@ -54,7 +57,7 @@ class R2SosSender {
         contact) => contact['phone'] as String).toList();
 
     for (String recipient in recipients) {
-      print('send $recipient : $message');
+      debugPrint('send $recipient : $message');
       R2Sms.sendSMS(recipient, message);
     }
   }

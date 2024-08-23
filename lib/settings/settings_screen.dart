@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import "package:r2cyclingapp/database/r2_db_helper.dart";
-import "package:r2cyclingapp/database/r2_account.dart";
-import 'package:r2cyclingapp/database/r2_token_storage.dart';
+
+import "package:r2cyclingapp/usermanager/r2_user_manager.dart";
+import "package:r2cyclingapp/usermanager/r2_account.dart";
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
 
 import 'user_profile_screen.dart';
@@ -10,10 +10,11 @@ class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  _SettingsScreenState createState() => _SettingsScreenState();
+  State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  final _manager = R2UserManager();
   R2Account? _account;
 
   @override
@@ -23,10 +24,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _loadAccount() async {
-    final account = await R2DBHelper().getLocalAccount();
+    final account = await _manager.localAccount();
     setState(() {
       _account = account;
     });
+  }
+
+  Future<void> _accountLogout() async {
+    _manager.deleteToken();
+    _manager.deleteUser(_account!.id);
   }
 
   Widget _userInfoWidget() {
@@ -63,7 +69,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => UserProfileScreen()),
+          MaterialPageRoute(builder: (context) => const UserProfileScreen()),
         );
       },
     );
@@ -170,10 +176,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: R2FlatButton(
                   text: '退出登录',
                   onPressed: () async {
-                    await R2DBHelper().deleteAccount(_account?.account ?? '');
-                    await R2TokenStorage.deleteToken();
                     Navigator.of(context).pop(true);
-                    },
+                    await _accountLogout();
+                  },
                   backgroundColor: Colors.red,
                 ),
               ),

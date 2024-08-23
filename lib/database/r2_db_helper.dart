@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'r2_device.dart';
-import 'r2_account.dart';
+import '../usermanager/r2_account.dart';
 
 class R2DBHelper {
   static final R2DBHelper _instance = R2DBHelper._internal();
@@ -20,14 +20,14 @@ class R2DBHelper {
 
   Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'ble_devices.db');
+    final path = join(dbPath, 'r2cycling.db');
 
     return await openDatabase(
       path,
       version: 2, // Increment the version number to handle schema changes
       onCreate: (db, version) async {
         await db.execute(
-          'CREATE TABLE accounts(account TEXT PRIMARY KEY, nickname TEXT, avatarPath INTEGER)',
+          'CREATE TABLE accounts(id INTEGER PRIMARY KEY, account TEXT KEY, nickname TEXT, phoneNumber TEXT, email TEXT, avatarPath INTEGER)',
         );
         await db.execute(
           'CREATE TABLE devices(id TEXT PRIMARY KEY, brand TEXT, name TEXT)',
@@ -50,7 +50,7 @@ class R2DBHelper {
         }
         if (oldVersion < 3) {
           await db.execute(
-            'CREATE TABLE accounts(account TEXT PRIMARY KEY, nickname TEXT, avatarPath INTEGER)',
+            'CREATE TABLE accounts(id INTEGER PRIMARY KEY, account TEXT KEY, nickname TEXT, phoneNumber TEXT, email TEXT, avatarPath INTEGER)',
           );
         }
       },
@@ -58,9 +58,9 @@ class R2DBHelper {
   }
 
   // Operations for account
-  Future<void> saveAccount(R2Account account) async {
+  Future<int> saveAccount(R2Account account) async {
     final db = await database;
-    await db.insert(
+    return await db.insert(
       'accounts',
       account.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
@@ -83,12 +83,12 @@ class R2DBHelper {
     return result.isNotEmpty ? R2Account.fromMap(result.first) : null;
   }
 
-  Future<int> deleteAccount(String account) async {
+  Future<int> deleteAccount(int id) async {
     final db = await database;
     return await db.delete(
       'accounts',
-      where: 'account = ?',
-      whereArgs: [account],
+      where: 'id = ?',
+      whereArgs: [id],
     );
   }
 

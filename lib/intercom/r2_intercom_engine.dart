@@ -4,7 +4,7 @@ import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
-import 'package:r2cyclingapp/database/r2_token_storage.dart';
+import 'package:r2cyclingapp/database/r2_storage.dart';
 
 import 'dart:convert';
 
@@ -36,7 +36,7 @@ class R2IntercomEngine {
   String? _rtcToken;
 
   Future<void> _requestRTCToken() async {
-    final r2token = await R2TokenStorage.getToken();
+    final r2token = await R2Storage.getToken();
     final r2request = R2HttpRequest();
     final r2response = await r2request.sendRequest(
       api: 'cyclingGroup/enterGroupVoice',
@@ -96,7 +96,7 @@ class R2IntercomEngine {
       ),
     );
 
-    final base64String = await R2TokenStorage.getToken();
+    final base64String = await R2Storage.getToken();
     // 拆分 JWT 为三部分
     final parts = base64String!.split('.');
 

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
-import 'package:r2cyclingapp/database/r2_token_storage.dart';
+import 'package:r2cyclingapp/database/r2_storage.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
-import 'package:r2cyclingapp/database/r2_account.dart';
+import 'package:r2cyclingapp/usermanager/r2_account.dart';
 import 'package:r2cyclingapp/intercom/r2_intercom_engine.dart';
 
 class GroupIntercomScreen extends StatefulWidget {
@@ -58,6 +58,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
     for (var memberData in mlist) {
       if (memberData['loginId'] != account.account) {
         R2Account account = R2Account(
+            id:memberData['id'] ?? memberData['userId'],
             account: memberData['userMobile'] ?? memberData['loginId'])
           ..nickname = memberData['userName'] ?? 'Unknown'
           ..avatarPath = memberData['userAvatar'] ?? ''; // 使用默认值或null
@@ -77,7 +78,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
    * including group number, name and members.
    */
   Future<void> _requestMyGroup() async {
-    final token = await R2TokenStorage.getToken();
+    final token = await R2Storage.getToken();
     final r2request = R2HttpRequest();
     final r2response = await r2request.sendRequest(
       token: token,
@@ -106,7 +107,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   }
 
   void _leaveMyGroup() async {
-    final token = await R2TokenStorage.getToken();
+    final token = await R2Storage.getToken();
     final r2request = R2HttpRequest();
     final r2response = await r2request.sendRequest(
       token: token,

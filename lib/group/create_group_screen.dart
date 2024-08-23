@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
-import 'package:r2cyclingapp/database/r2_token_storage.dart';
+import 'package:r2cyclingapp/database/r2_storage.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
-import 'package:r2cyclingapp/database/r2_account.dart';
+import 'package:r2cyclingapp/usermanager/r2_account.dart';
 
 
 import 'group_intercom_screen.dart';
@@ -38,7 +38,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   }
 
   void _requestGroupCode() async {
-    final token = await R2TokenStorage.getToken();
+    final token = await R2Storage.getToken();
     final r2request = R2HttpRequest();
     final r2response = await r2request.sendRequest(
         token: token,
@@ -65,7 +65,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   }
 
   void _leaveGroup() async {
-    final token = await R2TokenStorage.getToken();
+    final token = await R2Storage.getToken();
     final r2request = R2HttpRequest();
     final r2response = await r2request.sendRequest(
       token: token,

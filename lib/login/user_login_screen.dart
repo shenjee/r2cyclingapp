@@ -5,13 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:r2cyclingapp/database/r2_account.dart';
 import 'package:r2cyclingapp/login/password_recover_screen.dart';
 import 'package:r2cyclingapp/login/user_register_screen.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
-import 'package:r2cyclingapp/database/r2_token_storage.dart';
-import 'package:r2cyclingapp/database/r2_db_helper.dart';
+import 'package:r2cyclingapp/database/r2_storage.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
+import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 
 import 'package:r2cyclingapp/screens/home_screen.dart';
 import 'login_base_screen.dart';
@@ -52,7 +51,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
     final String phonenumber = _phoneController.text;
     final String password = _passwordController.text;
 
-    final t = await R2TokenStorage.getToken();
+    final t = await R2Storage.getToken();
     String? combined;
     String? hashedCombined;
     combined = '$phonenumber$password';
@@ -82,16 +81,16 @@ class _UserLoginScreenState extends LoginBaseScreenState {
       // retrieve the token and password-setting indicator
       final Map<String, dynamic> data = response.result;
       final token = data['token'];
-      final db = R2DBHelper();
-      final account = R2Account(account: phonenumber);
-
       debugPrint('$runtimeType :  parse result:');
       debugPrint('$runtimeType :    token:\n $token');
 
-      // save account
-      db.saveAccount(account);
+      final manager = R2UserManager();
+      manager.saveToken(token);
+      manager.saveAccountWithToken(token);
+
       // save token
-      await R2TokenStorage.saveToken(token);
+      await R2Storage.saveToken(token);
+
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,

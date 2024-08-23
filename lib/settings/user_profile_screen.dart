@@ -3,8 +3,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
 
-import 'package:r2cyclingapp/database/r2_db_helper.dart';
-import 'package:r2cyclingapp/database/r2_account.dart';
+import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
+import 'package:r2cyclingapp/usermanager/r2_account.dart';
 
 import 'image_cut_screen.dart';
 
@@ -12,10 +12,11 @@ class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
 
   @override
-  _UserProfileScreenState createState() => _UserProfileScreenState();
+  State<UserProfileScreen> createState() => _UserProfileScreenState();
 }
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
+  final _manager = R2UserManager();
   R2Account? _account;
 
   @override
@@ -25,7 +26,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Future<void> _loadAccount() async {
-    final account = await R2DBHelper().getLocalAccount();
+    final account = await _manager.localAccount();
     setState(() {
       _account = account;
     });
@@ -91,14 +92,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
       if (croppedImage != null) {
         setState(() {
+          // save the image path and upload to server
           _account?.avatarPath = croppedImage.path;
-          R2DBHelper().saveAccount(_account!);
+          _manager.updateAvatar(value: croppedImage.path);
         });
       }
     }
   }
 
-
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -162,7 +164,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('${_account?.nickname}', style: TextStyle(fontSize: 24.0),),
+                  Text('${_account?.nickname}', style: const TextStyle(fontSize: 24.0),),
                   const SizedBox(width: 20.0,),
                   const Icon(Icons.chevron_right),
                 ]), // Placeholder for nickname
@@ -171,7 +173,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
-                  TextEditingController nicknameController = TextEditingController(text: 'Jack'); // Placeholder
+                  TextEditingController nicknameController = TextEditingController(); // Placeholder
                   return AlertDialog(
                     title: const Text('修改昵称'),
                     content: TextField(
@@ -202,7 +204,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   setState(() {
                     // Save the new nickname
                     _account?.nickname = newNickname;
-                    R2DBHelper().saveAccount(_account!);
+                    _manager.updateNickname(value: newNickname);
                   });
                 }
               });

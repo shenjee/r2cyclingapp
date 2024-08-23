@@ -5,7 +5,6 @@ import 'package:uuid/uuid.dart';
 
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
-import 'package:r2cyclingapp/database/r2_token_storage.dart';
 
 import 'login_base_screen.dart';
 
@@ -40,7 +39,7 @@ class VerificationScreenState extends LoginBaseScreenState {
    * there are two values of the response, one is token, the other is bool value
    * which indicates the user is a new register and must set the password.
    */
-  void onTokenHandled(String phoneNumber, bool needSetPassword) {
+  void onTokenHandled(String token, String account, bool needSetPassword) {
     // TODO: implementaion
   }
 
@@ -114,8 +113,7 @@ class VerificationScreenState extends LoginBaseScreenState {
       final token = data['token'];
       final setPassword = data['defaultPassword'];
 
-      await R2TokenStorage.saveToken(token);
-      onTokenHandled(phonenumber,setPassword);
+      onTokenHandled(token, phonenumber, setPassword);
     } else {
       debugPrint('$runtimeType : Failed to request token: ${r2response.code}');
       if (mounted) {

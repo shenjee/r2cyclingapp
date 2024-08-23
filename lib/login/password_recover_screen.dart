@@ -18,11 +18,11 @@ class PasswordRecoverScreenState extends VerificationScreenState {
   }
 
   @override
-  void onTokenHandled(String phoneNumber, bool needSetPassword) {
+  void onTokenHandled(String token, String account, bool needSetPassword) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => PasswordSettingScreen(
-          phoneNumber: phoneNumber, title: '重置密码',)),
+          phoneNumber: account, title: '重置密码',)),
     );
   }
 }
