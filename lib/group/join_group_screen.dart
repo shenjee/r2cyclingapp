@@ -46,7 +46,8 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
       final gid = response.result['cyclingGroupId'];
       final gName = response.result['groupName'];
       final group = R2Group(gid: gid);
-      manager.saveGroup(account!.uid, group);
+      final ret = await manager.saveGroup(account!.uid, group);
+      debugPrint('$runtimeType : save group $gid : $ret');
 
       if (mounted) {
         Navigator.of(context).pushReplacement(

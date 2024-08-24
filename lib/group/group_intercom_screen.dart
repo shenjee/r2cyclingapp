@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
+import 'package:r2cyclingapp/usermanager/r2_group.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/intercom/r2_intercom_engine.dart';
 
@@ -14,8 +14,6 @@ class GroupIntercomScreen extends StatefulWidget {
 }
 
 class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
-  int? _groupID;
-  int? _userID;
   String? _groupCode;
   final List<R2Account> _members = [];
   bool _isPressed = false;
@@ -29,9 +27,9 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
     _requestMyGroup();
   }
 
-  _initR2Intercom() {
+  _initR2Intercom(int gid) {
     final account = _members.first;
-    _r2intercom = R2IntercomEngine(groupID: _groupID!, userID:account.uid);
+    _r2intercom = R2IntercomEngine(groupID: gid, userID:account.uid);
     _r2intercom!.initAgora();
   }
 
@@ -94,15 +92,22 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
 
       Map<String, dynamic> resultData = r2response.result;
       int groupNum = resultData['groupNum'];
-      _groupID = resultData['id'];
-      _userID = resultData['userId'];
+
+      // save group
+      final account = await _manager.localAccount();
+      final gid = resultData['id'];
+      final name = resultData['groupName'];
+      final group = R2Group(gid: gid, groupName: name);
+      final ret = await _manager.saveGroup(account!.uid, group);
+      debugPrint('$runtimeType : save group $gid : $ret');
+
       String formattedString = groupNum.toString().padLeft(4, '0'); // Convert to 4-digit string
       debugPrint('Formatted Result: $formattedString');
       setState(() {
         _groupCode = formattedString;
       });
       _decodeMemberList(resultData);
-      _initR2Intercom();
+      _initR2Intercom(gid);
     } else {
       debugPrint('Failed to request my group: ${r2response.code}');
     }
@@ -121,6 +126,10 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
       debugPrint('Response code: ${r2response.code}');
       debugPrint('Result: ${r2response.result}');
 
+      // delete local group data
+      final group = await _manager.localGroup();
+      final ret = await _manager.leaveGroup(group!.gid);
+      debugPrint('$runtimeType : remove local cached group data : $ret');
     } else {
       debugPrint('Failed to leave group code: ${r2response.code}');
     }

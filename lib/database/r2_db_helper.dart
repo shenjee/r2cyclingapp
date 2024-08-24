@@ -32,7 +32,7 @@ class R2DBHelper {
           'CREATE TABLE accounts(uid INTEGER PRIMARY KEY, account TEXT KEY, nickname TEXT, phoneNumber TEXT, email TEXT, avatarPath INTEGER)',
         );
         await db.execute(
-          'CREATE TABLE groups(uid INTEGER PRIMARY KEY, gid INTEGER, FOREIGN KEY(uid) REFERENCES accounts(uid))',
+          'CREATE TABLE groups(uid INTEGER PRIMARY KEY, gid INTEGER, gname TEXT, FOREIGN KEY(uid) REFERENCES accounts(uid))',
         );
         await db.execute(
           'CREATE TABLE devices(id TEXT PRIMARY KEY, brand TEXT, name TEXT)',
@@ -58,7 +58,7 @@ class R2DBHelper {
             'CREATE TABLE accounts(uid INTEGER PRIMARY KEY, account TEXT KEY, nickname TEXT, phoneNumber TEXT, email TEXT, avatarPath INTEGER)',
           );
           await db.execute(
-            'CREATE TABLE groups(uid INTEGER PRIMARY KEY, gid INTEGER, FOREIGN KEY(uid) REFERENCES accounts(uid))',
+            'CREATE TABLE groups(uid INTEGER PRIMARY KEY, gid INTEGER, gname TEXT, FOREIGN KEY(uid) REFERENCES accounts(uid))',
           );
         }
       },
@@ -115,14 +115,20 @@ class R2DBHelper {
 
   Future<R2Group?> getGroup(int uid) async {
     final db = await database;
+    R2Group? group;
     final result = await db.query(
       'groups',
       where: 'uid = ?',
       whereArgs: [uid],
     );
-    Map<String, dynamic> data = result.first;
-    final gid = data['gid'];
-    return result.isNotEmpty ? R2Group(gid: gid) : null;
+    if (result.isNotEmpty) {
+      Map<String, dynamic> data = result.first;
+      final gid = data['gid'];
+      group = R2Group(gid: gid);
+    } else {
+      group = null;
+    }
+    return group;
   }
 
   Future<int> deleteGroup(int gid) async {

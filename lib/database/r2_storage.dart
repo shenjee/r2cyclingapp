@@ -16,14 +16,14 @@ class R2Storage {
   }
 
   static Future<void> saveToken(String token) async {
-    await _storage.write(key: 'auth_token', value: token);
+    await _storage.write(key: 'authtoken', value: token);
   }
 
   static Future<String?> getToken() async {
-    return await _storage.read(key: 'auth_token');
+    return await _storage.read(key: 'authtoken');
   }
 
   static Future<void> deleteToken() async {
-    await _storage.delete(key: 'auth_token');
+    await _storage.delete(key: 'authtoken');
   }
 }

@@ -379,7 +379,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         () async {
                       final manager = R2UserManager();
                       final group = await manager.localGroup();
-                      if (0 == group!.gid) {
+                      if (null == group || 0 == group.gid) {
                         // If user is not in a group, navigate to GroupListScreen
                         await Navigator.pushNamed(context, '/groupList');
                       } else {

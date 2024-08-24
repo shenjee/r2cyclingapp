@@ -119,6 +119,8 @@ class R2Account {
   // Create R2Account from Map
   factory R2Account.fromMap(Map<String, dynamic> map) {
     return R2Account(uid: map['uid'], account: map['account'])
+      ..phoneNumber = map['phoneNumber']
+      ..email = map['email']
       ..nickname = map['nickname']
       ..avatarPath = map['avatarPath'];
   }
