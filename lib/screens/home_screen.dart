@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
+import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -69,9 +70,9 @@ class _HomeScreenState extends State<HomeScreen> {
    * if the token expires, request and newer the it.
    */
   Future<void> _checkLoginStatus() async {
-    final token = await R2Storage.getToken();
-    final db = R2DBHelper();
-    final account = await db.getLocalAccount();
+    final manager = R2UserManager();
+    final token = await manager.readToken();
+    final account = await manager.localAccount();
     if (token == null || account == null) {
       _registerScreen();
     }
