@@ -59,8 +59,8 @@ class R2UserManager {
     return await _db.saveAccount(r2a);
   }
 
-  Future<int> saveUser(int id, String account) async {
-    final r2a = R2Account(uid:id, account: account);
+  Future<int> saveUser(int uid, String account) async {
+    final r2a = R2Account(uid:uid, account: account);
     return await _db.saveAccount(r2a);
   }
 
