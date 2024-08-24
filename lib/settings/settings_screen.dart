@@ -32,7 +32,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _accountLogout() async {
     _manager.deleteToken();
-    _manager.deleteUser(_account!.id);
+    _manager.deleteUser(_account!.uid);
   }
 
   Widget _userInfoWidget() {

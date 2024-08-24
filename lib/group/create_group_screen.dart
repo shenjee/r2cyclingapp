@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
-import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
 
 
@@ -13,7 +13,7 @@ class CreateGroupScreen extends StatefulWidget {
   const CreateGroupScreen({super.key});
 
   @override
-  _CreateGroupScreenState createState() => _CreateGroupScreenState();
+  State<CreateGroupScreen> createState() => _CreateGroupScreenState();
 }
 
 class _CreateGroupScreenState extends State<CreateGroupScreen> {
@@ -28,8 +28,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   }
 
   void _loadLocalUser() async {
-    final db = R2DBHelper();
-    final account = await db.getLocalAccount();
+    final manager = R2UserManager();
+    final account = await manager.localAccount();
     if (account != null && _members.length < 8) {
       setState(() {
         _members.add(account);
@@ -40,46 +40,46 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   void _requestGroupCode() async {
     final token = await R2Storage.getToken();
     final r2request = R2HttpRequest();
-    final r2response = await r2request.sendRequest(
+    final r2response = await r2request.postRequest(
         token: token,
         api: 'cyclingGroup/newGroup',
     );
 
     if (true == r2response.success) {
-      print('Request succeeded: ${r2response.message}');
-      print('Response code: ${r2response.code}');
-      print('Result: ${r2response.result}');
+      debugPrint('Request succeeded: ${r2response.message}');
+      debugPrint('Response code: ${r2response.code}');
+      debugPrint('Result: ${r2response.result}');
 
       Map<String, dynamic> resultData = r2response.result;
       int groupNum = resultData['groupNum'];
       String formattedString = groupNum.toString().padLeft(4, '0'); // Convert to 4-digit string
-      print('Formatted Result: $formattedString');
+      debugPrint('Formatted Result: $formattedString');
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('groupNumber', formattedString);
       setState(() {
         _groupCode = formattedString;
       });
     } else {
-      print('Failed to request group code: $r2response');
+      debugPrint('Failed to request group code: $r2response');
     }
   }
 
   void _leaveGroup() async {
     final token = await R2Storage.getToken();
     final r2request = R2HttpRequest();
-    final r2response = await r2request.sendRequest(
+    final r2response = await r2request.postRequest(
       token: token,
       api: 'cyclingGroup/leaveGroup',
     );
 
     if (true == r2response.success) {
-      print('Request succeeded: ${r2response.message}');
-      print('Response code: ${r2response.code}');
-      print('Result: ${r2response.result}');
+      debugPrint('Request succeeded: ${r2response.message}');
+      debugPrint('Response code: ${r2response.code}');
+      debugPrint('Result: ${r2response.result}');
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('groupNumber');
     } else {
-      print('Failed to request group code: $r2response');
+      debugPrint('Failed to request group code: $r2response');
     }
   }
 

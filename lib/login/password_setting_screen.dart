@@ -68,7 +68,7 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
         debugPrint('hashedCombined: $hashedCombined');
 
         final request = R2HttpRequest();
-        final response = await request.sendRequest(
+        final response = await request.postRequest(
           api: 'user/modUserPass',
           token: token,
           body: {

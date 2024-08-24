@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'r2_device.dart';
-import '../usermanager/r2_account.dart';
+import 'package:r2cyclingapp/usermanager/r2_account.dart';
+import 'package:r2cyclingapp/usermanager/r2_group.dart';
+
 
 class R2DBHelper {
   static final R2DBHelper _instance = R2DBHelper._internal();
@@ -27,7 +29,10 @@ class R2DBHelper {
       version: 2, // Increment the version number to handle schema changes
       onCreate: (db, version) async {
         await db.execute(
-          'CREATE TABLE accounts(id INTEGER PRIMARY KEY, account TEXT KEY, nickname TEXT, phoneNumber TEXT, email TEXT, avatarPath INTEGER)',
+          'CREATE TABLE accounts(uid INTEGER PRIMARY KEY, account TEXT KEY, nickname TEXT, phoneNumber TEXT, email TEXT, avatarPath INTEGER)',
+        );
+        await db.execute(
+          'CREATE TABLE groups(uid INTEGER PRIMARY KEY, gid INTEGER, FOREIGN KEY(uid) REFERENCES accounts(uid))',
         );
         await db.execute(
           'CREATE TABLE devices(id TEXT PRIMARY KEY, brand TEXT, name TEXT)',
@@ -50,7 +55,10 @@ class R2DBHelper {
         }
         if (oldVersion < 3) {
           await db.execute(
-            'CREATE TABLE accounts(id INTEGER PRIMARY KEY, account TEXT KEY, nickname TEXT, phoneNumber TEXT, email TEXT, avatarPath INTEGER)',
+            'CREATE TABLE accounts(uid INTEGER PRIMARY KEY, account TEXT KEY, nickname TEXT, phoneNumber TEXT, email TEXT, avatarPath INTEGER)',
+          );
+          await db.execute(
+            'CREATE TABLE groups(uid INTEGER PRIMARY KEY, gid INTEGER, FOREIGN KEY(uid) REFERENCES accounts(uid))',
           );
         }
       },
@@ -67,28 +75,62 @@ class R2DBHelper {
     );
   }
 
-  Future<R2Account?> getLocalAccount() async {
+  Future<R2Account?> getAccount({int? uid}) async {
     final db = await database;
-    final result = await db.query('accounts');
-    return result.isNotEmpty ? R2Account.fromMap(result.first) : null;
+    List<Map<String, Object?>> accounts;
+    if (null == uid) {
+      accounts = await db.query('accounts');
+    } else {
+      accounts = await db.query(
+        'accounts',
+        where: 'uid = ?',
+        whereArgs: [uid],
+      );
+    }
+    return accounts.isNotEmpty ? R2Account.fromMap(accounts.first) : null;
   }
 
-  Future<R2Account?> getAccount(String account) async {
-    final db = await database;
-    final result = await db.query(
-      'accounts',
-      where: 'account = ?',
-      whereArgs: [account],
-    );
-    return result.isNotEmpty ? R2Account.fromMap(result.first) : null;
-  }
-
-  Future<int> deleteAccount(int id) async {
+  Future<int> deleteAccount(int uid) async {
     final db = await database;
     return await db.delete(
       'accounts',
-      where: 'id = ?',
-      whereArgs: [id],
+      where: 'uid = ?',
+      whereArgs: [uid],
+    );
+  }
+
+  // Operation for user group
+  Future<int> saveGroup(int uid, R2Group group) async {
+    final db = await database;
+
+    // Save the user profile
+    final map = {'uid': uid, 'gid': group.gid,};
+
+    return await db.insert(
+      'groups',
+      map,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<R2Group?> getGroup(int uid) async {
+    final db = await database;
+    final result = await db.query(
+      'groups',
+      where: 'uid = ?',
+      whereArgs: [uid],
+    );
+    Map<String, dynamic> data = result.first;
+    final gid = data['gid'];
+    return result.isNotEmpty ? R2Group(gid: gid) : null;
+  }
+
+  Future<int> deleteGroup(int gid) async {
+    final db = await database;
+    return await db.delete(
+      'groups',
+      where: 'gid = ?',
+      whereArgs: [gid],
     );
   }
 

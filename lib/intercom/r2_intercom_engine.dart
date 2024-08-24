@@ -38,8 +38,8 @@ class R2IntercomEngine {
   Future<void> _requestRTCToken() async {
     final r2token = await R2Storage.getToken();
     final r2request = R2HttpRequest();
-    final r2response = await r2request.sendRequest(
-      api: 'cyclingGroup/enterGroupVoice',
+    final r2response = await r2request.postRequest(
+      api: 'groupRoom/getVoiceToken',
       token: r2token,
       body: {
         'cyclingGroupId':'$_groupID',
@@ -96,35 +96,11 @@ class R2IntercomEngine {
       ),
     );
 
-    final base64String = await R2Storage.getToken();
-    // 拆分 JWT 为三部分
-    final parts = base64String!.split('.');
-
-    if (parts.length != 3) {
-      debugPrint('Invalid token');
-      return;
-    }
-
-    // 解码有效载荷部分
-    final payload = parts[1];
-    final normalized = base64Url.normalize(payload);
-    final decodedPayload = utf8.decode(base64Url.decode(normalized));
-
-    print('Decoded Payload: $decodedPayload');
-
-    // 解析 JSON 并获取 userId
-    final payloadMap = jsonDecode(decodedPayload);
-
-    final userId = payloadMap['data']['userId'];
-    print('UserId: $userId');
-
-    // join a channel
-
     try {
       await _engine.joinChannelWithUserAccount(
         token: _rtcToken!,
-        channelId: _groupID!.toString(),
-        userAccount: userId.toString(),
+        channelId: _groupID.toString(),
+        userAccount: _userID.toString(),
         options: const ChannelMediaOptions(
             autoSubscribeAudio: true,
             publishMicrophoneTrack: true,

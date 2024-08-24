@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:r2cyclingapp/usermanager/r2_group.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:r2cyclingapp/database/r2_storage.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
+import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 
 import 'group_intercom_screen.dart';
 
@@ -25,9 +26,10 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
   }
 
   void _requestJoinGroup(String? group) async {
-    final token = await R2Storage.getToken();
-    final r2request = R2HttpRequest();
-    final r2response = await r2request.sendRequest(
+    final manager = R2UserManager();
+    final token = await manager.readToken();
+    final request = R2HttpRequest();
+    final response = await request.postRequest(
       token: token,
       api: 'cyclingGroup/joinGroup',
       body: {
@@ -35,19 +37,25 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
       }
     );
 
-    if (true == r2response.success && group != null) {
-      print('Request succeeded: ${r2response.message}');
-      print('Response code: ${r2response.code}');
-      print('Result: ${r2response.result}');
+    if (true == response.success && group != null) {
+      debugPrint('$runtimeType : Request succeeded: ${response.message}');
+      debugPrint('$runtimeType :   Response code: ${response.code}');
+      debugPrint('$runtimeType :   Result: ${response.result}');
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('groupNumber', group);
+      final account = await manager.localAccount();
+      final gid = response.result['cyclingGroupId'];
+      final gName = response.result['groupName'];
+      final group = R2Group(gid: gid);
+      manager.saveGroup(account!.uid, group);
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => GroupIntercomScreen()),
-      );
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const GroupIntercomScreen()),
+        );
+      }
     } else {
-      print('Failed to join group: ${r2response.code}');
+      debugPrint('Failed to join group: ${response.code}');
+      // should let the user know the error with a dialog
     }
   }
 

@@ -86,6 +86,12 @@ class _UserRegisterScreenState extends VerificationScreenState {
 
   @override
   void onTokenHandled(String token, String account, bool needSetPassword) {
+    // save the account
+    final manager = R2UserManager();
+    manager.saveToken(token);
+    manager.saveAccountWithToken(token);
+    manager.requestUserProfile();
+
     if (true == needSetPassword) {
       Navigator.push(
         context,
@@ -94,10 +100,6 @@ class _UserRegisterScreenState extends VerificationScreenState {
               phoneNumber: account, title: '设置密码',)),
       );
     } else {
-      // save the account
-      final manager = R2UserManager();
-      manager.saveToken(token);
-      manager.saveAccountWithToken(token);
       Navigator.pop(context);
     }
   }

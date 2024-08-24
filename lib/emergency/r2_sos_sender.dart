@@ -15,7 +15,7 @@ class R2SosSender {
     String? address;
     final token = await _manager.readToken();
     final r2request = R2HttpRequest();
-    final r2response = await r2request.sendRequest(
+    final r2response = await r2request.postRequest(
       token: token,
       api: 'locationEvent/fallDownReport',
       body: {

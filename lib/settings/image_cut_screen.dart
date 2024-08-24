@@ -5,10 +5,10 @@ import 'dart:io';
 class ImageCutScreen extends StatefulWidget {
   final File imageFile;
 
-  ImageCutScreen({required this.imageFile});
+  const ImageCutScreen({super.key, required this.imageFile});
 
   @override
-  _ImageCutScreenState createState() => _ImageCutScreenState();
+  State<ImageCutScreen> createState() => _ImageCutScreenState();
 }
 
 class _ImageCutScreenState extends State<ImageCutScreen> {
@@ -53,7 +53,7 @@ class _ImageCutScreenState extends State<ImageCutScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: _croppedImage == null
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -66,14 +66,14 @@ class _ImageCutScreenState extends State<ImageCutScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               IconButton(
-                icon: Icon(Icons.cancel, color: Colors.red),
+                icon: const Icon(Icons.cancel, color: Colors.red),
                 iconSize: 50,
                 onPressed: () {
                   Navigator.pop(context, null);
                 },
               ),
               IconButton(
-                icon: Icon(Icons.check, color: Colors.green),
+                icon: const Icon(Icons.check, color: Colors.green),
                 iconSize: 50,
                 onPressed: () {
                   Navigator.pop(context, _croppedImage);

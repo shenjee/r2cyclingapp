@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
+import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
+import 'package:r2cyclingapp/usermanager/r2_group.dart';
+import 'package:r2cyclingapp/usermanager/r2_user_profile.dart';
 
 class R2UserManager {
   final _db = R2DBHelper();
@@ -52,22 +55,60 @@ class R2UserManager {
 
     // Create R2Account and save it to the database
     debugPrint('$runtimeType : User saved with token.');
-    final r2a = R2Account(id: userId, account: userAccount);
+    final r2a = R2Account(uid: userId, account: userAccount);
     return await _db.saveAccount(r2a);
   }
 
   Future<int> saveUser(int id, String account) async {
-    final r2a = R2Account(id:id, account: account);
+    final r2a = R2Account(uid:id, account: account);
     return await _db.saveAccount(r2a);
   }
 
-  Future<int> deleteUser(int id) async {
-    return await _db.deleteAccount(id);
+  Future<int> deleteUser(int uid) async {
+    return await _db.deleteAccount(uid);
   }
 
   Future<R2Account?> localAccount() async {
-    final account = await _db.getLocalAccount();
+    final account = await _db.getAccount();
     return account;
+  }
+
+  Future<int?> saveGroup(int uid, R2Group group) async {
+    return await _db.saveGroup(uid, group);
+  }
+
+  Future<R2Group?> localGroup() async {
+    final account = await _db.getAccount();
+    final group = await _db.getGroup(account!.uid);
+    return group;
+  }
+
+  Future<int?> leaveGroup(int gid) async {
+    return await _db.deleteGroup(gid);
+  }
+
+  Future<R2UserProfile?> requestUserProfile() async {
+    R2UserProfile? profile;
+    final token = await readToken();
+    final request = R2HttpRequest();
+    final response = await request.getRequest(
+      api: 'member/getMember',
+      token: token,
+    );
+
+    if (true == response.success) {
+      debugPrint('$runtimeType : message ${response.message}');
+      final Map<String, dynamic> data = response.result;
+      final groupId = data['cyclingGroupId'];
+      final group = R2Group(gid: groupId ?? 0);
+      final account = await _db.getAccount();
+      // save group info
+      _db.saveGroup(account!.uid, group);
+    } else {
+      debugPrint('$runtimeType : request profile info failed: ${response.code}');
+    }
+
+    return profile;
   }
 
   /*

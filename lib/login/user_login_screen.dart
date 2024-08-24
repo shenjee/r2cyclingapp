@@ -8,7 +8,6 @@ import 'package:uuid/uuid.dart';
 import 'package:r2cyclingapp/login/password_recover_screen.dart';
 import 'package:r2cyclingapp/login/user_register_screen.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
-import 'package:r2cyclingapp/database/r2_storage.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 
@@ -51,7 +50,6 @@ class _UserLoginScreenState extends LoginBaseScreenState {
     final String phonenumber = _phoneController.text;
     final String password = _passwordController.text;
 
-    final t = await R2Storage.getToken();
     String? combined;
     String? hashedCombined;
     combined = '$phonenumber$password';
@@ -61,9 +59,8 @@ class _UserLoginScreenState extends LoginBaseScreenState {
     debugPrint('  hashed_combined: $hashedCombined');
 
     final request = R2HttpRequest();
-    final response = await request.sendRequest(
+    final response = await request.postRequest(
       api: 'common/r2passwordLogin',
-      token: t,
       body: {
         'sid': sid,
         'loginId': phonenumber,
@@ -87,9 +84,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
       final manager = R2UserManager();
       manager.saveToken(token);
       manager.saveAccountWithToken(token);
-
-      // save token
-      await R2Storage.saveToken(token);
+      manager.requestUserProfile();
 
       if (mounted) {
         Navigator.pushAndRemoveUntil(
@@ -99,6 +94,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
         );
       } else {
         debugPrint('Failed to request login: ${response.code}');
+        // should show error info
       }
     }
   }

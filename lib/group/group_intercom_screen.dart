@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
-import 'package:r2cyclingapp/database/r2_storage.dart';
-import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
+import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/intercom/r2_intercom_engine.dart';
 
 class GroupIntercomScreen extends StatefulWidget {
@@ -21,6 +20,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   final List<R2Account> _members = [];
   bool _isPressed = false;
   R2IntercomEngine? _r2intercom;
+  final _manager = R2UserManager();
 
   @override
   void initState() {
@@ -31,16 +31,16 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
 
   _initR2Intercom() {
     final account = _members.first;
-    _r2intercom = R2IntercomEngine(groupID: _groupID!, userID:int.parse(account.account));
+    _r2intercom = R2IntercomEngine(groupID: _groupID!, userID:account.uid);
     _r2intercom!.initAgora();
   }
+
   /*
    * load local user and put it to the intercom member list
    *  as the leading role.
    */
   void _loadLocalUser() async {
-    final db = R2DBHelper();
-    final account = await db.getLocalAccount();
+    final account = await _manager.localAccount();
     if (account != null && _members.length < 8) {
       setState(() {
         _members.add(account);
@@ -50,6 +50,8 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
 
   /*
    * decode the response of group to build the member list
+   *
+   * result:
    */
   void _decodeMemberList(Map<String, dynamic> result) {
     List<dynamic> mlist = result['memberList'];
@@ -58,7 +60,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
     for (var memberData in mlist) {
       if (memberData['loginId'] != account.account) {
         R2Account account = R2Account(
-            id:memberData['id'] ?? memberData['userId'],
+            uid: memberData['id'] ?? memberData['userId'],
             account: memberData['userMobile'] ?? memberData['loginId'])
           ..nickname = memberData['userName'] ?? 'Unknown'
           ..avatarPath = memberData['userAvatar'] ?? ''; // 使用默认值或null
@@ -78,9 +80,9 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
    * including group number, name and members.
    */
   Future<void> _requestMyGroup() async {
-    final token = await R2Storage.getToken();
+    final token = await _manager.readToken();
     final r2request = R2HttpRequest();
-    final r2response = await r2request.sendRequest(
+    final r2response = await r2request.postRequest(
       token: token,
       api: 'cyclingGroup/getMyGroup',
     );
@@ -107,9 +109,9 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   }
 
   void _leaveMyGroup() async {
-    final token = await R2Storage.getToken();
+    final token = await _manager.readToken();
     final r2request = R2HttpRequest();
-    final r2response = await r2request.sendRequest(
+    final r2response = await r2request.postRequest(
       token: token,
       api: 'cyclingGroup/leaveGroup',
     );
@@ -118,8 +120,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
       debugPrint('Request succeeded: ${r2response.message}');
       debugPrint('Response code: ${r2response.code}');
       debugPrint('Result: ${r2response.result}');
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('groupNumber');
+
     } else {
       debugPrint('Failed to leave group code: ${r2response.code}');
     }

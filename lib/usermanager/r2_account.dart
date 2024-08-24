@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 class R2Account {
-  final int _id;
+  final int _uid;
   String _account; // User's phone number or email address
   String _nickname;
   String _phoneNumber;
@@ -11,11 +11,11 @@ class R2Account {
   String _avatarPath; //
 
   R2Account({
-    required int id,
+    required int uid,
     String? account,
     String? phoneNumber,
     String? email,
-  }) : _id = id,
+  }) : _uid = uid,
         _account = account ?? '',
         _phoneNumber = phoneNumber ?? '',
         _email = email ?? '',
@@ -23,24 +23,24 @@ class R2Account {
         _avatarPath = '';
 
   // Getter for id
-  int get id => _id;
+  int get uid => _uid;
 
   // Getter for account (cannot be modified)
   String get account => _account;
   set account(String value) {
-    _account = account;
+    _account = value;
   }
 
   // Getter for phone number (cannot be modified)
   String get phoneNumber => _phoneNumber;
   set phoneNumber(String value) {
-    _phoneNumber = phoneNumber;
+    _phoneNumber = value;
   }
 
   // Getter for email (cannot be modified)
   String get email => _email;
   set email(String value) {
-    _email = email;
+    _email = value;
   }
 
   // Getter and Setter for nickname
@@ -107,7 +107,7 @@ class R2Account {
   // Convert R2Account to Map
   Map<String, dynamic> toMap() {
     return {
-      'id': _id,
+      'uid': _uid,
       'account': _account,
       'phoneNumber': _phoneNumber,
       'email': _email,
@@ -118,7 +118,7 @@ class R2Account {
 
   // Create R2Account from Map
   factory R2Account.fromMap(Map<String, dynamic> map) {
-    return R2Account(id: map['id'], account: map['account'])
+    return R2Account(uid: map['uid'], account: map['account'])
       ..nickname = map['nickname']
       ..avatarPath = map['avatarPath'];
   }

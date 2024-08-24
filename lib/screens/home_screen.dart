@@ -6,7 +6,6 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:r2cyclingapp/connection/bt/r2_bluetooth_model.dart';
 import 'package:r2cyclingapp/connection/bt/r2_ble_command.dart';
-import 'package:r2cyclingapp/database/r2_storage.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_device.dart';
 import 'package:r2cyclingapp/emergency/r2_sos_sender.dart';
@@ -83,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return FractionallySizedBox(
+        return const FractionallySizedBox(
           heightFactor: 1.0,
           child: UserRegisterScreen(),
         );
@@ -378,9 +377,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 _listItem(
                     Icons.group, '骑行对讲', '',
                         () async {
-                      final prefs = await SharedPreferences.getInstance();
-                      final gn = await prefs.getString('groupNumber');
-                      if (null == gn) {
+                      final manager = R2UserManager();
+                      final group = await manager.localGroup();
+                      if (0 == group!.gid) {
                         // If user is not in a group, navigate to GroupListScreen
                         await Navigator.pushNamed(context, '/groupList');
                       } else {

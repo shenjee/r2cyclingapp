@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:r2cyclingapp/group/group_intercom_screen.dart';
 
 import 'create_group_screen.dart';
 import 'join_group_screen.dart';
@@ -11,7 +10,6 @@ class GroupListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Group List'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -46,7 +44,7 @@ class GroupListScreen extends StatelessWidget {
             trailing: Icon(Icons.keyboard_arrow_right, color: Colors.grey[500],),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => JoinGroupScreen()),
+                MaterialPageRoute(builder: (context) => const JoinGroupScreen()),
               );
             },
           ),

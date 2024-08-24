@@ -59,7 +59,7 @@ class VerificationScreenState extends LoginBaseScreenState {
     // request code via http
     final String userMobile = _phoneController.text;
     final r2request = R2HttpRequest();
-    final r2response = await r2request.sendRequest(
+    final r2response = await r2request.postRequest(
       api: 'common/sendAuthCode',
       body: {
         'sid': sid,
@@ -94,7 +94,7 @@ class VerificationScreenState extends LoginBaseScreenState {
     final String phonenumber = _phoneController.text;
     final String vcode = _vcodeController.text;
     final r2request = R2HttpRequest();
-    final r2response = await r2request.sendRequest(
+    final r2response = await r2request.postRequest(
       api: 'common/r2mobileLogin',
       body: {
         'sid': sid,
