@@ -24,6 +24,8 @@ class UserLoginScreen extends LoginBaseScreen {
 class _UserLoginScreenState extends LoginBaseScreenState {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  // toggle for password visibility
+  bool _isPasswordVisible = false;
 
   @override
   void initState() {
@@ -135,7 +137,18 @@ class _UserLoginScreenState extends LoginBaseScreenState {
           ),
           hintText: '请输入密码',
           controller: _passwordController,
-          keyboardType: TextInputType.number,
+          keyboardType: TextInputType.visiblePassword,
+          textVisible: _isPasswordVisible,
+          suffixWidget: IconButton(
+            icon: Icon(
+              _isPasswordVisible ? Icons.visibility_off : Icons.visibility ,
+            ),
+            onPressed: () {
+              setState(() {
+                _isPasswordVisible = !_isPasswordVisible;
+              });
+            },
+          ),
         ),
         const SizedBox(height:30),
         Container (

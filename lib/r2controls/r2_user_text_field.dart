@@ -8,28 +8,31 @@ class R2UserTextField extends StatefulWidget {
   final String? text;
   final String? hintText;
   final TextInputType? keyboardType;
+  final bool? textVisible;
   // Suffix
   final Widget? suffixWidget;
 
-  R2UserTextField({
+  const R2UserTextField({
+    super.key,
     this.prefixWidget,
     this.controller,
     this.text,
     this.hintText,
     this.keyboardType,
+    this.textVisible,
     this.suffixWidget
   });
 
   @override
-  _R2UserTextFieldState createState() => _R2UserTextFieldState();
+  State<R2UserTextField> createState() => _R2UserTextFieldState();
 }
 
 class _R2UserTextFieldState extends State<R2UserTextField> {
-  final double _prefix_width = 40.0;
-  final double _prefix_height = 40.0;
-  final double _suffix_width = 100.0;
-  final double _suffix_height = 40.0;
-  final double _font_size = 20.0;
+  final double _prefixWidth = 40.0;
+  final double _prefixHeight = 40.0;
+  final double _suffixWidth = 100.0;
+  final double _suffixHeight = 40.0;
+  final double _fontSize = 20.0;
 
   // build the top ui , it has the format like follows:
   // | prefix | text field | suffix |
@@ -42,26 +45,26 @@ class _R2UserTextFieldState extends State<R2UserTextField> {
     if (null != widget.prefixWidget) {
       p = Container(
         alignment:Alignment.center,
-        width: _prefix_width, height: _prefix_height,
+        width: _prefixWidth, height: _prefixHeight,
         child: widget.prefixWidget,
       );
     } else {
-      p = Container(color: Colors.yellow,width: _prefix_width, height: _prefix_height,);
+      p = Container(color: Colors.yellow,width: _prefixWidth, height: _prefixHeight,);
     }
     if (null != widget.suffixWidget) {
       s = Container(
         alignment:Alignment.center,
-        width: _suffix_width, height: _suffix_height,
+        width: _suffixWidth, height: _suffixHeight,
         child: widget.suffixWidget,
       );
     } else {
-      s = Container(width: _suffix_width, height: _suffix_height,);
+      s = Container(width: _suffixWidth, height: _suffixHeight,);
     }
     return Row (
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
           child: p,
         ),
         Expanded (
@@ -69,9 +72,10 @@ class _R2UserTextFieldState extends State<R2UserTextField> {
             controller: widget.controller,
             textAlign: TextAlign.start,
             textAlignVertical: TextAlignVertical.center,
-            style: TextStyle(fontSize: _font_size),
+            style: TextStyle(fontSize: _fontSize),
             decoration: InputDecoration.collapsed(hintText:widget.hintText),
             keyboardType: widget.keyboardType,
+            obscureText: widget.textVisible ?? true,
           ),
         ),
         Padding(
