@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:image_cropper/image_cropper.dart'; // For cropping the image
+import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
 
 class ImageCutScreen extends StatefulWidget {
@@ -45,6 +45,11 @@ class _ImageCutScreenState extends State<ImageCutScreen> {
       setState(() {
         _croppedImage = File(cropped.path);
       });
+    } else {
+      // If cropping was cancelled, pop the screen with null result
+      if (mounted) {
+        Navigator.pop(context, null);
+      }
     }
   }
 
