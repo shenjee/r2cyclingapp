@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'verification_screen.dart';
 import 'user_login_screen.dart';
 import 'password_setting_screen.dart';
@@ -86,12 +85,7 @@ class _UserRegisterScreenState extends VerificationScreenState {
 
   @override
   void onTokenHandled(String token, String account, bool needSetPassword) {
-    // save the account
-    final manager = R2UserManager();
-    manager.saveToken(token);
-    manager.saveAccountWithToken(token);
-    manager.requestUserProfile();
-
+    super.onTokenHandled(token, account, needSetPassword);
     if (true == needSetPassword) {
       Navigator.push(
         context,

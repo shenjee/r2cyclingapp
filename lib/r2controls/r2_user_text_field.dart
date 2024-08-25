@@ -30,8 +30,6 @@ class R2UserTextField extends StatefulWidget {
 class _R2UserTextFieldState extends State<R2UserTextField> {
   final double _prefixWidth = 40.0;
   final double _prefixHeight = 40.0;
-  final double _suffixWidth = 100.0;
-  final double _suffixHeight = 40.0;
   final double _fontSize = 20.0;
 
   // build the top ui , it has the format like follows:
@@ -42,6 +40,7 @@ class _R2UserTextFieldState extends State<R2UserTextField> {
   Widget _buildContent(BuildContext context) {
     Widget? p; // prefix
     Widget? s; // suffix
+
     if (null != widget.prefixWidget) {
       p = Container(
         alignment:Alignment.center,
@@ -49,24 +48,22 @@ class _R2UserTextFieldState extends State<R2UserTextField> {
         child: widget.prefixWidget,
       );
     } else {
-      p = Container(color: Colors.yellow,width: _prefixWidth, height: _prefixHeight,);
+      p = null;
     }
     if (null != widget.suffixWidget) {
-      s = Container(
-        alignment:Alignment.center,
-        width: _suffixWidth, height: _suffixHeight,
-        child: widget.suffixWidget,
-      );
+      s = widget.suffixWidget;
     } else {
-      s = Container(width: _suffixWidth, height: _suffixHeight,);
+      s = null;
     }
+
     return Row (
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-          child: p,
-        ),
+        if (null != p)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+            child: p,
+          ),
         Expanded (
           child: TextField(
             controller: widget.controller,
@@ -75,13 +72,14 @@ class _R2UserTextFieldState extends State<R2UserTextField> {
             style: TextStyle(fontSize: _fontSize),
             decoration: InputDecoration.collapsed(hintText:widget.hintText),
             keyboardType: widget.keyboardType,
-            obscureText: widget.textVisible ?? true,
+            obscureText: widget.textVisible ?? false,
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-          child: s,
-        ),
+        if (null != s)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+            child: s,
+          ),
       ],
     );
   }

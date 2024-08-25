@@ -25,7 +25,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   // toggle for password visibility
-  bool _isPasswordVisible = false;
+  bool _isPasswordHidden = true;
 
   @override
   void initState() {
@@ -120,7 +120,9 @@ class _UserLoginScreenState extends LoginBaseScreenState {
             '+86',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 20),
+                fontSize: 20,
+                color: Colors.grey,
+            ),
           ),
           hintText: '请输入手机号',
           controller: _phoneController,
@@ -129,23 +131,19 @@ class _UserLoginScreenState extends LoginBaseScreenState {
         const SizedBox(height:20),
         // text field for entering password
         R2UserTextField(
-          prefixWidget: const Text(
-            '[***]',
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20),
-          ),
+          prefixWidget: const Icon(Icons.password, color: Colors.grey,),
           hintText: '请输入密码',
           controller: _passwordController,
-          keyboardType: TextInputType.visiblePassword,
-          textVisible: _isPasswordVisible,
+          keyboardType: TextInputType.text,
+          textVisible: _isPasswordHidden,
           suffixWidget: IconButton(
             icon: Icon(
-              _isPasswordVisible ? Icons.visibility_off : Icons.visibility ,
+              _isPasswordHidden ? Icons.visibility_off : Icons.visibility ,
+              color: Colors.grey,
             ),
             onPressed: () {
               setState(() {
-                _isPasswordVisible = !_isPasswordVisible;
+                _isPasswordHidden = !_isPasswordHidden;
               });
             },
           ),

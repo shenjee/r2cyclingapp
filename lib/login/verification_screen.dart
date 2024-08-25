@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
+import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 
 import 'login_base_screen.dart';
 
@@ -40,6 +41,11 @@ class VerificationScreenState extends LoginBaseScreenState {
    * which indicates the user is a new register and must set the password.
    */
   void onTokenHandled(String token, String account, bool needSetPassword) {
+    // save the account
+    final manager = R2UserManager();
+    manager.saveToken(token);
+    manager.saveAccountWithToken(token);
+    manager.requestUserProfile();
     // TODO: implementaion
   }
 
@@ -126,9 +132,12 @@ class VerificationScreenState extends LoginBaseScreenState {
    * button for request v-code with phone number fed
    * once it is tapped and v-code received, it starts timer for 60s countdown
    */
-  Widget _requestVcodeButton() {
+  Widget _vcodeButton() {
     if (true == _isVcodeRequested) {
-      return Text('${_secondsRemaining}s');
+      return Padding(
+          padding: const EdgeInsets.fromLTRB(0.0, 0, 20.0, 0.0),
+          child:Text('${_secondsRemaining}s', style: const TextStyle(color: Colors.grey),)
+      );
     } else {
       return TextButton(
         onPressed: _requestVcode,
@@ -177,8 +186,10 @@ class VerificationScreenState extends LoginBaseScreenState {
             prefixWidget: const Text(
               '+86',
               style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20),
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Colors.grey,
+              ),
             ),
             hintText: '请输入手机号',
             controller: _phoneController,
@@ -187,14 +198,9 @@ class VerificationScreenState extends LoginBaseScreenState {
           const SizedBox(height: 20),
           // text field for entering password
           R2UserTextField(
-            prefixWidget: const Text(
-              '[•••]',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20),
-            ),
+            prefixWidget: const Icon(Icons.key, color:Colors.grey),
             hintText: '请输入验证码',
-            suffixWidget: _requestVcodeButton(),
+            suffixWidget: _vcodeButton(),
             controller: _vcodeController,
             keyboardType: TextInputType.number,
           ),

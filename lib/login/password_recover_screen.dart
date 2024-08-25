@@ -19,6 +19,7 @@ class PasswordRecoverScreenState extends VerificationScreenState {
 
   @override
   void onTokenHandled(String token, String account, bool needSetPassword) {
+    super.onTokenHandled(token, account, needSetPassword);
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => PasswordSettingScreen(

@@ -30,6 +30,9 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
   final TextEditingController _confirmController = TextEditingController();
   String? _phoneNumber;
   String? _title;
+  // toggle for password visibility
+  bool _isPasswordHidden = true;
+  bool _isConfirmHidden = true;
 
   @override
   void initState() {
@@ -120,28 +123,42 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
           ),
           // text field for entering phone number
           R2UserTextField(
-            prefixWidget: const Text(
-              '[***]',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20),
-            ),
+            prefixWidget: const Icon(Icons.password, color: Colors.grey,),
             hintText: '输入新密码',
             controller: _passwordController,
-            keyboardType: TextInputType.phone,
+            keyboardType: TextInputType.text,
+            textVisible: _isPasswordHidden,
+            suffixWidget: IconButton(
+              icon: Icon(
+                _isPasswordHidden ? Icons.visibility_off : Icons.visibility ,
+                color: Colors.grey,
+              ),
+              onPressed: () {
+                setState(() {
+                  _isPasswordHidden = !_isPasswordHidden;
+                });
+              },
+            ),
           ),
           const SizedBox(height:20),
           // text field for entering password
           R2UserTextField(
-            prefixWidget: const Text(
-              '[***]',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18.0),
-            ),
+            prefixWidget: const Icon(Icons.password, color: Colors.grey,),
             hintText: '再次确认',
             controller: _confirmController,
-            keyboardType: TextInputType.phone,
+            keyboardType: TextInputType.text,
+            textVisible: _isConfirmHidden,
+            suffixWidget: IconButton(
+              icon: Icon(
+                _isConfirmHidden ? Icons.visibility_off : Icons.visibility ,
+                color: Colors.grey,
+              ),
+              onPressed: () {
+                setState(() {
+                  _isConfirmHidden = !_isConfirmHidden;
+                });
+              },
+            ),
           ),
           const SizedBox(height: 30.0),
           const SizedBox(height: 48.0),
