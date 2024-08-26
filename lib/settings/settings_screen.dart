@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 
 import "package:r2cyclingapp/usermanager/r2_user_manager.dart";
 import "package:r2cyclingapp/usermanager/r2_account.dart";
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
-
-import 'user_profile_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -15,7 +14,9 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _manager = R2UserManager();
+  bool _isLoggedIn = false;
   R2Account? _account;
+  File? _avatar;
 
   @override
   void initState() {
@@ -23,11 +24,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadAccount();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadAvatar();  // Reload the avatar whenever dependencies change (i.e., when returning to this screen)
+  }
+
+  Future<void> _loadAvatar() async {
+    final manager = R2UserManager();
+    final account = await manager.localAccount();
+    if (account != null && account.avatarPath.isNotEmpty) {
+      setState(() {
+        _account = account;
+        _avatar = File(account.avatarPath);
+      });
+    }
+  }
+
   Future<void> _loadAccount() async {
     final account = await _manager.localAccount();
-    setState(() {
-      _account = account;
-    });
+    final token = await _manager.readToken();
+    if (null != account && null != token) {
+      setState(() {
+        _account = account;
+        _isLoggedIn = true;
+      });
+    } else {
+      setState(() {
+        _isLoggedIn = false;
+      });
+    }
   }
 
   Future<void> _accountLogout() async {
@@ -64,11 +90,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       title: Text(_account?.nickname ?? 'User', style: const TextStyle(fontSize: 24.0),),
       trailing: const Icon(Icons.chevron_right),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const UserProfileScreen()),
-        );
+      onTap: () async {
+        await Navigator.pushNamed(context, '/profile');
+        _loadAvatar();
       },
     );
   }
@@ -152,12 +176,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        // child: _account == null ? const CircularProgressIndicator() : Column(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. User Avatar and Nickname
-            _userInfoWidget(),
+            if (true == _isLoggedIn)
+              _userInfoWidget(),
             const Divider(),
             // 2. R2 Cycling Introduction
             const SizedBox(height:10.0),
@@ -169,18 +193,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _versionWidget(context),
             const SizedBox(height: 10.0),
             // 4. Logout Button
-            Expanded(
-              child:Center(
-                child: R2FlatButton(
-                  text: '退出登录',
-                  onPressed: () async {
-                    Navigator.of(context).pop(true);
-                    await _accountLogout();
-                  },
-                  backgroundColor: Colors.red,
+            if (true == _isLoggedIn)
+              Expanded(
+                child:Center(
+                  child: R2FlatButton(
+                    text: '退出登录',
+                    onPressed: () async {
+                      Navigator.of(context).pop(true);
+                      await _accountLogout();
+                      },
+                    backgroundColor: Colors.red,
+                  ),
                 ),
               ),
-            ),
             // 5. Company Info and Copyright
             Center(child:_copyrightWidget(context)),
           ],

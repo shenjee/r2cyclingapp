@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
-import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
 
 import 'package:r2cyclingapp/connection/bt/r2_bluetooth_model.dart';
 import 'package:r2cyclingapp/connection/bt/r2_ble_command.dart';
+import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_device.dart';
 import 'package:r2cyclingapp/emergency/r2_sos_sender.dart';
@@ -28,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isUnbindMode = false;
   String emergencyContactStatus = '已关闭';
   Color emergencyContactColor = Colors.grey;
+  File? _avatar;  // To store the avatar image
 
   // temporary usage to simulate the detection of a fall
   int? _strLast;
@@ -43,6 +45,26 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     _checkBondedDevice();
     _loadEmergencyContactStatus();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadAvatar();  // Reload the avatar whenever dependencies change (i.e., when returning to this screen)
+  }
+
+  Future<void> _loadAvatar() async {
+    final manager = R2UserManager();
+    final account = await manager.localAccount();
+    if (account != null && account.avatarPath.isNotEmpty) {
+      setState(() {
+        _avatar = File(account.avatarPath);
+      });
+    } else {
+      setState(() {
+        _avatar = null;
+      });
+    }
   }
 
   /*
@@ -227,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       return IconButton(
           icon: FutureBuilder<Image>(
-            future: account?.getAvatar(),
+            future: account.getAvatar(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const CircleAvatar(
@@ -247,8 +269,9 @@ class _HomeScreenState extends State<HomeScreen> {
               }
             },
           ),
-          onPressed: () {
-            Navigator.pushNamed(context, '/profile');
+          onPressed: () async {
+            await Navigator.pushNamed(context, '/profile');
+            _loadAvatar();
           });
     }
   }
@@ -408,8 +431,9 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () async {
               final _isLoggedOut = await Navigator.pushNamed(context, '/settings');
               if (true == _isLoggedOut) {
-                _checkLoginStatus();
+                //_checkLoginStatus();
               }
+              _loadAvatar();
             },
           ),
         ],
