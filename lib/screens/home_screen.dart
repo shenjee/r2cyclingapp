@@ -212,6 +212,48 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   /*
+   *
+   */
+  Future<Widget> _leftNavigationButton() async {
+    final manager = R2UserManager();
+    final account = await manager.localAccount();
+    final token  = await manager.readToken();
+    if (null == token || null == account) {
+      return IconButton(
+          icon: const Icon(Icons.person, size:34.0),
+          onPressed: () {
+            _registerScreen();
+          });
+    } else {
+      return IconButton(
+          icon: FutureBuilder<Image>(
+            future: account?.getAvatar(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircleAvatar(
+                  radius: 30,
+                  child: CircularProgressIndicator(),
+                );
+              } else if (snapshot.hasError || !snapshot.hasData) {
+                return const CircleAvatar(
+                  radius: 30,
+                  child: Icon(Icons.error),
+                );
+              } else {
+                return CircleAvatar(
+                  radius: 30,
+                  backgroundImage: snapshot.data?.image,
+                );
+              }
+            },
+          ),
+          onPressed: () {
+            Navigator.pushNamed(context, '/profile');
+          });
+    }
+  }
+
+  /*
    * it shows brief information of the bonded helmet
    */
   Widget _infoWidget() {
@@ -342,13 +384,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    //pd.show(context);
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.person, size:34.0),
-          onPressed: () {
-            Navigator.pushNamed(context, '/profile');
+        leading: FutureBuilder<Widget>(
+          future: _leftNavigationButton(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator(); // Loading indicator while waiting for the Future
+            } else if (snapshot.hasError) {
+              return IconButton(
+                icon: const Icon(Icons.error, size: 34.0),
+                onPressed: () {},
+              );
+            } else {
+              return snapshot.data ?? const SizedBox.shrink();
+            }
           },
         ),
         title: const Text('R2 Cycling'),
