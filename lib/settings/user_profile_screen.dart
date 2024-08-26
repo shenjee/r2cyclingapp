@@ -124,25 +124,22 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 FutureBuilder<Image>(
                   future: _account?.getAvatar(),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) {
-                      return ClipOval(
-                        child: SizedBox(
-                          width: 70.0,  // Set the desired width
-                          height: 70.0, // Set the desired height
-                          child: Image.asset(
-                            'assets/images/default_avatar.png',
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircleAvatar(
+                        radius: 30.0,
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (snapshot.hasError || !snapshot.hasData) {
+                      return const CircleAvatar(
+                        radius: 30.0,
+                        child: Icon(Icons.error),
+                      );
+                    } else {
+                      return CircleAvatar(
+                        radius: 30.0,
+                        backgroundImage: snapshot.data?.image,
                       );
                     }
-                    return ClipOval(
-                      child: SizedBox(
-                        width: 70.0,  // Set the desired width
-                        height: 70.0, // Set the desired height
-                        child: snapshot.data!,
-                      ),
-                    );
                   },
                 ),
                 const SizedBox(width: 20.0),
