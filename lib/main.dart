@@ -32,10 +32,12 @@ class R2CyclingApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'R2 Cycling',
+      /*
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF539765)),
         useMaterial3: true,
       ),
+       */
       initialRoute: '/',
         onGenerateRoute: (settings) {
           if (settings.name == '/bluetooth_pairing') {
