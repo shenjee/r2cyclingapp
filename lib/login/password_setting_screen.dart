@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flash/flash.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,6 +6,7 @@ import 'package:uuid/uuid.dart';
 
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
+import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/screens/home_screen.dart';
 import 'login_base_screen.dart';
@@ -48,8 +48,26 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
     return digest.toString();
   }
 
+  /*
+   * The password should be at least 6 characters long. And, the password
+   * should consist of letters (uppercase or lowercase), digits,
+   * or a combination of both.
+   * return: true for matching, false for irregular
+   */
+  bool _isValidPassword(String input) {
+    // Regular expression to match a password that is at least 6 characters long
+    // and contains only letters and digits
+    final RegExp passwordPattern = RegExp(r'^[a-zA-Z0-9]{6,}$');
+
+    // Check if the input matches the pattern
+    return passwordPattern.hasMatch(input);
+  }
+
   Future<void> _setPassword() async {
-    if (_passwordController.text == _confirmController.text) {
+    debugPrint('1st:${_passwordController.text} 2nd:${_confirmController.text}');
+    final isSame = _passwordController.text.compareTo(_confirmController.text);
+    final isValidPasswd = _isValidPassword(_passwordController.text);
+    if (0 == isSame && true == isValidPasswd) {
       // get uuid as session id
       final prefs = await SharedPreferences.getInstance();
       String? sid = prefs.getString('sessionId');
@@ -95,8 +113,27 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
           }
         } else {
           debugPrint('Failed to set password: ${response.code}');
+          if (mounted) {
+            R2Flash.showBasicFlash(
+                context: context,
+                message: '密码设置失败（${response.code}）',
+                duration: const Duration(seconds: 3),
+            );
+          }
         }
       }
+    } else {
+      String warning;
+      if (0 != isSame) {
+        warning = '两次密码输入不一致';
+      } else {
+        warning = '密码为不少于6位的数字和字符组合';
+      }
+      R2Flash.showBasicFlash(
+          context: context,
+          message: warning,
+          duration: const Duration(seconds: 3)
+      );
     }
   }
 
@@ -166,55 +203,10 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
     );
   }
 
-  /*
-   * it works like a toast, but it features more functionalities than toast does.
-   * it seems that flash library has a real toast module, but I failed to
-   * get toast working. Try it later.
-   */
-  void _showBasicFlash({
-    Duration? duration,
-    flashStyle = FlashBehavior.floating,
-  }) {
-    showFlash(
-      context: context,
-      duration: duration,
-      builder: (context, controller) {
-        return FlashBar(
-          controller: controller,
-          forwardAnimationCurve: Curves.easeInCirc,
-          reverseAnimationCurve: Curves.bounceIn,
-          position: FlashPosition.top,
-          behavior: flashStyle,
-          contentTextStyle: const TextStyle(fontSize: 20, color:Colors.red),
-          content: const Center(child:Text('两次密码输入不一致')),
-        );
-        },
-    );
-  }
-
-  /*
-  void _showSuccessFlash() {
-    _showBasicFlash(message: 'Password updated successfully!', duration: Duration(seconds: 2));
-  }
-
-  void _showErrorFlash({required String message}) {
-    _showBasicFlash(message: message, duration: Duration(seconds: 3));
-  }
-   */
-
   @override
   void mainButtonClicked() {
-    // TODO: implement main_button_clicked
-    int isSame = 0;
-
     super.mainButtonClicked();
-    isSame = _passwordController.text.compareTo(_confirmController.text);
-    debugPrint('1st:${_passwordController.text} 2nd:${_confirmController.text} same? $isSame');
-    if (0 == isSame) {
-      _setPassword();
-    } else {
-      _showBasicFlash(duration:const Duration(seconds: 3));
-    }
+    _setPassword();
     debugPrint('$runtimeType : main button clicked');
   }
 }

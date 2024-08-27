@@ -93,6 +93,10 @@ class _UserRegisterScreenState extends VerificationScreenState {
             PasswordSettingScreen(
               phoneNumber: account, title: '设置密码',)),
       );
+    } else {
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
     }
   }
 }

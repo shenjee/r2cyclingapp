@@ -130,9 +130,9 @@ class _UserLoginScreenState extends LoginBaseScreenState {
         // should show error info
         String warning;
         if (500 == response.code) {
-          warning = '用户名或密码输入有误';
+          warning = '用户名或密码输入有误（${response.code}）';
         } else {
-          warning = '网络错误，请稍后再试';
+          warning = '网络错误，请稍后再试（${response.code}）';
         }
         if (mounted) {
           R2Flash.showBasicFlash(

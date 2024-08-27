@@ -101,8 +101,8 @@ class VerificationScreenState extends LoginBaseScreenState {
       // get phone number and v-code
       final String phonenumber = _phoneController.text;
       final String vcode = _vcodeController.text;
-      final r2request = R2HttpRequest();
-      final r2response = await r2request.postRequest(
+      final request = R2HttpRequest();
+      final response = await request.postRequest(
         api: 'common/r2mobileLogin',
         body: {
           'sid': sid,
@@ -111,28 +111,25 @@ class VerificationScreenState extends LoginBaseScreenState {
         },
       );
 
-      if (true == r2response.success) {
+      if (true == response.success) {
         debugPrint(
-            '$runtimeType : Response of token request by phonenumber + password');
-        debugPrint('$runtimeType :  Message: ${r2response.message}');
-        debugPrint('$runtimeType :  Code: ${r2response.code}');
-        debugPrint('$runtimeType :  result: ${r2response.result}');
+            '$runtimeType : Response of token request by phone number + password');
+        debugPrint('$runtimeType :  Code: ${response.code}');
+        debugPrint('$runtimeType :  Message: ${response.message}');
+        debugPrint('$runtimeType :  result: ${response.result}');
 
-        final Map<String, dynamic> data = r2response.result;
+        final Map<String, dynamic> data = response.result;
         final token = data['token'];
         final setPassword = data['defaultPassword'];
 
         onTokenHandled(token, phonenumber, setPassword);
-        if (mounted) {
-          Navigator.of(context).pop();
-        }
       } else {
-        debugPrint('$runtimeType : Failed to request token: ${r2response.code}');
+        debugPrint('$runtimeType : Failed to request token: ${response.code}');
         String warning;
-        if (500 == r2response.code) {
-          warning = '验证码已失效或输入有误';
+        if (500 == response.code) {
+          warning = '验证码已失效或输入有误（${response.code}）';
         } else {
-          warning = '网络错误，请稍后再试';
+          warning = '网络错误，请稍后再试（${response.code}）';
         }
         if (mounted) {
           R2Flash.showBasicFlash(
