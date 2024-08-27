@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import 'package:r2cyclingapp/login/password_recover_screen.dart';
 import 'package:r2cyclingapp/login/user_register_screen.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
+import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 
@@ -33,6 +34,32 @@ class _UserLoginScreenState extends LoginBaseScreenState {
     mainButtonTitle = '登录';
   }
 
+  /*
+   * Chinese phone number consists of exactly 11 digits,
+   * return: true for matching, false for irregular
+   */
+  bool _isValidPhoneNumber(String input) {
+    final RegExp phoneNumberPattern = RegExp(r'^\d{11}$');
+
+    // Check if the input matches the pattern
+    return phoneNumberPattern.hasMatch(input);
+  }
+
+  /*
+   * The password should be at least 6 characters long. And, the password
+   * should consist of letters (uppercase or lowercase), digits,
+   * or a combination of both.
+   * return: true for matching, false for irregular
+   */
+  bool _isValidPassword(String input) {
+    // Regular expression to match a password that is at least 6 characters long
+    // and contains only letters and digits
+    final RegExp passwordPattern = RegExp(r'^[a-zA-Z0-9]{6,}$');
+
+    // Check if the input matches the pattern
+    return passwordPattern.hasMatch(input);
+  }
+
   String _hashPassword(String password) {
     var bytes = utf8.encode(password);
     var digest = sha512.convert(bytes);
@@ -40,63 +67,97 @@ class _UserLoginScreenState extends LoginBaseScreenState {
   }
 
   Future<void> _requestLogin() async {
-    // get uuid as session id
-    final prefs = await SharedPreferences.getInstance();
-    String? sid = prefs.getString('sessionId');
-    if (null == sid) {
-      var uuid = const Uuid();
-      sid = uuid.v4();
-      await prefs.setString('sessionId', sid);
-    }
+    final isValidNumber = _isValidPhoneNumber(_phoneController.text);
+    final isValidPasswd = _isValidPassword(_passwordController.text);
+    if (true == isValidNumber && true == isValidPasswd) {
+      // get uuid as session id
+      final prefs = await SharedPreferences.getInstance();
+      String? sid = prefs.getString('sessionId');
+      if (null == sid) {
+        var uuid = const Uuid();
+        sid = uuid.v4();
+        await prefs.setString('sessionId', sid);
+      }
 
-    final String phonenumber = _phoneController.text;
-    final String password = _passwordController.text;
+      final String phonenumber = _phoneController.text;
+      final String password = _passwordController.text;
 
-    String? combined;
-    String? hashedCombined;
-    combined = '$phonenumber$password';
-    hashedCombined = _hashPassword(combined);
-    debugPrint('Phone number and password combined:');
-    debugPrint('  combined: $combined');
-    debugPrint('  hashed_combined: $hashedCombined');
+      String? combined;
+      String? hashedCombined;
+      combined = '$phonenumber$password';
+      hashedCombined = _hashPassword(combined);
+      debugPrint('Phone number and password combined:');
+      debugPrint('  combined: $combined');
+      debugPrint('  hashed_combined: $hashedCombined');
 
-    final request = R2HttpRequest();
-    final response = await request.postRequest(
-      api: 'common/r2passwordLogin',
-      body: {
-        'sid': sid,
-        'loginId': phonenumber,
-        'userPsw': hashedCombined,
-        'validateCode':''
-      },
-    );
+      final request = R2HttpRequest();
+      final response = await request.postRequest(
+        api: 'common/r2passwordLogin',
+        body: {
+          'sid': sid,
+          'loginId': phonenumber,
+          'userPsw': hashedCombined,
+          'validateCode': ''
+        },
+      );
 
-    if (true == response.success) {
-      debugPrint('Login by phone number + password');
-      debugPrint('  Message: ${response.message}');
-      debugPrint('  Code: ${response.code}');
-      debugPrint('  Result: ${response.result}');
+      if (true == response.success) {
+        debugPrint('Login by phone number + password');
+        debugPrint('  Message: ${response.message}');
+        debugPrint('  Code: ${response.code}');
+        debugPrint('  Result: ${response.result}');
 
-      // retrieve the token and password-setting indicator
-      final Map<String, dynamic> data = response.result;
-      final token = data['token'];
-      debugPrint('$runtimeType :  parse result:');
-      debugPrint('$runtimeType :    token:\n $token');
+        // retrieve the token and password-setting indicator
+        final Map<String, dynamic> data = response.result;
+        final token = data['token'];
+        debugPrint('$runtimeType :  parse result:');
+        debugPrint('$runtimeType :    token:\n $token');
 
-      final manager = R2UserManager();
-      manager.saveToken(token);
-      manager.saveAccountWithToken(token);
-      manager.requestUserProfile();
+        final manager = R2UserManager();
+        manager.saveToken(token);
+        manager.saveAccountWithToken(token);
+        manager.requestUserProfile();
 
-      if (mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-              (Route<dynamic> route) => false,
-        );
+        if (mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+                (Route<dynamic> route) => false,
+          );
+        }
       } else {
         debugPrint('Failed to request login: ${response.code}');
         // should show error info
+        String warning;
+        if (500 == response.code) {
+          warning = '用户名或密码输入有误';
+        } else {
+          warning = '网络错误，请稍后再试';
+        }
+        if (mounted) {
+          R2Flash.showBasicFlash(
+              context: context,
+              message: warning,
+              duration: const Duration(seconds: 3)
+          );
+        }
+      }
+    } else {
+      // phone number or password are in wrong format
+      if (_phoneController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
+        String warning;
+        if (false == isValidPasswd && false == isValidNumber) {
+          warning = '手机号和密码输入格式有误';
+        } else if (false == isValidPasswd) {
+          warning = '密码为不少于6位的数字和字符组合';
+        } else {
+          warning = '手机号输入格式有误';
+        }
+        R2Flash.showBasicFlash(
+          context: context,
+          message: warning,
+          duration: const Duration(seconds: 3),
+        );
       }
     }
   }
