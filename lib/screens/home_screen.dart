@@ -429,9 +429,9 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.settings, size: 34.0,),
             onPressed: () async {
-              final _isLoggedOut = await Navigator.pushNamed(context, '/settings');
-              if (true == _isLoggedOut) {
-                //_checkLoginStatus();
+              final isLoggedOut = await Navigator.pushNamed(context, '/settings');
+              if (true == isLoggedOut) {
+                _checkLoginStatus();
               }
               _loadAvatar();
             },
