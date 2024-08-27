@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
@@ -40,7 +40,7 @@ class VerificationScreenState extends LoginBaseScreenState {
    * request v-code (verification code) from R2Cloud with correct phone number fed.
    */
   Future<void> _requestVcode() async {
-    final isValidNumber = isValidPhoneNumber(_phoneController.text);
+    final isValidNumber = _isValidPhoneNumber(_phoneController.text);
     if (true == isValidNumber) {
       // get uuid as session id
       final prefs = await SharedPreferences.getInstance();
@@ -87,9 +87,9 @@ class VerificationScreenState extends LoginBaseScreenState {
    * request authorization token with phone number and v-code fed.
    */
   Future<void> _requestToken() async {
-    final isRegularNumber = isValidPhoneNumber(_phoneController.text);
-    final isValidCode = isValidVerificationCode(_vcodeController.text);
-    if (true == isRegularNumber && true == isValidCode) {
+    final isValidNumber = _isValidPhoneNumber(_phoneController.text);
+    final isValidCode = _isValidVerificationCode(_vcodeController.text);
+    if (true == isValidNumber && true == isValidCode) {
       // get uuid
       final prefs = await SharedPreferences.getInstance();
       String? sid = prefs.getString('sessionId');
@@ -145,9 +145,17 @@ class VerificationScreenState extends LoginBaseScreenState {
     } else {
       // v-code is in a wrong format
       if (_phoneController.text.isNotEmpty && _vcodeController.text.isNotEmpty) {
+        String warning;
+        if (false == isValidCode && false == isValidNumber) {
+          warning = '手机号或验证码输入格式有误';
+        } else if (false == isValidCode) {
+          warning = '验证码输入格式有误';
+        } else {
+          warning = '手机号输入格式有误';
+        }
         R2Flash.showBasicFlash(
           context: context,
-          message: '手机号或验证码输入有误',
+          message: warning,
           duration: const Duration(seconds: 3),
         );
       }
@@ -200,10 +208,10 @@ class VerificationScreenState extends LoginBaseScreenState {
   }
 
   /*
-   * Chinese phone number must be 11 digits
+   * Chinese phone number consists of exactly 11 digits,
    * return: true for matching, false for irregular
    */
-  bool isValidPhoneNumber(String input) {
+  bool _isValidPhoneNumber(String input) {
     // Regular expression to match exactly 11 digits
     final RegExp phoneNumberPattern = RegExp(r'^\d{11}$');
 
@@ -212,10 +220,10 @@ class VerificationScreenState extends LoginBaseScreenState {
   }
 
   /*
-   * verification code must be 6 digits
+   * verification code consists of 6 digits
    * return: true for matching, false for irregular
    */
-  bool isValidVerificationCode(String input) {
+  bool _isValidVerificationCode(String input) {
     // Regular expression to match exactly 13 digits
     final RegExp codePattern = RegExp(r'^\d{6}$');
 
