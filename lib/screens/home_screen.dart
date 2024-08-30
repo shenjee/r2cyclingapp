@@ -86,10 +86,12 @@ class _HomeScreenState extends State<HomeScreen> {
     bool isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
     if (false == isFirstLaunch) {
       await prefs.setBool('isFirstLaunch', false);
-      await showDialog(
-        context: context,
-        builder: (BuildContext context) => PermissionDialog(),
-      );
+      if (mounted) {
+        await showDialog(
+          context: context,
+          builder: (BuildContext context) => PermissionDialog(),
+        );
+      }
     }
   }
 
