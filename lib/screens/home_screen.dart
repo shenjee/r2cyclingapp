@@ -379,7 +379,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(fontSize: 16.0, color: subtitleColor),
                   )),
             ),
-            Icon(Icons.keyboard_arrow_right, color: Colors.grey[500],),
+            Icon(Icons.chevron_right, color: Colors.grey[500],),
           ],
         ),
       ),

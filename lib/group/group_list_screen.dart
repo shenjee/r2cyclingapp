@@ -27,7 +27,7 @@ class GroupListScreen extends StatelessWidget {
                 horizontal: 16.0
             ),
             title: const Text('  建立一个骑行组', style: TextStyle(fontSize: 20.0),),
-            trailing: Icon(Icons.keyboard_arrow_right, color: Colors.grey[500],),
+            trailing: Icon(Icons.chevron_right, color: Colors.grey[500],),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => CreateGroupScreen()),

@@ -163,7 +163,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 children: [
                   Text('${_account?.nickname}', style: const TextStyle(fontSize: 24.0),),
                   const SizedBox(width: 20.0,),
-                  const Icon(Icons.chevron_right),
+                  Icon(Icons.chevron_right, color: Colors.grey[500],),
                 ]), // Placeholder for nickname
             onTap: () {
               // Handle nickname modification
