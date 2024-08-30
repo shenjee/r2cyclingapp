@@ -9,10 +9,10 @@ import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
 class BluetoothPairingScreen extends StatefulWidget {
   final Function(DiscoveredDevice) onDeviceConnected;
 
-  BluetoothPairingScreen({required this.onDeviceConnected});
+  const BluetoothPairingScreen({super.key, required this.onDeviceConnected});
 
   @override
-  _BluetoothPairingScreenState createState() => _BluetoothPairingScreenState();
+  State<BluetoothPairingScreen> createState() => _BluetoothPairingScreenState();
 }
 
 class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> {
@@ -26,11 +26,12 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> {
   void initState() {
     super.initState();
     requestPermissions();
-    _addListener();
+    //_addListener();
   }
 
   @override
   void dispose() {
+    _bluetoothModel.stopScan();
     _bluetoothModel.dispose();
     super.dispose();
   }
@@ -56,25 +57,39 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> {
     if (!locationStatus.isGranted) {
       locationStatus = await Permission.locationWhenInUse.request();
     }
-    print('${bluetoothStatus.isGranted} ${bluetoothScanStatus.isGranted} ${bluetoothConnectStatus.isGranted} ${locationStatus.isGranted}');
+    debugPrint('${bluetoothStatus.isGranted} ${bluetoothScanStatus.isGranted} ${bluetoothConnectStatus.isGranted} ${locationStatus.isGranted}');
     if (/*bluetoothStatus.isGranted && */bluetoothScanStatus.isGranted &&
         bluetoothConnectStatus.isGranted && locationStatus.isGranted) {
       //startScanning();
-      print('Permission granted');
+      debugPrint('Permission granted');
     } else {
-      print('Permissions not granted');
+      debugPrint('Permissions not granted');
     }
   }
 
   void _addListener() {
+    /*
     _bluetoothModel.scannedDevices.listen((devices) {
       setState(() {});
     });
-    _bluetoothModel.connectedDevice.listen((connectionState) {
-      if (connectionState?.connectionState == DeviceConnectionState.connected) {
-        Navigator.pop(context);
-      }
-    });
+
+    _bluetoothModel.connectedDevice.listen(
+            (connectionState) {
+              try {
+                if (connectionState?.connectionState ==
+                    DeviceConnectionState.connected) {
+                  debugPrint('$runtimeType : device connected');
+                  if (mounted) {
+                    Navigator.of(context).pop();
+                  }
+                }
+              } catch (error) {
+                debugPrint('$runtimeType : $error');
+              }
+    },
+    onError: (error) {
+      debugPrint('$runtimeType : ');
+    });*/
   }
 
   void _startScanning() {
@@ -86,15 +101,22 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> {
     _bluetoothModel.scanDevices();
   }
 
+  Future<void> _onDeviceSelected(DiscoveredDevice device) async {
+    // stop bluetooth scanning
+    _bluetoothModel.stopScan();
 
-  void _connectToDevice(DiscoveredDevice device) async {
     setState(() {
       connectedDevice = device;
     });
-
-    print('Connecting to ${device.name}');
-    _bluetoothModel.connectDevice(device.id);
-    widget.onDeviceConnected(device); // Notify the parent widget
+    try {
+      //await _bluetoothModel.connectDevice(device.id);
+      await widget.onDeviceConnected(device); // Notify the parent widget
+      if (mounted) {
+        Navigator.of(context).pop(true);
+      }
+    } catch (e) {
+      debugPrint('Connection failed: $e');
+    }
 
     // After BLE connection, initiate Bluetooth Classic connection
   }
@@ -107,14 +129,14 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> {
           backgroundColor: Colors.grey[500],
           child: Text(
             number,
-            style: TextStyle(color: Colors.white, fontSize: 18.0),
+            style: const TextStyle(color: Colors.white, fontSize: 18.0),
           ),
         ),
-        SizedBox(width: 16),
+        const SizedBox(width: 16),
         Expanded(
           child: Text(
             text,
-            style: TextStyle(fontSize: 20.0),
+            style: const TextStyle(fontSize: 20.0),
           ),
         ),
       ],
@@ -127,17 +149,17 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(50.0, 20.0, 50.0, 20.0),
+            padding: const EdgeInsets.fromLTRB(50.0, 20.0, 50.0, 20.0),
             child:_instructionItem('1', '确保手机蓝牙已开启'),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Padding(
-            padding:EdgeInsets.fromLTRB(50.0, 20.0, 50.0, 20.0),
+            padding:const EdgeInsets.fromLTRB(50.0, 20.0, 50.0, 20.0),
             child:_instructionItem('2', '长按智能头盔的开机键，\n直至听到“配对”提示音'),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Padding(
-            padding:EdgeInsets.fromLTRB(50.0, 20.0, 50.0, 20.0),
+            padding: const EdgeInsets.fromLTRB(50.0, 20.0, 50.0, 20.0),
             child:_instructionItem('3', '将手机紧靠您的智能头盔'),
           ),
         ],
@@ -147,7 +169,7 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> {
   Widget _scanningWidget() {
     return Column(
       children: [
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.phone_android, size: 48.0),
@@ -157,7 +179,7 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> {
             Icon(Icons.cyclone, size: 48.0),
           ],
         ),
-        SizedBox(height: 16.0),
+        const SizedBox(height: 16.0),
         StreamBuilder<List<DiscoveredDevice>>(
             stream: _bluetoothModel.scannedDevices,
             builder: (context, snapshot) {
@@ -167,12 +189,12 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> {
                     return ListTile(
                       title: Text(device.name),
                       subtitle: Text(device.id),
-                      onTap: () => _connectToDevice(device),
+                      onTap: () => _onDeviceSelected(device),
                     );
                   }).toList(),
                 );
               } else {
-                return Text("正在扫描...");
+                return const Text("正在扫描...");
               }
             }
         ),
@@ -196,25 +218,29 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.close, size: 34.0,),
+          icon: const Icon(Icons.close, size: 34.0,),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.of(context).pop(false);
             },
         ),
       ),
       body: Column(
           children: [
             Padding(
-              padding: EdgeInsets.all(30.0),
-              child:Text(_title, style: TextStyle(fontSize: 28.0),textAlign: TextAlign.left,),
+              padding: const EdgeInsets.all(30.0),
+              child:Text(
+                _title,
+                style: const TextStyle(fontSize: 28.0),
+                textAlign: TextAlign.left,
+              ),
             ),
             Container(
-              padding: EdgeInsets.all(0.0),
+              padding: const EdgeInsets.all(0.0),
               color: Colors.grey[200],
               height: 400,
               child:_centerWidget(),
             ),
-            SizedBox(height: 50.0,),
+            const SizedBox(height: 50.0,),
             R2FlatButton(text: '开始连接', onPressed: (){
               _startScanning();
             }),

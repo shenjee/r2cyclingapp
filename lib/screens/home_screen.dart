@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:r2cyclingapp/connection/bt/r2_bluetooth_model.dart';
 import 'package:r2cyclingapp/connection/bt/r2_ble_command.dart';
+import 'package:r2cyclingapp/service/r2_background_service.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_device.dart';
@@ -25,6 +26,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _bleModel = R2BluetoothModel();
+  final _service = R2BackgroundService();
   R2Device? _connectedDevice;
   bool _isUnbindMode = false;
   String emergencyContactStatus = '已关闭';
@@ -45,12 +47,20 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     _checkBondedDevice();
     _loadEmergencyContactStatus();
+    _service.initService();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _loadAvatar();  // Reload the avatar whenever dependencies change (i.e., when returning to this screen)
+  }
+
+  @override
+  void dispose() {
+    // stop background service
+    _service.stopService();
+    super.dispose();
   }
 
   Future<void> _loadAvatar() async {
@@ -129,11 +139,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final device = await R2DBHelper().getDevice();
     if (device != null) {
       // Connect to the bonded device
-      await _bleModel.connectDevice(device.id,);
       setState(() {
         _connectedDevice = R2Device(brand: device.brand, id: device.id, name: device.name);
       });
-      _startListen();
+      // start background service to handle the ble event
+      _service.startService();
     }
   }
 
@@ -141,52 +151,28 @@ class _HomeScreenState extends State<HomeScreen> {
    * callback for Bluetooth Paring Screen
    * when BLE's connected, it will be executed.
    */
-  void _helmetConnected(DiscoveredDevice device) async {
+  Future<void> _helmetConnected(DiscoveredDevice device) async {
     // later, it should analyze the brand name from id and name
-    final r2Device = R2Device(brand: 'na', id: device.id, name: device.name);
-    debugPrint('HomeScreen() _helmetConnected device : ${device.id}-${device.name}');
-    setState(() {
-      _connectedDevice = r2Device;
-    });
-    await R2DBHelper().saveDevice(r2Device);
-    _startListen();
-  }
-
-  void _startListen() {
-    if (null != _connectedDevice) {
-      _bleModel.sendData(_connectedDevice!.id, [0x55, 0xB1, 0x03, 0x09, 0x00, 0x01, 0x10]);
-      _bleModel.startListening(_connectedDevice!.id, _onHelmetNotify);
+    try {
+      final r2Device = R2Device(brand: 'na', id: device.id, name: device.name);
+      debugPrint('$runtimeType : device : ${device.id} - ${device.name}');
+      setState(() {
+        _connectedDevice = r2Device;
+      });
+      await R2DBHelper().saveDevice(r2Device);
+    } catch (error) {
+      debugPrint('$runtimeType : $error');
     }
   }
 
-  /*
-   * received the notification and handle it
-   */
-  void _onHelmetNotify(String data) {
-    // "-" :0x0004
-    // "‣︎" :0x0002
-    // "+" :0x0004
-    // "<" :0x0008
-    // "✆" :0x0010
-    // ">" :0x0020
-    // "end" :0x0000
-    debugPrint('_onHelmetNotify(): $data');
-    R2BLECommand command = decodeBLEData(data);
-    debugPrint('_onHelmetNotify(): ${command.toString()}');
-    if (0 != command.instruction) {
-      _strCurr = command.instruction;
-      debugPrint('last instruction: $_strLast');
-      debugPrint('current instruction: $_strCurr');
-      if (4 == _strLast && 8 == _strCurr) {
-        debugPrint('Condition met: Sending SMS');
-        final sr = R2SosSender();
-        sr.sendSos(data);
-      } else {
-        debugPrint('Condition not met.');
-      }
-      _strLast = _strCurr;
-    } else {
-      debugPrint('Ignored data: $data');
+  void _unbindDevice() async {
+    if (_connectedDevice != null) {
+      _service.stopService();
+      await R2DBHelper().deleteDevice();
+      setState(() {
+        _connectedDevice = null;
+        _isUnbindMode = false;
+      });
     }
   }
 
@@ -197,12 +183,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return Align(
       alignment: Alignment.center,
       child:GestureDetector(
-        onTap: (){
-          Navigator.pushNamed(
+        onTap: () async {
+          final isFound = await Navigator.pushNamed(
               context,
               '/bluetooth_pairing',
               arguments: {'onDeviceConnected':_helmetConnected}
           );
+          if (true == isFound) {
+            await _service.startService();
+          }
         },
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -221,16 +210,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }
-
-  void _unbindDevice() async {
-    if (_connectedDevice != null) {
-      await R2DBHelper().deleteDevice();
-      setState(() {
-        _connectedDevice = null;
-        _isUnbindMode = false;
-      });
-    }
   }
 
   /*
@@ -468,7 +447,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           await Navigator.pushNamed(context, '/emergencyContact');
                           _loadEmergencyContactStatus();
                           await Permission.sms.request();
-
                         },
                   subtitleColor: emergencyContactColor,
                 ),
