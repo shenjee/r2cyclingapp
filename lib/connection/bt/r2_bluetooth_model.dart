@@ -5,6 +5,17 @@ import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:rxdart/rxdart.dart';
 
 class R2BluetoothModel {
+  // Singleton instance
+  static final R2BluetoothModel _instance = R2BluetoothModel._internal();
+
+  // Factory constructor to return the singleton instance
+  factory R2BluetoothModel() {
+    return _instance;
+  }
+
+  // Private constructor for internal use
+  R2BluetoothModel._internal();
+
   final FlutterReactiveBle _reactiveBle = FlutterReactiveBle();
 
   StreamSubscription<DiscoveredDevice>? _scanHandler;

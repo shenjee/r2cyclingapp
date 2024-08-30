@@ -32,7 +32,6 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> {
   @override
   void dispose() {
     _bluetoothModel.stopScan();
-    _bluetoothModel.dispose();
     super.dispose();
   }
 

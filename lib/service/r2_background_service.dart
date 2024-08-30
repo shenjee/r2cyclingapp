@@ -25,8 +25,6 @@ class R2BackgroundService {
 
   Future<void> startService() async {
     // Introduce a small delay to ensure device stability
-    await Future.delayed(const Duration(seconds: 2));
-
     final device = await R2DBHelper().getDevice();
     if (device != null) {
       // Connect to the bonded device
