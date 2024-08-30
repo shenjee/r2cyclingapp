@@ -38,10 +38,13 @@ class R2SosSender {
     const LocationSettings locationSettings = LocationSettings(
       accuracy: LocationAccuracy.high,
       distanceFilter: 100,
+      timeLimit: Duration(seconds: 10),
     );
 
     Position position = await Geolocator.getCurrentPosition(
-        locationSettings: locationSettings);
+        locationSettings: locationSettings,);
+    debugPrint('$runtimeType : $position');
+
     final address = await _requestShortAddress(
         position.longitude, position.latitude);
     String message;
