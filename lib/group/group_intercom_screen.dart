@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
 import 'package:r2cyclingapp/usermanager/r2_group.dart';
@@ -79,59 +80,89 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
    */
   Future<void> _requestMyGroup() async {
     final token = await _manager.readToken();
-    final r2request = R2HttpRequest();
-    final r2response = await r2request.postRequest(
+    final request = R2HttpRequest();
+    final response = await request.postRequest(
       token: token,
       api: 'cyclingGroup/getMyGroup',
     );
 
-    if (true == r2response.success) {
-      debugPrint('Request succeeded: ${r2response.message}');
-      debugPrint('Response code: ${r2response.code}');
-      debugPrint('Result: ${r2response.result}');
+    if (true == response.success) {
+      debugPrint('Request succeeded: ${response.message}');
+      debugPrint('Response code: ${response.code}');
+      debugPrint('Result: ${response.result}');
 
-      Map<String, dynamic> resultData = r2response.result;
-      int groupNum = resultData['groupNum'];
+      Map<String, dynamic> resultData = response.result;
 
-      // save group
-      final account = await _manager.localAccount();
-      final gid = resultData['id'];
-      final name = resultData['groupName'];
-      final group = R2Group(gid: gid, groupName: name);
-      final ret = await _manager.saveGroup(account!.uid, group);
-      debugPrint('$runtimeType : save group $gid : $ret');
+      if (resultData.values.every((value) => value != null)) {
+        int groupNum = resultData['groupNum'];
 
-      String formattedString = groupNum.toString().padLeft(4, '0'); // Convert to 4-digit string
-      debugPrint('Formatted Result: $formattedString');
-      setState(() {
-        _groupCode = formattedString;
-      });
-      _decodeMemberList(resultData);
-      _initR2Intercom(gid);
+        // save group
+        final account = await _manager.localAccount();
+        final gid = resultData['id'];
+        final name = resultData['groupName'];
+        final group = R2Group(gid: gid, groupName: name);
+        final ret = await _manager.saveGroup(account!.uid, group);
+        debugPrint('$runtimeType : save group $gid : $ret');
+
+        String formattedString = groupNum.toString().padLeft(
+            4, '0'); // Convert to 4-digit string
+        debugPrint('Formatted Result: $formattedString');
+        setState(() {
+          _groupCode = formattedString;
+        });
+        _decodeMemberList(resultData);
+        _initR2Intercom(gid);
+      } else {
+        // empty group object indicates that user has left the group
+        if (mounted) {
+          R2Flash.showBasicFlash(
+            context: context,
+            message: '您已退出该骑行组，请重新加入或创建新组',
+            duration: const Duration(seconds: 3),
+          );
+        }
+        // remove local cached invalid group
+        final group = await _manager.localGroup();
+        final ret = await _manager.leaveGroup(group!.gid);
+
+        // do not pop till flash finishes
+        Future.delayed(const Duration(seconds: 3), () async {
+          if (mounted) {
+            Navigator.of(context).pop(true);
+          }
+        });
+      }
     } else {
-      debugPrint('Failed to request my group: ${r2response.code}');
+      debugPrint('Failed to request my group: ${response.code}');
     }
   }
 
-  void _leaveMyGroup() async {
+  Future<void> _leaveMyGroup() async {
     final token = await _manager.readToken();
-    final r2request = R2HttpRequest();
-    final r2response = await r2request.postRequest(
+    final request = R2HttpRequest();
+    final response = await request.postRequest(
       token: token,
       api: 'cyclingGroup/leaveGroup',
     );
 
-    if (true == r2response.success) {
-      debugPrint('Request succeeded: ${r2response.message}');
-      debugPrint('Response code: ${r2response.code}');
-      debugPrint('Result: ${r2response.result}');
+    if (true == response.success) {
+      debugPrint('Request succeeded: ${response.message}');
+      debugPrint('Response code: ${response.code}');
+      debugPrint('Result: ${response.result}');
 
       // delete local group data
       final group = await _manager.localGroup();
       final ret = await _manager.leaveGroup(group!.gid);
       debugPrint('$runtimeType : remove local cached group data : $ret');
     } else {
-      debugPrint('Failed to leave group code: ${r2response.code}');
+      debugPrint('Failed to leave group code: ${response.code}');
+      if (mounted) {
+        R2Flash.showBasicFlash(
+          context: context,
+          message: '${response.message} (${response.code})',
+          duration: const Duration(seconds: 3),
+        );
+      }
     }
   }
 
@@ -333,11 +364,11 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
         ),
         actions: [
           PopupMenuButton<String>(
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == 'quit') {
-                _leaveMyGroup();
-                _r2intercom!.stopIntercom();
                 Navigator.of(context).pop();
+                await _leaveMyGroup();
+                await _r2intercom!.stopIntercom();
               }
             },
             itemBuilder: (BuildContext context) {
