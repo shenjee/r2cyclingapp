@@ -365,7 +365,10 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              '/',
+                  (Route<dynamic> route) => false,
+            );
             _r2intercom!.stopIntercom();
           },
         ),
