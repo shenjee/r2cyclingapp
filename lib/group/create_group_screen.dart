@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
+import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
+import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
@@ -23,8 +25,11 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   @override
   void initState() {
     super.initState();
-    _requestGroupCode();
-    _loadLocalUser();
+    // Ensure the context is available by deferring the request
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _requestGroupCode();
+      _loadLocalUser();
+    });
   }
 
   void _loadLocalUser() async {
@@ -41,12 +46,19 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
    * request a group pin code, so that others can join the group by the code
    */
   void _requestGroupCode() async {
+    // loading indicator for requesting a group pin code
+    R2LoadingIndicator.show(context);
     final token = await R2Storage.getToken();
     final request = R2HttpRequest();
     final response = await request.postRequest(
         token: token,
         api: 'cyclingGroup/newGroup',
     );
+
+    // stop the indicator
+    if (mounted) {
+      R2LoadingIndicator.stop(context);
+    }
 
     if (true == response.success) {
       debugPrint('Request succeeded: ${response.message}');
@@ -76,6 +88,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
    * during the creation, the creator doesn't want to join it and leave.
    */
   void _leaveGroup() async {
+    // start the indicator of requesting leaving group
+    R2LoadingIndicator.show(context);
     final token = await R2Storage.getToken();
     final r2request = R2HttpRequest();
     final r2response = await r2request.postRequest(
@@ -83,12 +97,17 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       api: 'cyclingGroup/leaveGroup',
     );
 
+    // stop the indicator
+    if (mounted) {
+      R2LoadingIndicator.stop(context);
+    }
+
     if (true == r2response.success) {
       debugPrint('Request succeeded: ${r2response.message}');
       debugPrint('Response code: ${r2response.code}');
       debugPrint('Result: ${r2response.result}');
     } else {
-      debugPrint('Failed to request group code: $r2response');
+      debugPrint('Failed to leave group: $r2response');
     }
   }
 
@@ -195,15 +214,14 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         children: <Widget>[
           Center(child: _groupNumberWidget(context),),
           _groupMemberWidget(context),
-          ElevatedButton(
-            onPressed: () {
-              // Save the group to the database and navigate to GroupIntercomScreen
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const GroupIntercomScreen()),
-              );
-              },
-            child: const Text('Start Group Intercom'),
-          ),
+          R2FlatButton(
+              text: '进入骑行组',
+              onPressed: () {
+                // Save the group to the database and navigate to GroupIntercomScreen
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => const GroupIntercomScreen()),
+                );
+              }),
         ],
       ),
     );

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
+import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/usermanager/r2_group.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
@@ -30,6 +31,9 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
   }
 
   void _requestJoinGroup(String? group) async {
+    // show loading indicator for requesting
+    R2LoadingIndicator.show(context);
+
     final manager = R2UserManager();
     final token = await manager.readToken();
     final request = R2HttpRequest();
@@ -40,6 +44,11 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
         'joinCode':'$group',
       }
     );
+
+    // stop the indicator
+    if (mounted) {
+      R2LoadingIndicator.stop(context);
+    }
 
     if (true == response.success && group != null) {
       debugPrint('$runtimeType : Request succeeded: ${response.message}');

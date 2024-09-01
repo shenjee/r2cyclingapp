@@ -70,10 +70,11 @@ class _UserLoginScreenState extends LoginBaseScreenState {
   Future<void> _requestLogin() async {
     final isValidNumber = _isValidPhoneNumber(_phoneController.text);
     final isValidPasswd = _isValidPassword(_passwordController.text);
-    // show the loading indicator
-    R2LoadingIndicator.show(context);
 
     if (true == isValidNumber && true == isValidPasswd) {
+      // show the loading indicator
+      R2LoadingIndicator.show(context);
+
       // get uuid as session id
       final prefs = await SharedPreferences.getInstance();
       String? sid = prefs.getString('sessionId');
@@ -105,6 +106,11 @@ class _UserLoginScreenState extends LoginBaseScreenState {
         },
       );
 
+      // stop loading indicator
+      if (mounted) {
+        R2LoadingIndicator.stop(context);
+      }
+
       if (true == response.success) {
         debugPrint('Login by phone number + password');
         debugPrint('  Message: ${response.message}');
@@ -123,9 +129,6 @@ class _UserLoginScreenState extends LoginBaseScreenState {
         manager.requestUserProfile();
 
         if (mounted) {
-          // stop loading indicator
-          R2LoadingIndicator.stop(context);
-
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -137,9 +140,6 @@ class _UserLoginScreenState extends LoginBaseScreenState {
         // should show error info
         String warning = '${response.message}（${response.code}）';
         if (mounted) {
-          // stop loading indicator
-          R2LoadingIndicator.stop(context);
-
           R2Flash.showBasicFlash(
               context: context,
               message: warning,

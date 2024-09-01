@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
+import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/screens/home_screen.dart';
 import 'login_base_screen.dart';
@@ -80,6 +81,11 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
       final manager = R2UserManager();
       final token = await manager.readToken();
       if (null != token) {
+        // loading indicator for modification of the password
+        if (mounted) {
+          R2LoadingIndicator.show(context);
+        }
+
         String? combined;
         String? hashedCombined;
 
@@ -97,6 +103,11 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
             'modPassword': hashedCombined,
           },
         );
+
+        // stop the indicator
+        if (mounted) {
+          R2LoadingIndicator.stop(context);
+        }
 
         if (true == response.success) {
           debugPrint('$runtimeType : Password sent successfully');
@@ -116,7 +127,7 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
           if (mounted) {
             R2Flash.showBasicFlash(
                 context: context,
-                message: '密码设置失败（${response.code}）',
+                message: '${response.message}（${response.code}）',
                 duration: const Duration(seconds: 3),
             );
           }

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
+import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
@@ -41,7 +42,11 @@ class VerificationScreenState extends LoginBaseScreenState {
    */
   Future<void> _requestVcode() async {
     final isValidNumber = _isValidPhoneNumber(_phoneController.text);
+
     if (true == isValidNumber) {
+      // loading indicator for v-code request
+      R2LoadingIndicator.show(context);
+
       // get uuid as session id
       final prefs = await SharedPreferences.getInstance();
       String? sid = prefs.getString('sessionId');
@@ -53,8 +58,8 @@ class VerificationScreenState extends LoginBaseScreenState {
 
       // request code via http
       final String userMobile = _phoneController.text;
-      final r2request = R2HttpRequest();
-      final r2response = await r2request.postRequest(
+      final request = R2HttpRequest();
+      final response = await request.postRequest(
         api: 'common/sendAuthCode',
         body: {
           'sid': sid,
@@ -66,13 +71,26 @@ class VerificationScreenState extends LoginBaseScreenState {
       _secondsRemaining = 60;
       _startTimer();
 
-      if (true == r2response.success) {
+      // stop loading indicator
+      if (mounted) {
+        R2LoadingIndicator.stop(context);
+      }
+
+      if (true == response.success) {
         debugPrint('$runtimeType : Verification code sent successfully');
       } else {
         debugPrint(
-            '$runtimeType : Failed to request verification code: ${r2response
+            '$runtimeType : Failed to request verification code: ${response
                 .code}');
+
+        if (mounted) {
+          R2Flash.showBasicFlash(
+            context: context,
+            message: '${response.message} (${response.code})',
+          );
+        }
       }
+
     } else {
       // phone number is missing , or in a wrong format
       R2Flash.showBasicFlash(
@@ -89,7 +107,11 @@ class VerificationScreenState extends LoginBaseScreenState {
   Future<void> _requestToken() async {
     final isValidNumber = _isValidPhoneNumber(_phoneController.text);
     final isValidCode = _isValidVerificationCode(_vcodeController.text);
+
     if (true == isValidNumber && true == isValidCode) {
+      // start loading indicator for token request
+      R2LoadingIndicator.show(context);
+
       // get uuid
       final prefs = await SharedPreferences.getInstance();
       String? sid = prefs.getString('sessionId');
@@ -111,6 +133,11 @@ class VerificationScreenState extends LoginBaseScreenState {
         },
       );
 
+      //stop indicator
+      if (mounted) {
+        R2LoadingIndicator.stop(context);
+      }
+
       if (true == response.success) {
         debugPrint(
             '$runtimeType : Response of token request by phone number + password');
@@ -125,16 +152,10 @@ class VerificationScreenState extends LoginBaseScreenState {
         onTokenHandled(token, phonenumber, setPassword);
       } else {
         debugPrint('$runtimeType : Failed to request token: ${response.code}');
-        String warning;
-        if (500 == response.code) {
-          warning = '验证码已失效或输入有误（${response.code}）';
-        } else {
-          warning = '网络错误，请稍后再试（${response.code}）';
-        }
         if (mounted) {
           R2Flash.showBasicFlash(
               context: context,
-              message: warning,
+              message: '${response.message} (${response.code})',
               duration: const Duration(seconds: 3)
           );
         }

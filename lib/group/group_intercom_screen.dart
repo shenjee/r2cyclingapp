@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
+import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
 import 'package:r2cyclingapp/usermanager/r2_group.dart';
@@ -25,7 +26,10 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   void initState() {
     super.initState();
     _loadLocalUser();
-    _requestMyGroup();
+    // Ensure the context is available by deferring the request
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _requestMyGroup();
+    });
   }
 
   _initR2Intercom(int gid) {
@@ -79,12 +83,20 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
    * including group number, name and members.
    */
   Future<void> _requestMyGroup() async {
+    // loading indicator for requesting group and its members
+    R2LoadingIndicator.show(context);
+
     final token = await _manager.readToken();
     final request = R2HttpRequest();
     final response = await request.postRequest(
       token: token,
       api: 'cyclingGroup/getMyGroup',
     );
+
+    // stop the indicator
+    if (mounted) {
+      R2LoadingIndicator.stop(context);
+    }
 
     if (true == response.success) {
       debugPrint('Request succeeded: ${response.message}');
@@ -145,12 +157,20 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   }
 
   Future<void> _leaveMyGroup() async {
+    // loading indicator for leaving group
+    R2LoadingIndicator.show(context);
+
     final token = await _manager.readToken();
     final request = R2HttpRequest();
     final response = await request.postRequest(
       token: token,
       api: 'cyclingGroup/leaveGroup',
     );
+
+    // stop the indicator
+    if (mounted) {
+      R2LoadingIndicator.stop(context);
+    }
 
     if (true == response.success) {
       debugPrint('Request succeeded: ${response.message}');
@@ -170,6 +190,11 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
           duration: const Duration(seconds: 3),
         );
       }
+    }
+
+    // pop till leaving task completes
+    if (mounted) {
+      Navigator.of(context).pop();
     }
   }
 
@@ -376,9 +401,10 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
           PopupMenuButton<String>(
             onSelected: (value) async {
               if (value == 'quit') {
-                Navigator.of(context).pop();
                 await _leaveMyGroup();
-                await _r2intercom!.stopIntercom();
+                if (_r2intercom != null) {
+                  await _r2intercom!.stopIntercom();
+                }
               }
             },
             itemBuilder: (BuildContext context) {
