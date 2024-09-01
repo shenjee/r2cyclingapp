@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:pin_code_fields/pin_code_fields.dart';
 
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/usermanager/r2_group.dart';
@@ -16,6 +18,8 @@ class JoinGroupScreen extends StatefulWidget {
 
 class _JoinGroupScreenState extends State<JoinGroupScreen> {
   final List<TextEditingController> _controllers = List.generate(4, (index) => TextEditingController());
+  final _textEditingController = TextEditingController();
+  final _errorController = StreamController<ErrorAnimationType>();
 
   @override
   void dispose() {
@@ -87,48 +91,52 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
             padding: EdgeInsets.fromLTRB(40.0, 40.0, 40.0, 10.0),
             child: Text('输入四位组编号', style: TextStyle(fontSize: 18.0),),
           ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(4, (index) {
-              return SizedBox(
-                width: 60,
-                height: 80,
-                child: TextField(
-                  controller: _controllers[index],
-                  textAlign: TextAlign.center,
-                  maxLength: 1,
-                  keyboardType: TextInputType.number,
-                  style: const TextStyle(fontSize: 24.0),
-                  showCursor: false,
-                  decoration: InputDecoration(
-                    counterText: '',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(0.0),
-                      borderSide: const BorderSide(color: Colors.grey,
-                        width: 2.0,
-                      ),
-                    ),
-                  ),
-                  onChanged: (value) {
-                    if (value.isNotEmpty && index < 3) {
-                      FocusScope.of(context).nextFocus(); // 自动跳到下一个输入框
-                    } else if (value.isEmpty && index > 0) {
-                      FocusScope.of(context).previousFocus(); // 清空时自动跳到前一个输入框
-                    }
-
-                    if (value.isNotEmpty && index == 3) {
-                      String groupCode = _controllers.map((controller) => controller.text).join();
-                      _requestJoinGroup(groupCode);
-                    }
-                    },
-                  autofocus: index == 0,
-                ),
-                );
-              }),
+          Padding (
+            padding: const EdgeInsets.fromLTRB(40.0, 10.0, 40.0, 10.0),
+            child: PinCodeTextField(
+              appContext: context,
+              length: 4,
+              obscureText: false,
+              animationType: AnimationType.fade,
+              keyboardType: TextInputType.number,
+              textStyle: const TextStyle(fontSize: 24.0),
+              cursorColor: Colors.grey,
+              autoFocus:true,
+              pinTheme: PinTheme(
+                shape: PinCodeFieldShape.box,
+                fieldHeight: 80,
+                fieldWidth: 60,
+                inactiveBorderWidth: 1.0,
+                inactiveColor: Colors.grey,
+                inactiveFillColor:Colors.white,
+                activeBorderWidth: 1.0,
+                activeColor: const Color(0xFF539765),
+                activeFillColor: Colors.white,
+                selectedBorderWidth: 1.0,
+                selectedColor: Colors.grey,
+                selectedFillColor: Colors.white,
+              ),
+              animationDuration: const Duration(milliseconds: 300),
+              enableActiveFill: true,
+              errorAnimationController: _errorController,
+              controller: _textEditingController,
+              onCompleted: (value) {
+                debugPrint('$runtimeType : Completed $value');
+                _requestJoinGroup(value);
+                },
+              onChanged: (value) {
+                debugPrint(value);
+                },
+              beforeTextPaste: (text) {
+                debugPrint("Allowing to paste $text");
+                //if you return true then it will show the paste confirmation dialog. Otherwise if false, then nothing will happen.
+                // but you can show anything you want here, like your pop up saying wrong paste format or etc
+                return true;
+              },
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 }
