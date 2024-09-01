@@ -93,7 +93,26 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
 
       Map<String, dynamic> resultData = response.result;
 
-      if (resultData.values.every((value) => value != null)) {
+      if (resultData.values.every((value) => value == null)) {
+        // empty group object indicates that user has left the group
+        if (mounted) {
+          R2Flash.showBasicFlash(
+            context: context,
+            message: '${response.message} (${response.code})',
+            duration: const Duration(seconds: 3),
+          );
+        }
+        // remove local cached invalid group
+        final group = await _manager.localGroup();
+        final ret = await _manager.leaveGroup(group!.gid);
+
+        // do not pop till flash finishes
+        Future.delayed(const Duration(seconds: 3), () async {
+          if (mounted) {
+            Navigator.of(context).pop(true);
+          }
+        });
+      } else {
         int groupNum = resultData['groupNum'];
 
         // save group
@@ -112,28 +131,16 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
         });
         _decodeMemberList(resultData);
         _initR2Intercom(gid);
-      } else {
-        // empty group object indicates that user has left the group
-        if (mounted) {
-          R2Flash.showBasicFlash(
-            context: context,
-            message: '您已退出该骑行组，请重新加入或创建新组',
-            duration: const Duration(seconds: 3),
-          );
-        }
-        // remove local cached invalid group
-        final group = await _manager.localGroup();
-        final ret = await _manager.leaveGroup(group!.gid);
-
-        // do not pop till flash finishes
-        Future.delayed(const Duration(seconds: 3), () async {
-          if (mounted) {
-            Navigator.of(context).pop(true);
-          }
-        });
       }
     } else {
       debugPrint('Failed to request my group: ${response.code}');
+      if (mounted) {
+        R2Flash.showBasicFlash(
+          context: context,
+          message: '${response.message} (${response.code})',
+          duration: const Duration(seconds: 3),
+        );
+      }
     }
   }
 
