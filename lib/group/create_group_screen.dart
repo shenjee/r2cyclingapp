@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:r2cyclingapp/r2controls/r2_flash.dart';
+import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
@@ -37,33 +37,44 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     }
   }
 
+  /*
+   * request a group pin code, so that others can join the group by the code
+   */
   void _requestGroupCode() async {
     final token = await R2Storage.getToken();
-    final r2request = R2HttpRequest();
-    final r2response = await r2request.postRequest(
+    final request = R2HttpRequest();
+    final response = await request.postRequest(
         token: token,
         api: 'cyclingGroup/newGroup',
     );
 
-    if (true == r2response.success) {
-      debugPrint('Request succeeded: ${r2response.message}');
-      debugPrint('Response code: ${r2response.code}');
-      debugPrint('Result: ${r2response.result}');
+    if (true == response.success) {
+      debugPrint('Request succeeded: ${response.message}');
+      debugPrint('Response code: ${response.code}');
+      debugPrint('Result: ${response.result}');
 
-      Map<String, dynamic> resultData = r2response.result;
+      Map<String, dynamic> resultData = response.result;
       int groupNum = resultData['groupNum'];
       String formattedString = groupNum.toString().padLeft(4, '0'); // Convert to 4-digit string
       debugPrint('Formatted Result: $formattedString');
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('groupNumber', formattedString);
       setState(() {
         _groupCode = formattedString;
       });
     } else {
-      debugPrint('Failed to request group code: $r2response');
+      debugPrint('Failed to request group code: $response');
+      if (mounted) {
+        R2Flash.showBasicFlash(
+          context: context,
+          message: '${response.message} (${response.code})',
+          duration: const Duration(seconds: 3),
+        );
+      }
     }
   }
 
+  /*
+   * during the creation, the creator doesn't want to join it and leave.
+   */
   void _leaveGroup() async {
     final token = await R2Storage.getToken();
     final r2request = R2HttpRequest();
@@ -76,13 +87,14 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       debugPrint('Request succeeded: ${r2response.message}');
       debugPrint('Response code: ${r2response.code}');
       debugPrint('Result: ${r2response.result}');
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('groupNumber');
     } else {
       debugPrint('Failed to request group code: $r2response');
     }
   }
 
+  /*
+   * show the group pin code (group number)
+   */
   Widget _groupNumberWidget(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -182,7 +194,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             onPressed: () {
               // Save the group to the database and navigate to GroupIntercomScreen
               Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => GroupIntercomScreen()),
+                MaterialPageRoute(builder: (context) => const GroupIntercomScreen()),
               );
               },
             child: const Text('Start Group Intercom'),
