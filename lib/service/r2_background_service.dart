@@ -7,6 +7,13 @@ import 'package:r2cyclingapp/connection/bt/r2_ble_command.dart';
 import 'package:r2cyclingapp/emergency/r2_sos_sender.dart';
 
 class R2BackgroundService {
+  // Singleton pattern
+  R2BackgroundService._privateConstructor();
+  static final R2BackgroundService _instance = R2BackgroundService._privateConstructor();
+  factory R2BackgroundService() {
+    return _instance;
+  }
+
   final R2BluetoothModel _btModel = R2BluetoothModel();
 
   // temporary usage to simulate the detection of a fall
@@ -14,7 +21,7 @@ class R2BackgroundService {
   int? _strCurr;
 
   void initService() async {
-    final androidConfig = FlutterBackgroundAndroidConfig (
+    const androidConfig = FlutterBackgroundAndroidConfig (
       notificationTitle: "R2 Background Service",
       notificationText: "Listening for BLE signals",
       notificationImportance: AndroidNotificationImportance.normal,
