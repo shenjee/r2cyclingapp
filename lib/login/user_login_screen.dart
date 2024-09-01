@@ -9,6 +9,7 @@ import 'package:r2cyclingapp/login/password_recover_screen.dart';
 import 'package:r2cyclingapp/login/user_register_screen.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
+import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 
@@ -69,6 +70,9 @@ class _UserLoginScreenState extends LoginBaseScreenState {
   Future<void> _requestLogin() async {
     final isValidNumber = _isValidPhoneNumber(_phoneController.text);
     final isValidPasswd = _isValidPassword(_passwordController.text);
+    // show the loading indicator
+    R2LoadingIndicator.show(context);
+
     if (true == isValidNumber && true == isValidPasswd) {
       // get uuid as session id
       final prefs = await SharedPreferences.getInstance();
@@ -119,6 +123,9 @@ class _UserLoginScreenState extends LoginBaseScreenState {
         manager.requestUserProfile();
 
         if (mounted) {
+          // stop loading indicator
+          R2LoadingIndicator.stop(context);
+
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -130,6 +137,9 @@ class _UserLoginScreenState extends LoginBaseScreenState {
         // should show error info
         String warning = '${response.message}（${response.code}）';
         if (mounted) {
+          // stop loading indicator
+          R2LoadingIndicator.stop(context);
+
           R2Flash.showBasicFlash(
               context: context,
               message: warning,
