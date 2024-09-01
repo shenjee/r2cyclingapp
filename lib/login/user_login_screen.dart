@@ -128,12 +128,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
       } else {
         debugPrint('Failed to request login: ${response.code}');
         // should show error info
-        String warning;
-        if (500 == response.code) {
-          warning = '用户名或密码输入有误（${response.code}）';
-        } else {
-          warning = '网络错误，请稍后再试（${response.code}）';
-        }
+        String warning = '${response.message}（${response.code}）';
         if (mounted) {
           R2Flash.showBasicFlash(
               context: context,
