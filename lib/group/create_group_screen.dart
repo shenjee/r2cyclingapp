@@ -166,8 +166,13 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 }
               },
             ),
-            const SizedBox(height: 5),
-            Text(member.nickname),
+            const SizedBox(height: 2),
+            Text(
+                member.nickname,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 12.0,)
+            ),
           ],
         );
       },
