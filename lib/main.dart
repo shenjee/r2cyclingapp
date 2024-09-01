@@ -12,15 +12,6 @@ import 'package:r2cyclingapp/settings/user_profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  /*
-  await FlutterBackground.initialize(
-    androidConfig: const FlutterBackgroundAndroidConfig(
-      notificationTitle: "Background Service",
-      notificationText: "Listening for BLE signals",
-      notificationImportance: AndroidNotificationImportance.Default,
-    ),
-  );
-   */
   runApp(const R2CyclingApp());
 }
 
