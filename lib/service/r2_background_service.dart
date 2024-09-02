@@ -5,20 +5,24 @@ import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/connection/bt/r2_bluetooth_model.dart';
 import 'package:r2cyclingapp/connection/bt/r2_ble_command.dart';
 import 'package:r2cyclingapp/emergency/r2_sos_sender.dart';
+import 'package:r2cyclingapp/intercom/r2_intercom_engine.dart';
 
 class R2BackgroundService {
   // Singleton pattern
   R2BackgroundService._privateConstructor();
   static final R2BackgroundService _instance = R2BackgroundService._privateConstructor();
+
   factory R2BackgroundService() {
     return _instance;
   }
 
   final R2BluetoothModel _btModel = R2BluetoothModel();
 
+  bool _isIntercomOn = false;
+
   // temporary usage to simulate the detection of a fall
-  int? _strLast;
-  int? _strCurr;
+  int? _intLast;
+  int? _intCurr;
 
   void initService() async {
     const androidConfig = FlutterBackgroundAndroidConfig (
@@ -28,6 +32,41 @@ class R2BackgroundService {
     );
     bool success = await FlutterBackground.initialize(androidConfig: androidConfig);
     debugPrint('$runtimeType : initialize background $success');
+  }
+
+  /*
+   * handle the sos instruction from helmet
+   */
+  _sos(R2BLECommand c) {
+    final sr = R2SosSender();
+
+    _intCurr = c.instruction;
+    debugPrint('last instruction: $_intLast');
+    debugPrint('current instruction: $_intCurr');
+    if (4 == _intLast && 8 == _intCurr) {
+      debugPrint('Condition met: Sending SMS');
+      // data here is useless, because i don't want to revise the r2 sos sender
+      // perhaps will refactory later
+      sr.sendSos('data');
+    } else {
+      debugPrint('Condition not met.');
+    }
+    _intLast = _intCurr;
+  }
+
+  /*
+   * handle intercom instruction from remote. 1st tap to stop pause,
+   * resuming speaking, 2nd tap to pause speak.
+   */
+  _intercom(R2BLECommand c) {
+    final r2intercom = R2IntercomEngine.getInstance();
+
+    if (null != r2intercom) {
+      // turn on/off speak
+      debugPrint('$runtimeType : _intercom() pause $_isIntercomOn');
+      r2intercom.pauseSpeak(_isIntercomOn);
+      _isIntercomOn = !_isIntercomOn;
+    }
   }
 
   Future<void> startService() async {
@@ -68,23 +107,18 @@ class R2BackgroundService {
     // "✆" :0x0010
     // ">" :0x0020
     // "end" :0x0000
-    debugPrint('_onHelmetNotify(): $data');
+    debugPrint('$runtimeType : _onHelmetNotify(): $data');
     R2BLECommand command = decodeBLEData(data);
-    debugPrint('_onHelmetNotify(): ${command.toString()}');
-    if (0 != command.instruction) {
-      _strCurr = command.instruction;
-      debugPrint('last instruction: $_strLast');
-      debugPrint('current instruction: $_strCurr');
-      if (4 == _strLast && 8 == _strCurr) {
-        debugPrint('Condition met: Sending SMS');
-        final sr = R2SosSender();
-        sr.sendSos(data);
-      } else {
-        debugPrint('Condition not met.');
-      }
-      _strLast = _strCurr;
-    } else {
-      debugPrint('Ignored data: $data');
+    debugPrint('$runtimeType : _onHelmetNotify(): ${command.toString()}');
+    switch(command.instruction) {
+      case 0x04:
+      case 0x08:
+        // temporarily 1st tap 0x04 + 2nd tap 0x08 simulates the crashing signal
+        _sos(command);
+      case 0x10:
+        _intercom(command);
+      default:
+        debugPrint('Ignored data: $data');
     }
   }
 }
