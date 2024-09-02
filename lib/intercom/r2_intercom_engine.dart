@@ -1,12 +1,10 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
-
-import 'dart:convert';
 
 // application id provide by Shengwang
 // const appId = "e861b361b8754affbe1cd3772b20d040";
@@ -14,22 +12,50 @@ import 'dart:convert';
 typedef IntercomCallback = void Function(int value);
 
 class R2IntercomEngine {
-  final int? _groupID;
-  final int? _userID;
-  final IntercomCallback? onLocalJoined;
-  final IntercomCallback? onMemberJoined;
-  final IntercomCallback? onMemberLeft;
-  final IntercomCallback? onMemberSpeaking;
-
-  R2IntercomEngine({
+  // Private constructor for singleton
+  R2IntercomEngine._internal({
     required int groupID,
     required int userID,
     this.onLocalJoined,
     this.onMemberJoined,
     this.onMemberLeft,
     this.onMemberSpeaking,
-  }) : _groupID = groupID,
+  })  : _groupID = groupID,
         _userID = userID;
+
+  static R2IntercomEngine? _instance;
+
+  // Singleton factory method
+  static R2IntercomEngine getInstance({
+    int? groupID,
+    int? userID,
+    IntercomCallback? onLocalJoined,
+    IntercomCallback? onMemberJoined,
+    IntercomCallback? onMemberLeft,
+    IntercomCallback? onMemberSpeaking,
+  }) {
+    if (_instance == null) {
+      if (groupID == null || userID == null) {
+        throw Exception('R2IntercomEngine must be initialized with groupID and userID the first time.');
+      }
+      _instance = R2IntercomEngine._internal(
+        groupID: groupID,
+        userID: userID,
+        onLocalJoined: onLocalJoined,
+        onMemberJoined: onMemberJoined,
+        onMemberLeft: onMemberLeft,
+        onMemberSpeaking: onMemberSpeaking,
+      );
+    }
+    return _instance!;
+  }
+
+  final int? _groupID;
+  final int? _userID;
+  final IntercomCallback? onLocalJoined;
+  final IntercomCallback? onMemberJoined;
+  final IntercomCallback? onMemberLeft;
+  final IntercomCallback? onMemberSpeaking;
 
   late RtcEngine _engine;
   String? _rtcAppId;

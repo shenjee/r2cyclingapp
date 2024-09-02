@@ -34,7 +34,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
 
   _initR2Intercom(int gid) {
     final account = _members.first;
-    _r2intercom = R2IntercomEngine(groupID: gid, userID:account.uid);
+    _r2intercom = R2IntercomEngine.getInstance(groupID: gid, userID:account.uid);
     _r2intercom!.initAgora();
   }
 
