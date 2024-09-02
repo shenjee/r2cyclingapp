@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_background/flutter_background.dart';
 
 import 'package:r2cyclingapp/emergency/emergency_contact_screen.dart';
 import 'package:r2cyclingapp/screens/home_screen.dart';
