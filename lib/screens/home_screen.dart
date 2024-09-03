@@ -33,10 +33,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Color emergencyContactColor = Colors.grey;
   File? _avatar;  // To store the avatar image
 
-  // temporary usage to simulate the detection of a fall
-  int? _strLast;
-  int? _strCurr;
-
   @override
   void initState() {
     super.initState();
@@ -106,7 +102,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final manager = R2UserManager();
     final token = await manager.readToken();
     final account = await manager.localAccount();
-    if (token == null || account == null) {
+    final isExpired = manager.expiredToken(token: token);
+    debugPrint('$runtimeType : check login token?${null != token} account?${null != account} expired?$isExpired');
+    if (token == null || account == null || true == isExpired) {
       _registerScreen();
     }
   }
