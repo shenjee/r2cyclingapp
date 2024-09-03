@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 // ble
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
@@ -70,31 +69,6 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
     }
   }
 
-  void _addListener() {
-    /*
-    _bluetoothModel.scannedDevices.listen((devices) {
-      setState(() {});
-    });
-
-    _bluetoothModel.connectedDevice.listen(
-            (connectionState) {
-              try {
-                if (connectionState?.connectionState ==
-                    DeviceConnectionState.connected) {
-                  debugPrint('$runtimeType : device connected');
-                  if (mounted) {
-                    Navigator.of(context).pop();
-                  }
-                }
-              } catch (error) {
-                debugPrint('$runtimeType : $error');
-              }
-    },
-    onError: (error) {
-      debugPrint('$runtimeType : ');
-    });*/
-  }
-
   void _startScanning() {
     setState(() {
       _isScanning = true;
@@ -142,6 +116,7 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
 
   Widget _instructionItem(String number, String text) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         CircleAvatar(
           radius: 22.0,
@@ -152,36 +127,28 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
           ),
         ),
         const SizedBox(width: 16),
-        Expanded(
-          child: Text(
+        Text(
             text,
             style: const TextStyle(fontSize: 20.0),
-          ),
         ),
       ],
     );
   }
 
   Widget _instructionWidget() {
-    return Column(
+    return Center(
+      child:Column(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(50.0, 20.0, 50.0, 20.0),
-            child:_instructionItem('1', '确保手机蓝牙已开启'),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding:const EdgeInsets.fromLTRB(50.0, 20.0, 50.0, 20.0),
-            child:_instructionItem('2', '长按智能头盔的开机键，\n直至听到“配对”提示音'),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(50.0, 20.0, 50.0, 20.0),
-            child:_instructionItem('3', '将手机紧靠您的智能头盔'),
-          ),
+          _instructionItem('1', '确保手机蓝牙已开启'),
+          const SizedBox(height: 30),
+          _instructionItem('2', '长按智能头盔的开机键，\n直至听到“配对”提示音'),
+          const SizedBox(height: 30),
+         _instructionItem('3', '将手机紧靠您的智能头盔'),
         ],
+      ),
     );
   }
 
