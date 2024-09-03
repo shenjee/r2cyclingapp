@@ -26,7 +26,7 @@ class R2IntercomEngine {
   static R2IntercomEngine? _instance;
 
   // Singleton factory method
-  static R2IntercomEngine getInstance({
+  static R2IntercomEngine? getInstance({
     int? groupID,
     int? userID,
     IntercomCallback? onLocalJoined,
@@ -36,7 +36,7 @@ class R2IntercomEngine {
   }) {
     if (_instance == null) {
       if (groupID == null || userID == null) {
-        throw Exception('R2IntercomEngine must be initialized with groupID and userID the first time.');
+        return null;
       }
       _instance = R2IntercomEngine._internal(
         groupID: groupID,
