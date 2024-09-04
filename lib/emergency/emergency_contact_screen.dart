@@ -1,13 +1,13 @@
-// emergency_contact_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 
 import 'contact_widget.dart';
 
 class EmergencyContactScreen extends StatefulWidget {
+  const EmergencyContactScreen({super.key});
+
   @override
-  _EmergencyContactScreenState createState() => _EmergencyContactScreenState();
+  State<EmergencyContactScreen> createState() => _EmergencyContactScreenState();
 }
 
 class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
@@ -55,14 +55,17 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
     return Column(
       children: [
         Row(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              const Padding(
-                padding:EdgeInsets.fromLTRB(40.0, 20.00, 40.0, 10.0),
-                child:Text('SOS 紧急联络', style: TextStyle(fontSize: 24.0),),
+              const Expanded (
+                child: Padding(
+                  padding:EdgeInsets.fromLTRB(20.0, 20.0, 0.0, 10.0),
+                  child:Text('SOS 紧急联络', style: TextStyle(fontSize: 24.0),),
+                ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(40.0, 20.00, 40.0, 10.0),
+                padding: const EdgeInsets.fromLTRB(00.0, 20.0, 20.0, 10.0),
                 child:Switch(
                   value: isEmergencyContactEnabled,
                   onChanged: (value) {
@@ -76,7 +79,8 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
             ]
         ),
         if (!isEmergencyContactEnabled)
-          const Padding(padding: EdgeInsets.fromLTRB(40.0, 10.0, 40.0, 0.0),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(30.0, 10.0, 30.0, 0.0),
             child:Text(
               '开启SOS紧急联络，您在骑行过程中若摔倒，'
                   '将自动将您的位置信息以短信方式发给您的紧急联系人，并尝试拨打紧急联系人的电话。',
