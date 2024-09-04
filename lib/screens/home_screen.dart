@@ -5,12 +5,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 
 import 'package:r2cyclingapp/connection/bt/r2_bluetooth_model.dart';
-import 'package:r2cyclingapp/connection/bt/r2_ble_command.dart';
 import 'package:r2cyclingapp/service/r2_background_service.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_device.dart';
-import 'package:r2cyclingapp/emergency/r2_sos_sender.dart';
 
 import 'package:r2cyclingapp/permission/permission_dialog.dart';
 import 'package:r2cyclingapp/login/user_register_screen.dart';
@@ -31,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isUnbindMode = false;
   String emergencyContactStatus = '已关闭';
   Color emergencyContactColor = Colors.grey;
-  File? _avatar;  // To store the avatar image
+  File? _avatar;
 
   @override
   void initState() {
@@ -343,47 +341,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /*
-   * the item of the navigation list .
-   */
-  Widget _listItem(
-      IconData data,
-      String title,
-      String subtitle,
-      GestureTapCallback onTap,
-      {Color subtitleColor = Colors.grey}
-      ) {
-    return InkWell(
-      onTap: onTap,
-      child:Container(
-        height: 120.0,
-        child:Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children:[
-            Padding(
-                padding:const EdgeInsets.all(20.0),
-                child:Icon(data, size: 50.0,)
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[Text(title,style:const TextStyle(fontSize: 24.0))],
-            ),
-            Expanded(
-              child: Center(
-                  child:Text(
-                      subtitle,
-                      style: TextStyle(fontSize: 16.0, color: subtitleColor),
-                  )),
-            ),
-            Icon(Icons.chevron_right, color: Colors.grey[500],),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -422,36 +379,67 @@ class _HomeScreenState extends State<HomeScreen> {
         child:Column(
           children: [
             _helmetWidget(),
-            const SizedBox(height: 24.0),
-            ListView(
-              shrinkWrap: true,
-              children: [
-                const Divider(),
-                _listItem(
-                    Icons.group, '骑行对讲', '',
-                        () async {
-                      final manager = R2UserManager();
-                      final group = await manager.localGroup();
-                      if (null == group || 0 == group.gid) {
-                        // If user is not in a group, navigate to GroupListScreen
-                        await Navigator.pushNamed(context, '/groupList');
-                      } else {
-                        // If user is in a group, navigate to GroupIntercomScreen
-                        await Navigator.pushNamed(context, '/intercom');
-                      }
-                    }
+            Expanded(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    const Divider(),
+                    ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 30.0,
+                            horizontal: 16.0
+                        ),
+                        leading: const Icon(Icons.group, size: 50.0,),
+                        title: const Padding(
+                            padding: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                            child: Text('骑行对讲', style: TextStyle(fontSize: 24.0),)
+                        ),
+                        trailing: Icon(Icons.chevron_right, color: Colors.grey[500],),
+                        onTap: () async {
+                          final manager = R2UserManager();
+                          final group = await manager.localGroup();
+                          if (mounted) {
+                            if (null == group || 0 == group.gid) {
+                              // If user is not in a group, navigate to GroupListScreen
+                              Navigator.pushNamed(context, '/groupList');
+                            } else {
+                              // If user is in a group, navigate to GroupIntercomScreen
+                              Navigator.pushNamed(context, '/intercom');
+                            }
+                          }
+                        }
                     ),
-                const Divider(),
-                _listItem(Icons.sos, '紧急联络', emergencyContactStatus,
-                        () async {
+                    const Divider(),
+                    ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 30.0,
+                            horizontal: 16.0
+                        ),
+                        leading: const Icon(Icons.sos, size: 50.0,),
+                        title: const Padding(
+                            padding: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                            child: Text('紧急联络', style: TextStyle(fontSize: 24.0),)
+                        ),
+                        trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                emergencyContactStatus,
+                                style: TextStyle(fontSize: 16.0, color: emergencyContactColor),
+                              ),
+                              const SizedBox(width: 10.0,),
+                              Icon(Icons.chevron_right, color: Colors.grey[500],),
+                            ]
+                        ),
+                        onTap: () async {
                           await Navigator.pushNamed(context, '/emergencyContact');
                           _loadEmergencyContactStatus();
                           await Permission.sms.request();
-                        },
-                  subtitleColor: emergencyContactColor,
-                ),
-                const Divider(),
-              ],
+                        }
+                    ),
+                    const Divider(),
+                  ],
+                )
             ),
           ],
         ),
