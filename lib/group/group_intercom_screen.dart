@@ -66,7 +66,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
             uid: memberData['id'] ?? memberData['userId'],
             account: memberData['userMobile'] ?? memberData['loginId'])
           ..nickname = memberData['userName'] ?? 'Unknown'
-          ..avatarPath = memberData['userAvatar'] ?? ''; // 使用默认值或null
+          ..avatarPath = memberData['userAvatar'] ?? '';
 
         // add to member list
         if (_members.length < 8) {
@@ -88,7 +88,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
 
     final token = await _manager.readToken();
     final request = R2HttpRequest();
-    final response = await request.postRequest(
+    final response = await request.getRequest(
       token: token,
       api: 'cyclingGroup/getMyGroup',
     );
