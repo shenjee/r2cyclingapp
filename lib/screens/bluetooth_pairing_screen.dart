@@ -203,7 +203,7 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
             children: [
               // fuck it, stupid flutter , u have to ... use sized box.
               const SizedBox(height:140.0),
-              Icon(Icons.bluetooth, size: 36, color: Colors.grey[700]),
+              Icon(Icons.bluetooth_searching, size: 36, color: Colors.grey[700]),
               const SizedBox(height: 8.0,),
               AnimatedBuilder(
                   animation: _animation,
