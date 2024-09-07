@@ -25,8 +25,8 @@ class R2SosSender {
     );
 
     if (true == r2response.success) {
-      String resultData = r2response.result;
-      address = 'http://r2cycling.imai.site/t/$resultData';
+      String shortUrl = r2response.result['shortLinkId'];
+      address = 'http://r2cycling.imai.site/t/$shortUrl';
     } else {
       debugPrint('Failed to request group code: $r2response');
     }

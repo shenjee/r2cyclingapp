@@ -4,6 +4,7 @@ import 'package:flutter_background/flutter_background.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/connection/bt/r2_bluetooth_model.dart';
 import 'package:r2cyclingapp/connection/bt/r2_ble_command.dart';
+import 'package:r2cyclingapp/emergency/sos_widget.dart';
 import 'package:r2cyclingapp/emergency/r2_sos_sender.dart';
 import 'package:r2cyclingapp/intercom/r2_intercom_engine.dart';
 
@@ -14,6 +15,12 @@ class R2BackgroundService {
 
   factory R2BackgroundService() {
     return _instance;
+  }
+
+  BuildContext? _context;
+  // Method to set context from widget
+  void setContext(BuildContext context) {
+    _context = context;
   }
 
   final R2BluetoothModel _btModel = R2BluetoothModel();
@@ -45,9 +52,18 @@ class R2BackgroundService {
     debugPrint('current instruction: $_intCurr');
     if (4 == _intLast && 8 == _intCurr) {
       debugPrint('Condition met: Sending SMS');
-      // data here is useless, because i don't want to revise the r2 sos sender
-      // perhaps will refactory later
-      sr.sendSos('data');
+      Navigator.of(_context!).push(MaterialPageRoute(
+        builder: (context) => SOSWidget(
+          onCancel: () {
+            Navigator.of(context).pop(); // Close the widget
+          },
+          onSend: () {
+            final sr = R2SosSender();
+            sr.sendSos('data');  // Send the SOS message
+          },
+        ),
+        fullscreenDialog: true, // This ensures it's over any other screen
+      ));
     } else {
       debugPrint('Condition not met.');
     }

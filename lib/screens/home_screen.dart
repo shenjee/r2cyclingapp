@@ -41,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     _checkBondedDevice();
     _loadEmergencyContactStatus();
+    _service.setContext(context);
     _service.initService();
   }
 
