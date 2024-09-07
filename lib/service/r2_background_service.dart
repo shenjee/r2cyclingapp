@@ -45,8 +45,6 @@ class R2BackgroundService {
    * handle the sos instruction from helmet
    */
   _sos(R2BLECommand c) {
-    final sr = R2SosSender();
-
     _intCurr = c.instruction;
     debugPrint('last instruction: $_intLast');
     debugPrint('current instruction: $_intCurr');
