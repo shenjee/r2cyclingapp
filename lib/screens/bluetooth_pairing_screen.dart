@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:r2cyclingapp/connection/bt/r2_bluetooth_model.dart';
 // classic bluttoth
+import 'package:flutter_blue_classic/flutter_blue_classic.dart';
+import 'package:r2cyclingapp/connection/bt/bluetooth_audio_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
 
@@ -20,7 +22,7 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
   bool _isScanning = false;  // title
   String _title = '开始连接您的智能头盔';
   // ble
-  DiscoveredDevice? connectedDevice;// classic bluetooth
+  DiscoveredDevice? connectedDevice;
 
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -81,9 +83,9 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
   Future<void> _onDeviceSelected(DiscoveredDevice device) async {
     // stop bluetooth scanning
     _bluetoothModel.stopScan();
-    _isScanning = false;
-    _title = '正在连接您的智能头盔';
     setState(() {
+      _isScanning = false;
+      _title = '正在连接您的智能头盔';
       connectedDevice = device;
     });
 
@@ -103,15 +105,47 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
       }
     });
 
-    // Execute the code after the animation completes
-    Future.delayed(const Duration(seconds: 3), () async {
-      await widget.onDeviceConnected(device); // Notify the parent widget
-      if (mounted) {
-        Navigator.of(context).pop(true);
-      }
-    });
+    // connect to BLE
+    await widget.onDeviceConnected(device);
+    // connect ot classic BT
+    await _connectBlueClassic();
+  }
 
-    // After BLE connection, initiate Bluetooth Classic connection
+  Future<void> _connectBlueClassic() async {
+    final classicBt = FlutterBlueClassic();
+    // transfer ble name to classic name
+    String bleName = connectedDevice?.name ?? '';
+    // Get the last 6 characters (e.g. Helmet-39C5B8 in EH201-5BA3BB39C5B8)
+    String? lastPart = bleName.substring(bleName.length - 6);
+
+    if (lastPart.isNotEmpty) {
+      classicBt.scanResults.listen((device) async {
+        // classic bluetooth scanned
+        debugPrint('$runtimeType : bond state: ${device.bondState
+            .name}, device type: ${device.type.name}');
+        BluetoothConnection? connection;
+
+        if (device.name!.startsWith('Helmet-$lastPart')) {
+          try {
+            connection = await classicBt.connect(device.address);
+            if (connection != null && connection.isConnected) {
+              debugPrint('$runtimeType : classic ${device.name} ${device
+                  .address} connected');
+              BluetoothAudioManager.enableAudioProfiles(device.address);
+              // Stop the animation and pop the animation widget
+              if (mounted) {
+                _animationController.stop();  // Stop the animation
+                Navigator.of(context).pop(true);
+              }
+            }
+          } catch (e) {
+            debugPrint('$runtimeType : connecting to classic failed $e');
+          }
+        }
+      });
+
+      classicBt.startScan();
+    }
   }
 
   Widget _instructionItem(String number, String text) {
