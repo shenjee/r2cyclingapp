@@ -6,9 +6,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
 
 class BluetoothPairingScreen extends StatefulWidget {
-  final Function(R2Device) onDeviceConnected;
 
-  const BluetoothPairingScreen({super.key, required this.onDeviceConnected});
+  const BluetoothPairingScreen({super.key});
 
   @override
   State<BluetoothPairingScreen> createState() => _BluetoothPairingScreenState();

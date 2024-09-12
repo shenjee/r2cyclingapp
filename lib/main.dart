@@ -29,26 +29,15 @@ class R2CyclingApp extends StatelessWidget {
       ),
        */
       initialRoute: '/',
-        onGenerateRoute: (settings) {
-          if (settings.name == '/bluetooth_pairing') {
-            final args = settings.arguments as Map;
-            return MaterialPageRoute(
-              builder: (context) {
-                return BluetoothPairingScreen(onDeviceConnected: args['onDeviceConnected']);
-              },
-            );
-          }
-          // Define other routes here
-          return MaterialPageRoute(builder: (context) => HomeScreen());
-        },
       routes: {
-        '/':(context) => HomeScreen(),
-        '/register':(context) => UserRegisterScreen(),
-        '/groupList':(context) => GroupListScreen(),
-        '/intercom':(context) => GroupIntercomScreen(),
-        '/emergencyContact':(context) => EmergencyContactScreen(),
-        '/settings':(context) => SettingsScreen(),
-        '/profile':(context) => UserProfileScreen(),
+        '/':(context) => const HomeScreen(),
+        '/register':(context) => const UserRegisterScreen(),
+        '/bluetooth_pairing':(context) => const BluetoothPairingScreen(),
+        '/groupList':(context) => const GroupListScreen(),
+        '/intercom':(context) => const GroupIntercomScreen(),
+        '/emergencyContact':(context) => const EmergencyContactScreen(),
+        '/settings':(context) => const SettingsScreen(),
+        '/profile':(context) => const UserProfileScreen(),
       }
     );
   }

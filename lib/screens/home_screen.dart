@@ -182,8 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: () async {
           final isFound = await Navigator.pushNamed(
               context,
-              '/bluetooth_pairing',
-              arguments: {'onDeviceConnected':_helmetConnected}
+              '/bluetooth_pairing'
           );
           if (true == isFound) {
             await _checkBondedDevice();
