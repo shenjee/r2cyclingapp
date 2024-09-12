@@ -27,29 +27,38 @@ class R2BLECommand {
 
 R2BLECommand decodeBLEData(String data) {
   // Ensure the data is in the correct format
-  if (data.length != 20 || !RegExp(r'^[0-9a-fA-F]+$').hasMatch(data)) {
-    throw ArgumentError('Invalid BLE data format');
-  }
-
-  // Parse the values from the data string
   String header = data.substring(0, 2);
   String commandType = data.substring(2, 4);
   int length = int.parse(data.substring(4, 6), radix: 16);
-  int version = int.parse(data.substring(6, 8), radix: 16);
-  int instruction = int.parse(data.substring(8, 12), radix: 16);
-  double voltage = int.parse(data.substring(12, 16), radix: 16) / 100.0;
-  int batteryPercentage = int.parse(data.substring(16, 18), radix: 16);
-  String crc = data.substring(18, 20);
+  if (length == 6 && RegExp(r'^[0-9a-fA-F]+$').hasMatch(data)) {
+    // Parse the values from the data string
+    int version = int.parse(data.substring(6, 8), radix: 16);
+    int instruction = int.parse(data.substring(8, 12), radix: 16);
+    double voltage = int.parse(data.substring(12, 16), radix: 16) / 100.0;
+    int batteryPercentage = int.parse(data.substring(16, 18), radix: 16);
+    String crc = data.substring(18, 20);
 
-  // Create and return the BLECommand object
-  return R2BLECommand(
-    header: header,
-    commandType: commandType,
-    length: length,
-    version: version,
-    instruction: instruction,
-    voltage: voltage,
-    batteryPercentage: batteryPercentage,
-    crc: crc,
-  );
+    // Create and return the BLECommand object
+    return R2BLECommand(
+      header: header,
+      commandType: commandType,
+      length: length,
+      version: version,
+      instruction: instruction,
+      voltage: voltage,
+      batteryPercentage: batteryPercentage,
+      crc: crc,
+    );
+  } else {
+    return R2BLECommand(
+      header: header,
+      commandType: commandType,
+      length: length,
+      version: 0,
+      instruction: 0x00,
+      voltage: 0,
+      batteryPercentage: 0,
+      crc: 'na',
+    );
+  }
 }

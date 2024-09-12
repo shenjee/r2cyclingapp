@@ -123,7 +123,6 @@ class R2BackgroundService {
     // "end" :0x0000
     debugPrint('$runtimeType : _onHelmetNotify(): $data');
     R2BLECommand command = decodeBLEData(data);
-    debugPrint('$runtimeType : _onHelmetNotify(): ${command.toString()}');
     switch(command.instruction) {
       case 0x04:
       case 0x08:

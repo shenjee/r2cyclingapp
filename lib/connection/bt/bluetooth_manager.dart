@@ -18,26 +18,6 @@ class BluetoothManager {
 
   final _btModel = R2BluetoothModel();
 
-  // enable A2dp and Headset profiles
-  static Future<void> enableAudioProfiles(String deviceAddress) async {
-    try {
-      await platform.invokeMethod('enableAudioProfiles', {"deviceAddress": deviceAddress});
-    } on PlatformException catch (e) {
-      debugPrint("Failed to enable audio profiles: ${e.message}");
-    }
-  }
-
-  // Method to unpair a classic bluetooth device
-  static Future<bool> unpairDevice(String deviceAddress) async {
-    try {
-      final bool result = await platform.invokeMethod('unpairDevice', {"deviceAddress": deviceAddress});
-      return result;
-    } on PlatformException catch (e) {
-      debugPrint("Failed to unpair device: ${e.message}");
-      return false;
-    }
-  }
-
   Stream<List<R2Device>> scanDevices({String? brand}) {
     // Start scanning BLE devices using the existing method in _btModel
     _btModel.scanDevices(brand: brand);
@@ -71,6 +51,7 @@ class BluetoothManager {
       device.classicAddress = deviceAddress;
       // save ble and bt classic
       await R2DBHelper().saveDevice(device);
+      
       onBond(device);
     });
 

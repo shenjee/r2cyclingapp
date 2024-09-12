@@ -289,8 +289,6 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
         leading: IconButton(
           icon: const Icon(Icons.close, size: 34.0,),
           onPressed: () {
-            // stop device scanning
-            _animationController.stop();
             Navigator.of(context).pop(false);
             },
         ),

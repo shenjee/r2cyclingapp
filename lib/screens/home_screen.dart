@@ -38,10 +38,10 @@ class _HomeScreenState extends State<HomeScreen> {
       _grantPermissions();
       _checkLoginStatus();
     });
-    _checkBondedDevice();
-    _loadEmergencyContactStatus();
     _service.setContext(context);
     _service.initService();
+    _checkBondedDevice();
+    _loadEmergencyContactStatus();
   }
 
   @override

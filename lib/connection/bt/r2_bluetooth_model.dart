@@ -180,18 +180,31 @@ class R2BluetoothModel {
         BluetoothConnection? connection;
 
         if (device.name!.startsWith('Helmet-$lastPart')) {
+          // stop scanning classic bt
+          _classicBt.stopScan();
+          // bond device
+          final b = await _classicBt.bondDevice(device.address);
+          debugPrint('$runtimeType : ${device.address} bonded? $b');
+          _pairingController.add({'name': device.name!, 'address': device.address});
+
+          // connect to classic bt
+          /*
+           * when i use connect method, the ble read service always failed to
+           * start.
+           * so i try bondDevice method, it seems to work well.
           try {
             connection = await _classicBt.connect(device.address);
             if (connection != null && connection.isConnected) {
               debugPrint('$runtimeType : classic ${device.name} ${device
                   .address} connected');
               _enableAudioProfiles(device.address);
-              // TODO:
-              _pairingController.add({'name': device.name!, 'address': device.address});
+
+              // Add a delay to ensure Classic Bluetooth is stable before starting BLE
+              await Future.delayed(const Duration(seconds: 1));
             }
           } catch (e) {
             debugPrint('$runtimeType : connecting to classic failed $e');
-          }
+          }  */
         }
       });
 
