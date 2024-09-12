@@ -62,6 +62,19 @@ class _HelmetScreenState extends State<HelmetScreen> {
     _btManager.remote(HelmetRemoteOperation.rightLight);
   }
 
+  Widget _helmetInfo() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Brand: ${_helmet!.brand}'),
+        Text('ID: ${_helmet!.id}'),
+        Text('Name: ${_helmet!.name}'),
+        Text('BLE Address: ${_helmet!.bleAddress}'),
+        Text('Classic Address: ${_helmet!.classicAddress}'),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,11 +88,7 @@ class _HelmetScreenState extends State<HelmetScreen> {
           children: [
             const Text('Helmet Info:', style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text('Brand: ${_helmet!.brand}'),
-            Text('ID: ${_helmet!.id}'),
-            Text('Name: ${_helmet!.name}'),
-            Text('BLE Address: ${_helmet!.bleAddress}'),
-            Text('Classic Address: ${_helmet!.classicAddress}'),
+            if (_helmet != null) _helmetInfo(),
             // control volume
             const SizedBox(height: 24),
             const Text('音量：', style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),),
