@@ -1,70 +1,119 @@
 import 'package:flutter/material.dart';
+import 'package:r2cyclingapp/connection/bt/bluetooth_manager.dart';
 
-import 'package:r2cyclingapp/connection/bt/r2_bluetooth_model.dart';
 import 'package:r2cyclingapp/database/r2_device.dart';
 
 class HelmetScreen extends StatefulWidget {
-  final R2Device device;
-  final R2BluetoothModel bleModel;
 
-  HelmetScreen({required this.device, required this.bleModel});
+  const HelmetScreen({super.key});
 
   @override
-  _HelmetScreenState createState() => _HelmetScreenState();
+  State<HelmetScreen> createState() => _HelmetScreenState();
 }
 
 class _HelmetScreenState extends State<HelmetScreen> {
+  final _btManager = BluetoothManager();
+  R2Device? _helmet;
 
   @override
   void initState() {
     super.initState();
-    widget.bleModel.connectDevice(widget.device.id).then((_) {
+    _fetchDevice();
+    /*
+    bleModel.connectDevice(widget.device.id).then((_) {
       // Successfully connected and initialized characteristic
     }).catchError((error) {
       print('Connection error: $error');
     });
+     */
+  }
+
+  // Separate async method
+  Future<void> _fetchDevice() async {
+    R2Device? device = await _btManager.getDevice();
+    if (device != null) {
+      setState(() {
+        _helmet = device;
+      });
+    }
   }
 
   void _sendDataAppConnection() {
     // App sends 0x55B10309000110
     // Left Light 0x55B10301000110
-    widget.bleModel.sendData(widget.device.id, [0x55, 0xB1, 0x03, 0x09, 0x00, 0x01, 0x10]);
+    _btManager.remote(HelmetRemoteOperation.appConnect);
   }
 
-  void _sendDataLeftLight() {
+  void _volumeUp() {
+    _btManager.remote(HelmetRemoteOperation.volumeUp);
+  }
+
+  void _volumeDown() {
+    _btManager.remote(HelmetRemoteOperation.volumeDown);
+  }
+
+  void _leftLight() {
     // Right Light 0x55B10301000118
-    widget.bleModel.sendData(widget.device.id, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x01, 0x18]);
+    _btManager.remote(HelmetRemoteOperation.leftLight);
   }
 
-  void _sendDataRightLight() {
+  void _rightLight() {
     // Right Light 0x55B1030100D0C9
-    widget.bleModel.sendData(widget.device.id, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x02, 0x1b]);
+    _btManager.remote(HelmetRemoteOperation.rightLight);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Helmet Control'),
+        title: const Text('Helmet Control'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Helmet Info:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            SizedBox(height: 8),
-            Text('Brand: ${widget.device.brand}'),
-            Text('ID: ${widget.device.id}'),
-            Text('Name: ${widget.device.name}'),
-
-            SizedBox(height: 24),
+            const Text('Helmet Info:', style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text('Brand: ${_helmet!.brand}'),
+            Text('ID: ${_helmet!.id}'),
+            Text('Name: ${_helmet!.name}'),
+            // control volume
+            const SizedBox(height: 24),
+            const Text('音量：', style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 ElevatedButton(
-                  onPressed: () => _sendDataLeftLight(),
-                  child: Row(
+                  onPressed: () => _volumeUp(),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.volume_down),
+                      Text('Volume Down'),
+                    ],
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () => _volumeUp(),
+                  child: const Row(
+                    children: [
+                      Text('Volume Up'),
+                      SizedBox(width: 5),
+                      Icon(Icons.volume_up),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            // control light
+            const SizedBox(height: 24),
+            const Text('灯光：', style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ElevatedButton(
+                  onPressed: () => _leftLight(),
+                  child: const Row(
                     children: [
                       Icon(Icons.arrow_left),
                       SizedBox(width: 8),
@@ -73,8 +122,8 @@ class _HelmetScreenState extends State<HelmetScreen> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () => _sendDataRightLight(),
-                  child: Row(
+                  onPressed: () => _rightLight(),
+                  child: const Row(
                     children: [
                       Text('Right Light'),
                       SizedBox(width: 8),

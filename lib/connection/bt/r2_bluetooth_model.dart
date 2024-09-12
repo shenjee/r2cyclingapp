@@ -1,10 +1,16 @@
 import 'dart:async';
-
-import 'package:flutter/material.dart';
-import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+// ble lib
+import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
+// classic bt lib
+import 'package:flutter_blue_classic/flutter_blue_classic.dart';
+
 
 class R2BluetoothModel {
+  static const platform = MethodChannel('r2_sms_channel');
+
   // Singleton instance
   static final R2BluetoothModel _instance = R2BluetoothModel._internal();
 
@@ -16,6 +22,7 @@ class R2BluetoothModel {
   // Private constructor for internal use
   R2BluetoothModel._internal();
 
+  // ble
   final FlutterReactiveBle _reactiveBle = FlutterReactiveBle();
 
   StreamSubscription<DiscoveredDevice>? _scanHandler;
@@ -39,12 +46,28 @@ class R2BluetoothModel {
   final String _readServcieID = "0000ffe0-0000-1000-8000-00805f9b34fb";
   final String _readCharacteristicID = "0000ffe4-0000-1000-8000-00805f9b34fb";
 
-  void scanDevices() {
+  // classic bt
+  final _classicBt = FlutterBlueClassic();
+
+  final StreamController<Map<String, String>> _pairingController = StreamController.broadcast();
+  Stream<Map<String, String>> get pairingStream => _pairingController.stream;
+
+  // ble operations
+  void scanDevices({String? brand}) {
     _scannedDevices.add([]);
     _scanHandler = _reactiveBle.scanForDevices(withServices: []).listen(
             (device) {
-              debugPrint('$runtimeType found ble: ${device.id}-${device.name}');
-              if (device.name.startsWith('EH201')) {
+              debugPrint('$runtimeType found ble: ${device.id} ${device.name}');
+              if (brand != null) {
+                if (device.name.startsWith(brand)) {
+                  final devices = List<DiscoveredDevice>.from(
+                      _scannedDevices.value);
+                  if (!devices.any((d) => d.id == device.id)) {
+                    devices.add(device);
+                    _scannedDevices.add(devices);
+                  }
+                }
+              } else {
                 final devices = List<DiscoveredDevice>.from(
                     _scannedDevices.value);
                 if (!devices.any((d) => d.id == device.id)) {
@@ -120,7 +143,6 @@ class R2BluetoothModel {
         deviceId: deviceId,
       );
       _reactiveBle.subscribeToCharacteristic(c).listen((data) {
-        //final receivedData = String.fromCharCodes(data);
         final receivedData = _bytesToHex(data);
         onDataReceived(receivedData);
       });
@@ -133,11 +155,71 @@ class R2BluetoothModel {
     return bytes.map((byte) => byte.toRadixString(16).padLeft(2, '0')).join('');
   }
 
+  // classic bt operations
+
+  /*
+   * enable A2dp and Headset profiles
+   */
+  static Future<void> _enableAudioProfiles(String deviceAddress) async {
+    try {
+      await platform.invokeMethod('enableAudioProfiles', {"deviceAddress": deviceAddress});
+    } on PlatformException catch (e) {
+      debugPrint("Failed to enable audio profiles: ${e.message}");
+    }
+  }
+
+  Future<void> pairClassicBt(String name) async {
+    // Get the last 6 characters (e.g. Helmet-39C5B8 in EH201-5BA3BB39C5B8)
+    String? lastPart = name.substring(name.length - 6);
+
+    if (lastPart.isNotEmpty) {
+      _classicBt.scanResults.listen((device) async {
+        // classic bluetooth scanned
+        debugPrint('$runtimeType : bond state: ${device.bondState
+            .name}, device type: ${device.type.name}');
+        BluetoothConnection? connection;
+
+        if (device.name!.startsWith('Helmet-$lastPart')) {
+          try {
+            connection = await _classicBt.connect(device.address);
+            if (connection != null && connection.isConnected) {
+              debugPrint('$runtimeType : classic ${device.name} ${device
+                  .address} connected');
+              _enableAudioProfiles(device.address);
+              // TODO:
+              _pairingController.add({'name': device.name!, 'address': device.address});
+            }
+          } catch (e) {
+            debugPrint('$runtimeType : connecting to classic failed $e');
+          }
+        }
+      });
+
+      _classicBt.startScan();
+    }
+  }
+
+  /*
+   * Method to unpair a classic bluetooth device
+   */
+  Future<bool> unpairClassicBt(String deviceAddress) async {
+    try {
+      final bool result = await platform.invokeMethod('unpairDevice', {"deviceAddress": deviceAddress});
+      return result;
+    } on PlatformException catch (e) {
+      debugPrint("Failed to unpair device: ${e.message}");
+      return false;
+    }
+  }
+
+  // database operations
+
   void dispose() async {
     await _scanHandler?.cancel();
     await _connectionHandler?.cancel();
     await _writeSubscription?.cancel();
 
+    _pairingController.close();
     _scannedDevices.close();
     _connectedDevice.close();
     _reactiveBle.deinitialize();

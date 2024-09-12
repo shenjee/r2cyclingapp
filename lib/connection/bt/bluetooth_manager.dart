@@ -1,0 +1,114 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
+
+import 'package:r2cyclingapp/database/r2_db_helper.dart';
+import 'package:r2cyclingapp/database/r2_device.dart';
+import 'r2_bluetooth_model.dart';
+
+enum HelmetRemoteOperation {
+  appConnect,
+  leftLight,
+  rightLight,
+  volumeUp,
+  volumeDown,
+}
+
+class BluetoothManager {
+  static const platform = MethodChannel('r2_sms_channel');
+
+  final _btModel = R2BluetoothModel();
+
+  // enable A2dp and Headset profiles
+  static Future<void> enableAudioProfiles(String deviceAddress) async {
+    try {
+      await platform.invokeMethod('enableAudioProfiles', {"deviceAddress": deviceAddress});
+    } on PlatformException catch (e) {
+      debugPrint("Failed to enable audio profiles: ${e.message}");
+    }
+  }
+
+  // Method to unpair a classic bluetooth device
+  static Future<bool> unpairDevice(String deviceAddress) async {
+    try {
+      final bool result = await platform.invokeMethod('unpairDevice', {"deviceAddress": deviceAddress});
+      return result;
+    } on PlatformException catch (e) {
+      debugPrint("Failed to unpair device: ${e.message}");
+      return false;
+    }
+  }
+
+  Stream<List<R2Device>> scanDevices({String? brand}) {
+    // Start scanning BLE devices using the existing method in _btModel
+    _btModel.scanDevices(brand: brand);
+
+    // Convert the stream of List<DiscoveredDevice> to List<R2Device>
+    return _btModel.scannedDevices.map((discoveredDevices) {
+      return discoveredDevices.map((discoveredDevice) {
+        // Map DiscoveredDevice to R2Device
+        return R2Device(
+          id: discoveredDevice.id,
+          brand: brand ?? '',
+          name: discoveredDevice.name.isNotEmpty ? discoveredDevice.name : "Unknown",
+          bleAddress: discoveredDevice.id,
+          classicAddress: null,
+        );
+      }).toList();
+    });
+  }
+
+  void stopScan() {
+    _btModel.stopScan();
+  }
+
+  Future<void> bindDevice(R2Device device, {required Function(R2Device) onBond}) async {
+    // Listen to pairing events
+    _btModel.pairingStream.listen((pairingInfo) async {
+      String deviceName = pairingInfo['name']!;
+      String deviceAddress = pairingInfo['address']!;
+      debugPrint("Paired with classic bt : $deviceName $deviceAddress");
+
+      device.classicAddress = deviceAddress;
+      // save ble and bt classic
+      await R2DBHelper().saveDevice(device);
+      onBond(device);
+    });
+
+    if (device.name.isNotEmpty) {
+      await _btModel.pairClassicBt(device.name);
+    }
+  }
+
+  Future<void> unbindDevice(R2Device device) async {
+    await R2DBHelper().deleteDevice();
+    if (device.classicAddress.isNotEmpty) {
+      bool unpaired = await _btModel.unpairClassicBt(device.classicAddress);
+      if (unpaired) {
+        debugPrint("Device successfully unpaired");
+      } else {
+        debugPrint("Failed to unpair the device");
+      }
+    }
+  }
+
+  Future<R2Device?> getDevice() async {
+    final device = await R2DBHelper().getDevice();
+    return device;
+  }
+
+  Future<void> remote(HelmetRemoteOperation operation) async {
+    final device = await R2DBHelper().getDevice();
+    switch(operation) {
+      case HelmetRemoteOperation.appConnect:
+        _btModel.sendData(device!.id, [0x55, 0xB1, 0x03, 0x09, 0x00, 0x01, 0x10]);
+      case HelmetRemoteOperation.rightLight:
+        _btModel.sendData(device!.id, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x02, 0x1b]);
+      case HelmetRemoteOperation.leftLight:
+        _btModel.sendData(device!.id, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x01, 0x18]);
+      case HelmetRemoteOperation.volumeUp:
+      case HelmetRemoteOperation.volumeDown:
+      default:
+    }
+  }
+}

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 
-import 'package:r2cyclingapp/connection/bt/r2_bluetooth_model.dart';
+import 'package:r2cyclingapp/connection/bt/bluetooth_manager.dart';
 import 'package:r2cyclingapp/service/r2_background_service.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
@@ -23,7 +22,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _bleModel = R2BluetoothModel();
+  final _btManager = BluetoothManager();
   final _service = R2BackgroundService();
   R2Device? _connectedDevice;
   bool _isUnbindMode = false;
@@ -135,11 +134,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _checkBondedDevice() async {
-    final device = await R2DBHelper().getDevice();
+    final device = await _btManager.getDevice();
     if (device != null) {
       // Connect to the bonded device
       setState(() {
-        _connectedDevice = R2Device(brand: device.brand, id: device.id, name: device.name);
+        _connectedDevice = device;
       });
       // start background service to handle the ble event
       _service.startService();
@@ -150,15 +149,13 @@ class _HomeScreenState extends State<HomeScreen> {
    * callback for Bluetooth Paring Screen
    * when BLE's connected, it will be executed.
    */
-  Future<void> _helmetConnected(DiscoveredDevice device) async {
+  Future<void> _helmetConnected(R2Device device) async {
     // later, it should analyze the brand name from id and name
     try {
-      final r2Device = R2Device(brand: 'na', id: device.id, name: device.name);
       debugPrint('$runtimeType : device : ${device.id} - ${device.name}');
       setState(() {
-        _connectedDevice = r2Device;
+        _connectedDevice = device;
       });
-      await R2DBHelper().saveDevice(r2Device);
     } catch (error) {
       debugPrint('$runtimeType : $error');
     }
@@ -167,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _unbindDevice() async {
     if (_connectedDevice != null) {
       _service.stopService();
-      await R2DBHelper().deleteDevice();
+      _btManager.unbindDevice(_connectedDevice!);
       setState(() {
         _connectedDevice = null;
         _isUnbindMode = false;
@@ -189,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
               arguments: {'onDeviceConnected':_helmetConnected}
           );
           if (true == isFound) {
-            await _service.startService();
+            await _checkBondedDevice();
           }
         },
         child: Column(
@@ -273,9 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        HelmetScreen(
-                          device: _connectedDevice!, bleModel: _bleModel,),
+                    builder: (context) => const HelmetScreen(),
                   ),
                 );
               }

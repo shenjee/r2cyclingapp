@@ -35,7 +35,7 @@ class R2DBHelper {
           'CREATE TABLE groups(uid INTEGER PRIMARY KEY, gid INTEGER, gname TEXT, FOREIGN KEY(uid) REFERENCES accounts(uid))',
         );
         await db.execute(
-          'CREATE TABLE devices(id TEXT PRIMARY KEY, brand TEXT, name TEXT)',
+          'CREATE TABLE devices(id TEXT PRIMARY KEY, brand TEXT, name TEXT, bleAddress TEXT, classicAddress TEXT)',
         );
         await db.execute(
           'CREATE TABLE emergency_contacts(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, phone TEXT)',

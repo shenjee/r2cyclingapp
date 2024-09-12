@@ -47,6 +47,17 @@ class MainActivity: FlutterActivity() {
                     }
                 }
 
+                "unpairDevice" -> {
+                    val deviceAddress = call.argument<String>("deviceAddress")
+                    if (deviceAddress != null) {
+                        val device: BluetoothDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(deviceAddress)
+                        val success = unpairDevice(device)
+                        result.success(success)
+                    } else {
+                        result.error("INVALID_ADDRESS", "Device address is null", null)
+                    }
+                }
+
                 else -> result.notImplemented()
             }
         }
@@ -77,6 +88,20 @@ class MainActivity: FlutterActivity() {
                 Log.d("Bluetooth", "A2DP disconnected")
             }
         }, BluetoothProfile.A2DP)
+    }
+
+    // Method to unpair a Bluetooth device
+    private fun unpairDevice(device: BluetoothDevice): Boolean {
+        return try {
+            val removeBondMethod = BluetoothDevice::class.java.getMethod("removeBond")
+            val result = removeBondMethod.invoke(device) as Boolean
+            Log.d("Bluetooth", "Unpairing device: ${device.name}, Result: $result")
+            result
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.e("Bluetooth", "Failed to unpair device", e)
+            false
+        }
     }
 
     // Method to connect HFP (call audio profile)
