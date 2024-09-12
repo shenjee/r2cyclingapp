@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_device.dart';
@@ -107,7 +106,9 @@ class BluetoothManager {
       case HelmetRemoteOperation.leftLight:
         _btModel.sendData(device!.id, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x01, 0x18]);
       case HelmetRemoteOperation.volumeUp:
+        _btModel.sendData(device!.id, [0x55, 0xB1, 0x03, 0x08, 0x00, 0x08, 0x18]);
       case HelmetRemoteOperation.volumeDown:
+        _btModel.sendData(device!.id, [0x55, 0xB1, 0x03, 0x08, 0x00, 0x09, 0x19]);
       default:
     }
   }

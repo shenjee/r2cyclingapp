@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:r2cyclingapp/connection/bt/bluetooth_manager.dart';
 import 'package:r2cyclingapp/database/r2_device.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
 
 class BluetoothPairingScreen extends StatefulWidget {
@@ -16,11 +16,10 @@ class BluetoothPairingScreen extends StatefulWidget {
 class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with TickerProviderStateMixin {
   final _btManager = BluetoothManager();
   Stream<List<R2Device>>? _scannedDevices;
+  R2Device? _bondedDevice;
 
   bool _isScanning = false;  // title
   String _title = '开始连接您的智能头盔';
-  // ble
-  R2Device? connectedDevice;
 
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -67,6 +66,9 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
     }
   }
 
+  /*
+   * start scanning bluetooth devices
+   */
   void _startScanning() {
     setState(() {
       _isScanning = true;
@@ -76,13 +78,17 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
     _scannedDevices = _btManager.scanDevices(brand: 'EH201');
   }
 
+  /*
+   * it responds to the selection of device
+   * device - ble info, no classic bt address
+   */
   Future<void> _onDeviceSelected(R2Device device) async {
     // stop bluetooth scanning
     _btManager.stopScan();
     setState(() {
       _isScanning = false;
       _title = '正在连接您的智能头盔';
-      connectedDevice = device;
+      _bondedDevice = device;
     });
 
     // Initialize the animation controller for twinkling effect
@@ -101,10 +107,13 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
       }
     });
 
-    // bind device
+    // bind device, especially pairing classic bt
     await _btManager.bindDevice(device, onBond: _helmetBonded);
   }
 
+  /*
+   * helmet is boned, then stop animation and pop off bluetooth pairing screen
+   */
   void _helmetBonded(R2Device device) {
     if (mounted) {
       _animationController.stop();
@@ -112,6 +121,12 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
     }
   }
 
+  /*
+   * Items of instruction guide, an item features a rounded number and
+   * instruction content.
+   * number - number
+   * text - instruction content
+   */
   Widget _instructionItem(String number, String text) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -133,6 +148,9 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
     );
   }
 
+  /*
+   * Instruction board tells user what to be prepared before helmet pairing.
+   */
   Widget _instructionWidget() {
     return Center(
       child:Column(
@@ -150,6 +168,9 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
     );
   }
 
+  /*
+   * scanning board, dynamically listing the devices scanned
+   */
   Widget _scanningWidget() {
     return Expanded(
       child:StreamBuilder<List<R2Device>>(
@@ -199,6 +220,10 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
     );
   }
 
+  /*
+   * An animation start when paring starts and stop when paring finishes,
+   * let user know the process of pairing
+   */
   Widget _connectingWidget() {
     return Center(
       child: Row(
@@ -241,11 +266,14 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
     );
   }
 
+  /*
+   * change the center of the screen in accordance with the status of binding
+   */
   Widget _centerWidget() {
     Widget w;
     if (true == _isScanning) {
       w = _scanningWidget();
-    } else if (connectedDevice == null) {
+    } else if (_bondedDevice == null) {
       w = _instructionWidget();
     } else {
       w = _connectingWidget();
@@ -284,7 +312,7 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
               child:_centerWidget(),
             ),
             const SizedBox(height: 50.0,),
-            if (false == _isScanning && null == connectedDevice)
+            if (false == _isScanning && null == _bondedDevice)
               R2FlatButton(
                   text: '开始连接',
                   onPressed: () {

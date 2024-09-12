@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:r2cyclingapp/connection/bt/bluetooth_manager.dart';
 
+import 'package:r2cyclingapp/connection/bt/bluetooth_manager.dart';
 import 'package:r2cyclingapp/database/r2_device.dart';
 
 class HelmetScreen extends StatefulWidget {
@@ -78,6 +78,8 @@ class _HelmetScreenState extends State<HelmetScreen> {
             Text('Brand: ${_helmet!.brand}'),
             Text('ID: ${_helmet!.id}'),
             Text('Name: ${_helmet!.name}'),
+            Text('BLE Address: ${_helmet!.bleAddress}'),
+            Text('Classic Address: ${_helmet!.classicAddress}'),
             // control volume
             const SizedBox(height: 24),
             const Text('音量：', style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),),
@@ -85,7 +87,7 @@ class _HelmetScreenState extends State<HelmetScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 ElevatedButton(
-                  onPressed: () => _volumeUp(),
+                  onPressed: () => _volumeDown(),
                   child: const Row(
                     children: [
                       Icon(Icons.volume_down),
