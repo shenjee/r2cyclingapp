@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import 'package:r2cyclingapp/connection/bt/bluetooth_manager.dart';
 import 'package:r2cyclingapp/database/r2_device.dart';
