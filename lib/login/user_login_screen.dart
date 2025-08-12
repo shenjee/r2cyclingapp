@@ -13,6 +13,7 @@ import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
+import 'package:r2cyclingapp/constants.dart';
 
 import 'package:r2cyclingapp/screens/home_screen.dart';
 import 'login_base_screen.dart';
@@ -177,8 +178,8 @@ class _UserLoginScreenState extends LoginBaseScreenState {
   @override
   Widget topWidget(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.all(10.0),
-        child:Image.asset('assets/images/r2cycling_logo.png')
+      padding: const EdgeInsets.fromLTRB(25.0,0.0,25.0,0.0),
+      child:Image.asset('assets/images/r2cycling_logo.png')
     );
   }
 
@@ -194,17 +195,17 @@ class _UserLoginScreenState extends LoginBaseScreenState {
             style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
-                color: Colors.grey,
+                color: AppConstants.primaryColor200,
             ),
           ),
           hintText: AppLocalizations.of(context)!.enterPhoneNumber,
           controller: _phoneController,
           keyboardType: TextInputType.phone,
         ),
-        const SizedBox(height:20),
+        const SizedBox(height:40.0),
         // text field for entering password
         R2UserTextField(
-          prefixWidget: const Icon(Icons.password, color: Colors.grey,),
+          prefixWidget: Image.asset('assets/icons/icon_password.png', width: 24, height: 24),
           hintText: AppLocalizations.of(context)!.enterPassword,
           controller: _passwordController,
           keyboardType: TextInputType.text,
@@ -212,7 +213,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
           suffixWidget: IconButton(
             icon: Icon(
               _isPasswordHidden ? Icons.visibility_off : Icons.visibility ,
-              color: Colors.grey,
+              color: AppConstants.primaryColor200,
             ),
             onPressed: () {
               setState(() {
@@ -227,10 +228,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
           alignment: Alignment.centerRight,
           child: TextButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const UserRegisterScreen()),
-              );
+              Navigator.pop(context);
               },
             child: Text(AppLocalizations.of(context)!.verificationCodeLogin),
           ),
