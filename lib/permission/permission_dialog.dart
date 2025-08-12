@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:r2cyclingapp/permission/r2_permission_model.dart';
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
@@ -27,8 +28,8 @@ class PermissionDialog extends StatelessWidget {
                       child: Text(AppLocalizations.of(context)!.needFollowingPermissions, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))
                   ),
                   _permissionitem(context, 'assets/icons/bluetooth.png', AppLocalizations.of(context)!.bluetooth, AppLocalizations.of(context)!.bluetoothDesc),
-                   _permissionitem(context, 'assets/icons/mic.png', AppLocalizations.of(context)!.microphone, AppLocalizations.of(context)!.microphoneDesc),
-                   _permissionitem(context, 'assets/icons/location.png', AppLocalizations.of(context)!.locationInfo, AppLocalizations.of(context)!.locationDesc),
+                  _permissionitem(context, 'assets/icons/mic.png', AppLocalizations.of(context)!.microphone, AppLocalizations.of(context)!.microphoneDesc),
+                  _permissionitem(context, 'assets/icons/location.png', AppLocalizations.of(context)!.locationInfo, AppLocalizations.of(context)!.locationDesc),
                   SizedBox(height: 50),
                   R2FlatButton(
                     text: AppLocalizations.of(context)!.confirm,

@@ -8,6 +8,8 @@ import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
+import 'package:r2cyclingapp/l10n/app_localizations.dart';
+import 'package:r2cyclingapp/constants.dart';
 
 import 'login_base_screen.dart';
 
@@ -28,7 +30,7 @@ class VerificationScreenState extends LoginBaseScreenState {
   @override
   void initState() {
     super.initState();
-    mainButtonTitle = '注册/登录';
+    // mainButtonTitle will be set in build method using localization
   }
 
   @override
@@ -95,7 +97,7 @@ class VerificationScreenState extends LoginBaseScreenState {
       // phone number is missing , or in a wrong format
       R2Flash.showBasicFlash(
         context: context,
-        message: '手机号码格式错误',
+        message: AppLocalizations.of(context)!.phoneNumberFormatError,
         duration: const Duration(seconds: 3),
       );
     }
@@ -165,11 +167,11 @@ class VerificationScreenState extends LoginBaseScreenState {
       if (_phoneController.text.isNotEmpty && _vcodeController.text.isNotEmpty) {
         String warning;
         if (false == isValidCode && false == isValidNumber) {
-          warning = '手机号或验证码输入格式有误';
+          warning = AppLocalizations.of(context)!.phoneOrCodeFormatError;
         } else if (false == isValidCode) {
-          warning = '验证码输入格式有误';
+          warning = AppLocalizations.of(context)!.codeFormatError;
         } else {
-          warning = '手机号输入格式有误';
+          warning = AppLocalizations.of(context)!.phoneFormatError;
         }
         R2Flash.showBasicFlash(
           context: context,
@@ -193,7 +195,7 @@ class VerificationScreenState extends LoginBaseScreenState {
     } else {
       return TextButton(
         onPressed: _requestVcode,
-        child: const Text('获取验证码'),
+        child: Text(AppLocalizations.of(context)!.getVerificationCode),
       );
     }
   }
@@ -220,8 +222,8 @@ class VerificationScreenState extends LoginBaseScreenState {
   @override
   Widget topWidget(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(40.0),
-      child:Image.asset('assets/images/r2cycling_logo.png')
+      padding: const EdgeInsets.fromLTRB(25.0,0.0,25.0,0.0),
+      child:Image.asset('assets/images/r2cycling_logo.png'),
     );
   }
 
@@ -268,6 +270,8 @@ class VerificationScreenState extends LoginBaseScreenState {
    */
   @override
   Widget centerWidget(BuildContext context) {
+    // Set the main button title using localization
+    mainButtonTitle = AppLocalizations.of(context)!.registerLogin;
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -278,23 +282,22 @@ class VerificationScreenState extends LoginBaseScreenState {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
-                color: Colors.grey,
+                color: AppConstants.primaryColor200,
               ),
             ),
-            hintText: '请输入手机号',
+            hintText: AppLocalizations.of(context)!.enterPhoneNumber,
             controller: _phoneController,
             keyboardType: TextInputType.phone,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 40.0),
           // text field for entering password
           R2UserTextField(
-            prefixWidget: const Icon(Icons.key, color:Colors.grey),
-            hintText: '请输入验证码',
+            prefixWidget: Image.asset('assets/icons/icon_vcode.png', width: 24, height: 24),
+            hintText: AppLocalizations.of(context)!.enterVerificationCode,
             suffixWidget: _vcodeButton(),
             controller: _vcodeController,
             keyboardType: TextInputType.number,
           ),
-          const SizedBox(height: 30),
         ]
     );
   }

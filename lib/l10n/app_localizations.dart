@@ -43,6 +43,7 @@ class AppLocalizations {
   String get passwordHint => _localizedValues[locale.languageCode]!['password_hint']!;
   String get enterNewPassword => _localizedValues[locale.languageCode]!['enter_new_password']!;
   String get confirmAgain => _localizedValues[locale.languageCode]!['confirm_again']!;
+  String get agreeTermsAndPrivacy => _localizedValues[locale.languageCode]!['agree_terms_and_privacy']!;
 
   // Permissions
   String get needFollowingPermissions => _localizedValues[locale.languageCode]!['need_following_permissions']!;
@@ -123,18 +124,18 @@ class AppLocalizations {
 
   static const Map<String, Map<String, String>> _localizedValues = {
     'en': {
-      'register_login': 'Register/Login',
+      'register_login': 'Register / Login',
       'phone_number_format_error': 'Phone number format error',
       'phone_or_code_format_error': 'Phone number or verification code format error',
       'code_format_error': 'Verification code format error',
       'phone_format_error': 'Phone number format error',
-      'get_verification_code': 'Get Verification Code',
-      'enter_phone_number': 'Enter phone number',
-      'enter_verification_code': 'Enter verification code',
+      'get_verification_code': 'Get Code',
+      'enter_phone_number': 'Phone number',
+      'enter_verification_code': 'Verification code',
       'next_step': 'Next',
       'reset_password': 'Reset Password',
       'password_login': 'Password Login',
-      'unregistered_phone_auto_create': 'Unregistered phone numbers will automatically create an R2 account after verification\n\n',
+      'unregistered_phone_auto_create': 'Verfication with an unregistered phone number will\nautomatically create an R2 account\n',
       'set_password': 'Set Password',
       'login': 'Login',
       'phone_password_format_error': 'Phone number and password format error',
@@ -148,6 +149,7 @@ class AppLocalizations {
       'password_hint': 'Password must be at least 6 characters, including numbers and letters\n',
       'enter_new_password': 'Enter new password',
       'confirm_again': 'Confirm again',
+      'agree_terms_and_privacy': 'I agree to the Terms of Service and Privacy Policy',
       'need_following_permissions': 'Need the following permissions',
       'bluetooth': 'Bluetooth',
       'bluetooth_desc': 'Connect to your smart helmet',
@@ -238,6 +240,7 @@ class AppLocalizations {
       'password_hint': '密码至少6位，包含数字和字母\n',
       'enter_new_password': '输入新密码',
       'confirm_again': '再次确认',
+      'agree_terms_and_privacy': '我已同意《用户协议》和《隐私策略》',
       'need_following_permissions': '需要获取以下权限',
       'bluetooth': '蓝牙',
       'bluetooth_desc': '连接您的智能头盔',

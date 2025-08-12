@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
+import 'package:r2cyclingapp/constants.dart';
+
 import 'package:r2cyclingapp/emergency/emergency_contact_screen.dart';
 import 'package:r2cyclingapp/screens/home_screen.dart';
 import 'package:r2cyclingapp/screens/bluetooth_pairing_screen.dart';
@@ -34,16 +36,12 @@ class R2CyclingApp extends StatelessWidget {
       ],
       supportedLocales: AppLocalizations.supportedLocales,
       
-      // TODO: Theme configuration - to be developed in the future
-      // theme: ThemeData(
-      //   colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF539765)),
-      //   useMaterial3: true,
-      //   appBarTheme: const AppBarTheme(
-      //      backgroundColor: Color(0xFF539765),
-      //      foregroundColor: Colors.white,
-      //      elevation: 0,
-      //    ),
-      // ),
+      // Theme configuration
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: AppConstants.primaryColor),
+        useMaterial3: true,
+        scaffoldBackgroundColor: AppConstants.backgroundColor,
+      ),
       
       // Route configuration
       initialRoute: '/home',

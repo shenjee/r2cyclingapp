@@ -13,6 +13,8 @@ class UserRegisterScreen extends VerificationScreen {
 }
 
 class _UserRegisterScreenState extends VerificationScreenState {
+  bool _isAgreed = false;
+
   @override
   void initState() {
     super.initState();
@@ -42,17 +44,6 @@ class _UserRegisterScreenState extends VerificationScreenState {
   }
 
   /*
-   * in the top of this widget is a R2 cycling logo
-   */
-  @override
-  Widget topWidget(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.all(40.0),
-        child:Image.asset('assets/images/r2cycling_logo.png')
-    );
-  }
-
-  /*
    * two controls of text filed for entering phone number and v-code
    */
   @override
@@ -61,7 +52,7 @@ class _UserRegisterScreenState extends VerificationScreenState {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           super.centerWidget(context),
-          const SizedBox(height: 30),
+          const SizedBox(height: 30.0),
           Container (
             width: 340,
             alignment: Alignment.centerRight,
@@ -84,9 +75,60 @@ class _UserRegisterScreenState extends VerificationScreenState {
    */
   @override
   Widget bottomWidget(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Text(AppLocalizations.of(context)!.unregisteredPhoneAutoCreate),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Top aligned text
+        Align(
+          alignment: Alignment.topCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 20.0),
+            child: Text(
+              AppLocalizations.of(context)!.unregisteredPhoneAutoCreate,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        // Bottom aligned checkbox with text
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _isAgreed = !_isAgreed;
+                });
+              },
+              child: Row(
+                children: [
+                  Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10.0),
+                      color: _isAgreed ? Colors.grey : Colors.transparent,
+                    ),
+                    child: Icon(
+                      Icons.check,
+                      size: 16,
+                      color: _isAgreed ? Colors.white : Colors.transparent,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      AppLocalizations.of(context)!.agreeTermsAndPrivacy,
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

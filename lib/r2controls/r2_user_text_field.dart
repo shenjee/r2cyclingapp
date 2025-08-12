@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:r2cyclingapp/constants.dart';
 
 class R2UserTextField extends StatefulWidget {
   // Prefix
@@ -70,7 +71,10 @@ class _R2UserTextFieldState extends State<R2UserTextField> {
             textAlign: TextAlign.start,
             textAlignVertical: TextAlignVertical.center,
             style: TextStyle(fontSize: _fontSize),
-            decoration: InputDecoration.collapsed(hintText:widget.hintText),
+            decoration: InputDecoration.collapsed(
+              hintText: widget.hintText,
+              hintStyle: const TextStyle(color: AppConstants.textColor200),
+            ),
             keyboardType: widget.keyboardType,
             obscureText: widget.textVisible ?? false,
           ),
@@ -90,9 +94,9 @@ class _R2UserTextFieldState extends State<R2UserTextField> {
       width: 340,
       height: 57,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(20.0)),
-        border: Border.all(color: Colors.grey, width: 1.0),
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(20.0)),
+        color: Colors.white,
       ),
       child: _buildContent(context),
     );

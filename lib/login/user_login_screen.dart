@@ -177,7 +177,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
   @override
   Widget topWidget(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.all(40.0),
+        padding: const EdgeInsets.all(10.0),
         child:Image.asset('assets/images/r2cycling_logo.png')
     );
   }

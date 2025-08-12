@@ -53,9 +53,8 @@ class LoginBaseScreenState extends State<LoginBaseScreen> {
   // private method
   Widget _buildTopWidget(BuildContext context) {
     Widget w;
-    //w = Container(color: Colors.red, child: topWidget(context),);
-    w = Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+    w = SizedBox(
+      height: 160.0, // Fixed height for top area
       child: topWidget(context),
     );
     
@@ -65,8 +64,8 @@ class LoginBaseScreenState extends State<LoginBaseScreen> {
   Widget _buildCenterWidget(BuildContext context) {
     Widget w;
     //w = Container(color: Colors.yellow, child: centerWidget(context),);
-    w = Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+    w = SizedBox(
+      height: 250, // Fixed height for center area
       child: centerWidget(context),
     );
 
@@ -82,9 +81,7 @@ class LoginBaseScreenState extends State<LoginBaseScreen> {
 
   Widget _buildBottomWidget(BuildContext context) {
     Widget w;
-    w = Expanded(
-      child: bottomWidget(context),
-    );
+    w = bottomWidget(context);
 
     return w;
   }
@@ -101,12 +98,15 @@ class LoginBaseScreenState extends State<LoginBaseScreen> {
         // which might be tried later.
         resizeToAvoidBottomInset:false,
         body:Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              _buildTopWidget(context), // top area
-              _buildCenterWidget(context), // 2nd area
-              _buildMainButton(context), // 3rd area
-              _buildBottomWidget(context), // bottom area
+              _buildTopWidget(context), // top area - fixed height
+              _buildCenterWidget(context), // 2nd area - fixed height
+              const SizedBox(height: 130.0),
+              _buildMainButton(context), // 3rd area - button position now fixed
+              Expanded(
+                child: _buildBottomWidget(context)
+              ), // bottom area - fills remaining space
             ]
         )
     );
