@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'verification_screen.dart';
 import 'user_login_screen.dart';
 import 'password_setting_screen.dart';
@@ -15,7 +16,13 @@ class _UserRegisterScreenState extends VerificationScreenState {
   @override
   void initState() {
     super.initState();
-    mainButtonTitle = '注册/登录';
+    // mainButtonTitle will be set in didChangeDependencies
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    mainButtonTitle = AppLocalizations.of(context)!.registerLogin;
   }
 
   /*
@@ -65,7 +72,7 @@ class _UserRegisterScreenState extends VerificationScreenState {
                   MaterialPageRoute(builder: (context) => const UserLoginScreen()),
                 );
               },
-              child: const Text('密码登录'),
+              child: Text(AppLocalizations.of(context)!.passwordLogin),
             ),
           ),
         ]
@@ -77,9 +84,9 @@ class _UserRegisterScreenState extends VerificationScreenState {
    */
   @override
   Widget bottomWidget(BuildContext context) {
-    return const Align(
+    return Align(
       alignment: Alignment.bottomCenter,
-      child: Text('未注册的手机号验证后自动创建R2账户\n\n'),
+      child: Text(AppLocalizations.of(context)!.unregisteredPhoneAutoCreate),
     );
   }
 
@@ -91,7 +98,7 @@ class _UserRegisterScreenState extends VerificationScreenState {
         context,
         MaterialPageRoute(builder: (context) =>
             PasswordSettingScreen(
-              phoneNumber: account, title: '设置密码',)),
+              phoneNumber: account, title: AppLocalizations.of(context)!.setPassword,)),
       );
     } else {
       if (mounted) {

@@ -3,7 +3,7 @@ import 'r2_http_response.dart';
 
 class R2HttpRequest {
   // Base URL is fixed.
-  final String _baseUrl = 'http://r2cycling.imai.site/api/';
+  final String _baseUrl = 'https://rock.r2cycling.com/api/';
 
   // Method to send the POST request.
   Future<R2HttpResponse> postRequest({String? token, required String api, Map<String, String>? body}) async {

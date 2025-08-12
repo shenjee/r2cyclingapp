@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   flutter_spinkit: ^5.1.0 # Animation
   permission_handler: ^11.3.1
   flutter_reactive_ble: ^5.0.2 # multiple BLE

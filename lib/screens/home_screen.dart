@@ -11,6 +11,7 @@ import 'package:r2cyclingapp/database/r2_device.dart';
 
 import 'package:r2cyclingapp/permission/permission_dialog.dart';
 import 'package:r2cyclingapp/login/user_register_screen.dart';
+import 'package:r2cyclingapp/l10n/app_localizations.dart';
 
 import 'helmet_screen.dart';
 
@@ -111,6 +112,9 @@ class _HomeScreenState extends State<HomeScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.transparent,
       builder: (BuildContext context) {
         return const FractionallySizedBox(
           heightFactor: 1.0,
@@ -198,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 18.0),
             Text(
-              '点击添加您的智能头盔',
+              AppLocalizations.of(context)!.clickAddHelmet,
               style: TextStyle(fontSize: 20.0, color: Colors.grey[700]),
             ),
           ],

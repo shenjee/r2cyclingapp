@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import 'package:r2cyclingapp/connection/bt/bluetooth_manager.dart';
 import 'package:r2cyclingapp/database/r2_device.dart';
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
+import 'package:r2cyclingapp/l10n/app_localizations.dart';
 
 class BluetoothPairingScreen extends StatefulWidget {
 
@@ -19,7 +21,7 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
   R2Device? _bondedDevice;
 
   bool _isScanning = false;  // title
-  String _title = '开始连接您的智能头盔';
+  String _title = '';
 
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -28,6 +30,14 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
   void initState() {
     super.initState();
     requestPermissions();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_title.isEmpty) {
+      _title = AppLocalizations.of(context)!.startConnectHelmet;
+    }
   }
 
   @override
@@ -72,7 +82,7 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
   void _startScanning() {
     setState(() {
       _isScanning = true;
-      _title = '请选择您的智能头盔';
+      _title = AppLocalizations.of(context)!.selectYourHelmet;
     });
 
     _scannedDevices = _btManager.scanDevices(brand: 'EH201');
@@ -87,7 +97,7 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
     _btManager.stopScan();
     setState(() {
       _isScanning = false;
-      _title = '正在连接您的智能头盔';
+      _title = AppLocalizations.of(context)!.connectingHelmet;
       _bondedDevice = device;
     });
 
@@ -158,11 +168,11 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _instructionItem('1', '确保手机蓝牙已开启'),
+          _instructionItem('1', AppLocalizations.of(context)!.ensureBluetoothOn),
           const SizedBox(height: 30),
-          _instructionItem('2', '长按智能头盔的开机键，\n直至听到“配对”提示音'),
+          _instructionItem('2', AppLocalizations.of(context)!.longPressHelmetButton),
           const SizedBox(height: 30),
-         _instructionItem('3', '将手机紧靠您的智能头盔'),
+         _instructionItem('3', AppLocalizations.of(context)!.bringPhoneClose),
         ],
       ),
     );
@@ -312,7 +322,7 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
             const SizedBox(height: 50.0,),
             if (false == _isScanning && null == _bondedDevice)
               R2FlatButton(
-                  text: '开始连接',
+                  text: AppLocalizations.of(context)!.startConnect,
                   onPressed: () {
                     _startScanning();
                   }),

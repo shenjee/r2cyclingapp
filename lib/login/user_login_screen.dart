@@ -12,6 +12,7 @@ import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
+import 'package:r2cyclingapp/l10n/app_localizations.dart';
 
 import 'package:r2cyclingapp/screens/home_screen.dart';
 import 'login_base_screen.dart';
@@ -32,7 +33,13 @@ class _UserLoginScreenState extends LoginBaseScreenState {
   @override
   void initState() {
     super.initState();
-    mainButtonTitle = '登录';
+    // mainButtonTitle will be set in build method using localization
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    mainButtonTitle = AppLocalizations.of(context)!.login;
   }
 
   /*
@@ -152,11 +159,11 @@ class _UserLoginScreenState extends LoginBaseScreenState {
       if (_phoneController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
         String warning;
         if (false == isValidPasswd && false == isValidNumber) {
-          warning = '手机号和密码输入格式有误';
+          warning = AppLocalizations.of(context)!.phonePasswordFormatError;
         } else if (false == isValidPasswd) {
-          warning = '密码为不少于6位的数字和字符组合';
+          warning = AppLocalizations.of(context)!.passwordFormatError;
         } else {
-          warning = '手机号输入格式有误';
+          warning = AppLocalizations.of(context)!.phoneFormatError;
         }
         R2Flash.showBasicFlash(
           context: context,
@@ -190,7 +197,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
                 color: Colors.grey,
             ),
           ),
-          hintText: '请输入手机号',
+          hintText: AppLocalizations.of(context)!.enterPhoneNumber,
           controller: _phoneController,
           keyboardType: TextInputType.phone,
         ),
@@ -198,7 +205,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
         // text field for entering password
         R2UserTextField(
           prefixWidget: const Icon(Icons.password, color: Colors.grey,),
-          hintText: '请输入密码',
+          hintText: AppLocalizations.of(context)!.enterPassword,
           controller: _passwordController,
           keyboardType: TextInputType.text,
           textVisible: _isPasswordHidden,
@@ -225,7 +232,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
                 MaterialPageRoute(builder: (context) => const UserRegisterScreen()),
               );
               },
-            child: const Text('验证码登录'),
+            child: Text(AppLocalizations.of(context)!.verificationCodeLogin),
           ),
         )
       ]
@@ -253,7 +260,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
             MaterialPageRoute(builder: (context) => const PasswordRecoverScreen()),
           );
           },
-          child: const Text('忘记密码？'),
+          child: Text(AppLocalizations.of(context)!.forgotPassword),
         )
     );
   }

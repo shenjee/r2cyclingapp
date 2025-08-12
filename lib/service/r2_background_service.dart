@@ -7,6 +7,7 @@ import 'package:r2cyclingapp/connection/bt/r2_ble_command.dart';
 import 'package:r2cyclingapp/emergency/sos_widget.dart';
 import 'package:r2cyclingapp/emergency/r2_sos_sender.dart';
 import 'package:r2cyclingapp/intercom/r2_intercom_engine.dart';
+import 'package:r2cyclingapp/permission/r2_permission_manager.dart';
 
 class R2BackgroundService {
   // Singleton pattern
@@ -31,14 +32,23 @@ class R2BackgroundService {
   int? _intLast;
   int? _intCurr;
 
-  void initService() async {
-    const androidConfig = FlutterBackgroundAndroidConfig (
-      notificationTitle: "R2 Background Service",
-      notificationText: "Listening for BLE signals",
-      notificationImportance: AndroidNotificationImportance.normal,
-    );
-    bool success = await FlutterBackground.initialize(androidConfig: androidConfig);
-    debugPrint('$runtimeType : initialize background $success');
+  Future<bool> initService() async {
+    try {
+      // Check and request permissions first
+      final permissionManager = R2PermissionManager();
+      final hasPermissions = await permissionManager.requestBackgroundPermissions();
+      
+      if (!hasPermissions) {
+        debugPrint('$runtimeType : Background permissions not granted');
+        return false;
+      }
+      
+      debugPrint('$runtimeType : Background service initialized successfully');
+      return true;
+    } catch (e) {
+      debugPrint('$runtimeType : Error initializing background service: $e');
+      return false;
+    }
   }
 
   /*
@@ -83,31 +93,71 @@ class R2BackgroundService {
     }
   }
 
-  Future<void> startService() async {
-    // Introduce a small delay to ensure device stability
-    final device = await R2DBHelper().getDevice();
-    if (device != null) {
-      // Connect to the bonded device
-      await _btModel.connectDevice(device.id,);
-
-      // turn on the notification of device
-      _btModel.sendData(device.id, [0x55, 0xB1, 0x03, 0x09, 0x00, 0x01, 0x10]);
-
-      // Enable background execution
-      final hasPermission =  await FlutterBackground.hasPermissions;
-      final success = await FlutterBackground.enableBackgroundExecution();
-      debugPrint('$runtimeType : permission $hasPermission ; enable background $success');
-
-      try {
-        _btModel.startListening(device.id, _onHelmetNotify,);
-      } catch(e) {
-        debugPrint('$runtimeType : Error starting listener $e');
+  Future<bool> startService() async {
+    try {
+      // Check permissions before starting
+      final permissionManager = R2PermissionManager();
+      if (!permissionManager.canStartBackgroundService()) {
+        debugPrint('$runtimeType : Insufficient permissions to start background service');
+        return false;
       }
+      
+      // Get bonded device
+      final device = await R2DBHelper().getDevice();
+      if (device == null) {
+        debugPrint('$runtimeType : No bonded device found');
+        return false;
+      }
+      
+      // Connect to the bonded device
+      try {
+        await _btModel.connectDevice(device.id);
+        debugPrint('$runtimeType : Connected to device');
+      } catch (e) {
+        debugPrint('$runtimeType : Failed to connect to device: $e');
+        return false;
+      }
+      
+      // Turn on device notifications
+      await _btModel.sendData(device.id, [0x55, 0xB1, 0x03, 0x09, 0x00, 0x01, 0x10]);
+      
+      // Enable background execution
+      final hasPermission = await FlutterBackground.hasPermissions;
+      if (!hasPermission) {
+        debugPrint('$runtimeType : Background permissions not available');
+        return false;
+      }
+      
+      final success = await FlutterBackground.enableBackgroundExecution();
+      if (!success) {
+        debugPrint('$runtimeType : Failed to enable background execution');
+        return false;
+      }
+      
+      // Start listening for helmet notifications
+      try {
+        _btModel.startListening(device.id, _onHelmetNotify);
+        debugPrint('$runtimeType : Background service started successfully');
+        return true;
+      } catch (e) {
+        debugPrint('$runtimeType : Error starting listener: $e');
+        await FlutterBackground.disableBackgroundExecution();
+        return false;
+      }
+    } catch (e) {
+      debugPrint('$runtimeType : Error starting background service: $e');
+      return false;
     }
   }
 
   Future<void> stopService() async {
-    await FlutterBackground.disableBackgroundExecution();
+    try {
+      // Disable background execution
+      await FlutterBackground.disableBackgroundExecution();
+      debugPrint('$runtimeType : Background service stopped');
+    } catch (e) {
+      debugPrint('$runtimeType : Error stopping background service: $e');
+    }
   }
 
   /*
