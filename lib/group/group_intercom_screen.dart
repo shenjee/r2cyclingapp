@@ -391,7 +391,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.of(context).pushNamedAndRemoveUntil(
-              '/',
+              '/home',
                   (Route<dynamic> route) => false,
             );
             _r2intercom!.stopIntercom();

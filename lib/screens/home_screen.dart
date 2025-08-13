@@ -12,6 +12,7 @@ import 'package:r2cyclingapp/database/r2_device.dart';
 import 'package:r2cyclingapp/permission/permission_dialog.dart';
 import 'package:r2cyclingapp/login/user_register_screen.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
+import 'package:r2cyclingapp/constants.dart';
 
 import 'helmet_screen.dart';
 
@@ -27,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final _service = R2BackgroundService();
   R2Device? _connectedDevice;
   bool _isUnbindMode = false;
-  String emergencyContactStatus = '已关闭';
+  String emergencyContactStatus = '';
   Color emergencyContactColor = Colors.grey;
   File? _avatar;
 
@@ -128,10 +129,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final setting = await R2DBHelper().getSetting();
     setState(() {
       if (setting != null && setting['emergencyContactEnabled'] == 1) {
-        emergencyContactStatus = '已开启';
+        emergencyContactStatus = AppLocalizations.of(context)!.enabled;
         emergencyContactColor = const Color(0xFF539765);
       } else {
-        emergencyContactStatus = '已关闭';
+        emergencyContactStatus = AppLocalizations.of(context)!.disabled;
         emergencyContactColor = Colors.grey;
       }
     });
@@ -195,15 +196,15 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.grey[500],
-              child: Icon(Icons.add, size: 50, color: Colors.grey[200]),
+            Image.asset(
+              'assets/images/add_device_button.png',
+              width: 180,
+              height: 180,
             ),
-            const SizedBox(height: 18.0),
+            const SizedBox(height: 30.0),
             Text(
               AppLocalizations.of(context)!.clickAddHelmet,
-              style: TextStyle(fontSize: 20.0, color: Colors.grey[700]),
+              style: TextStyle(fontSize: 24.0, color: Colors.grey[700]),
             ),
           ],
         ),
@@ -242,6 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
               } else {
                 return CircleAvatar(
                   radius: 30,
+                  backgroundColor: Colors.transparent,
                   backgroundImage: snapshot.data?.image,
                 );
               }
@@ -309,7 +311,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         backgroundColor: WidgetStatePropertyAll(Colors.red),
                         foregroundColor: WidgetStatePropertyAll(Colors.white),
                       ),
-                      child: const Text('解除绑定'),
+                      child: Text(AppLocalizations.of(context)!.unbind),
                     ),
                   ],
               )
@@ -335,7 +337,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     return Container(
       width: 360.0,
-      height:300.0,
+      height:320.0,
       child: w,
     );
   }
@@ -374,7 +376,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child:Column(
           children: [
             _helmetWidget(),
@@ -382,16 +384,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ListView(
                   shrinkWrap: true,
                   children: [
-                    const Divider(),
+                    const Divider(color: AppConstants.primaryColor200,),
                     ListTile(
                         contentPadding: const EdgeInsets.symmetric(
                             vertical: 30.0,
                             horizontal: 16.0
                         ),
-                        leading: const Icon(Icons.group, size: 50.0,),
-                        title: const Padding(
-                            padding: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                            child: Text('骑行对讲', style: TextStyle(fontSize: 24.0),)
+                        leading: const Icon(Icons.group, size: 50.0, color: AppConstants.primaryColor200,),
+                        title: Padding(
+                            padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                            child: Text(AppLocalizations.of(context)!.cyclingIntercom, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),)
                         ),
                         trailing: Icon(Icons.chevron_right, color: Colors.grey[500],),
                         onTap: () async {
@@ -408,16 +410,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           }
                         }
                     ),
-                    const Divider(),
+                    const Divider(color: AppConstants.primaryColor200),
                     ListTile(
                         contentPadding: const EdgeInsets.symmetric(
                             vertical: 30.0,
                             horizontal: 16.0
                         ),
-                        leading: const Icon(Icons.sos, size: 50.0,),
-                        title: const Padding(
-                            padding: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                            child: Text('紧急联络', style: TextStyle(fontSize: 24.0),)
+                        leading: const Icon(Icons.sos, size: 50.0, color: AppConstants.primaryColor200,),
+                        title: Padding(
+                            padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                            child: Text(AppLocalizations.of(context)!.emergencyContactHome, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),)
                         ),
                         trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -436,7 +438,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           await Permission.sms.request();
                         }
                     ),
-                    const Divider(),
+                    const Divider(color: AppConstants.primaryColor200),
                   ],
                 )
             ),

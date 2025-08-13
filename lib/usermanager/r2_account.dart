@@ -59,7 +59,7 @@ class R2Account {
   Future<Image> getAvatar() async {
     if (_avatarPath.isEmpty || !await File(_avatarPath).exists()) {
       // Return default image if no custom avatar is found
-      return Image.asset('assets/images/default_avatar.png');
+      return Image.asset('assets/icons/default_avatar.png');
     } else {
       // Load custom avatar from the file
       return Image.file(File(_avatarPath));

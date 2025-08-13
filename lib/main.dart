@@ -38,9 +38,10 @@ class R2CyclingApp extends StatelessWidget {
       
       // Theme configuration
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: AppConstants.primaryColor),
-        useMaterial3: true,
         scaffoldBackgroundColor: AppConstants.backgroundColor,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: AppConstants.backgroundColor,
+        ),
       ),
       
       // Route configuration
