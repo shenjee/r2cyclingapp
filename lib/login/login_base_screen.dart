@@ -102,7 +102,7 @@ class LoginBaseScreenState extends State<LoginBaseScreen> {
             children: <Widget>[
               _buildTopWidget(context), // top area - fixed height
               _buildCenterWidget(context), // 2nd area - fixed height
-              const SizedBox(height: 130.0),
+              const SizedBox(height: 100.0),
               _buildMainButton(context), // 3rd area - button position now fixed
               Expanded(
                 child: _buildBottomWidget(context)

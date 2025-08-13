@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:r2cyclingapp/constants.dart';
 
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'verification_screen.dart';
@@ -63,7 +64,7 @@ class _UserRegisterScreenState extends VerificationScreenState {
                   MaterialPageRoute(builder: (context) => const UserLoginScreen()),
                 );
               },
-              child: Text(AppLocalizations.of(context)!.passwordLogin),
+              child: Text(AppLocalizations.of(context)!.passwordLogin, style: const TextStyle(color: AppConstants.textColor),),
             ),
           ),
         ]

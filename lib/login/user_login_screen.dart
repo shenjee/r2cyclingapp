@@ -230,7 +230,10 @@ class _UserLoginScreenState extends LoginBaseScreenState {
             onPressed: () {
               Navigator.pop(context);
               },
-            child: Text(AppLocalizations.of(context)!.verificationCodeLogin),
+            child: Text(
+              AppLocalizations.of(context)!.verificationCodeLogin, 
+              style: const TextStyle(color: AppConstants.textColor),
+              ),
           ),
         )
       ]

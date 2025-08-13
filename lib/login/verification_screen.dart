@@ -190,12 +190,12 @@ class VerificationScreenState extends LoginBaseScreenState {
     if (true == _isVcodeRequested) {
       return Padding(
           padding: const EdgeInsets.fromLTRB(0.0, 0, 20.0, 0.0),
-          child:Text('${_secondsRemaining}s', style: const TextStyle(color: Colors.grey),)
+          child:Text('${_secondsRemaining}s', style: const TextStyle(color: AppConstants.textColor),)
       );
     } else {
       return TextButton(
         onPressed: _requestVcode,
-        child: Text(AppLocalizations.of(context)!.getVerificationCode),
+        child: Text(AppLocalizations.of(context)!.getVerificationCode, style: const TextStyle(color: AppConstants.textColor),),
       );
     }
   }
