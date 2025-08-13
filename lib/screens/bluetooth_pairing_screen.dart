@@ -5,6 +5,7 @@ import 'package:r2cyclingapp/connection/bt/bluetooth_manager.dart';
 import 'package:r2cyclingapp/database/r2_device.dart';
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
+import 'package:r2cyclingapp/constants.dart';
 
 class BluetoothPairingScreen extends StatefulWidget {
 
@@ -140,18 +141,31 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        CircleAvatar(
-          radius: 22.0,
-          backgroundColor: Colors.grey[500],
-          child: Text(
-            number,
-            style: const TextStyle(color: Colors.white, fontSize: 18.0),
+        Container(
+          width: 50.0,
+          height: 50.0,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: AppConstants.primaryColor200,
+              width: 2.5,
+            ),
+            color: Colors.transparent,
+          ),
+          child: Center(
+            child: Text(
+              number,
+              style: const TextStyle(
+                color: AppConstants.primaryColor200,
+                fontSize: 22.0,
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 16),
         Text(
             text,
-            style: const TextStyle(fontSize: 20.0),
+            style: const TextStyle(fontSize: 22.0),
         ),
       ],
     );
@@ -168,9 +182,9 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _instructionItem('1', AppLocalizations.of(context)!.ensureBluetoothOn),
-          const SizedBox(height: 30),
+          const SizedBox(height: 50.0),
           _instructionItem('2', AppLocalizations.of(context)!.longPressHelmetButton),
-          const SizedBox(height: 30),
+          const SizedBox(height: 50.0),
          _instructionItem('3', AppLocalizations.of(context)!.bringPhoneClose),
         ],
       ),
@@ -303,22 +317,24 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
         ),
       ),
       body: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.all(30.0),
+              padding: const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
               child:Text(
                 _title,
                 style: const TextStyle(fontSize: 28.0),
                 textAlign: TextAlign.left,
               ),
             ),
+            const SizedBox(height: 30.0),
             Container(
               padding: const EdgeInsets.all(10.0),
-              color: Colors.grey[200],
-              height: 400,
+              color: Colors.white,
+              height: 420,
               child:_centerWidget(),
             ),
-            const SizedBox(height: 50.0,),
+            const SizedBox(height: 100.0,),
             if (false == _isScanning && null == _bondedDevice)
               R2FlatButton(
                   text: AppLocalizations.of(context)!.startConnect,
