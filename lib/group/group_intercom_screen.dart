@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:r2cyclingapp/constants.dart';
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
@@ -245,7 +246,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
       _isPressed = false;
       _r2intercom!.pauseSpeak(true);
     });
-    // 在此处添加启动或停止对讲的逻辑
+    // Add logic to start or stop intercom here
     debugPrint("$runtimeType: Intercom button tapped");
   }
 
@@ -260,95 +261,61 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   }
 
   /*
-   * show the number of the intercom group.
-   */
-  Widget _groupNumberWidget(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        const SizedBox(height: 20.0,),
-        const Text('让身边的骑友输入下方四位编号，'),
-        const Text('加入同一个骑行组，'),
-        const SizedBox(height: 20.0,),
-        Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  Text(
-                    _groupCode??'- - - -',
-                    style: const TextStyle(
-                      fontSize: 48.0,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF539765),
-                    ),
-                  ),
-                ]
-            ),
-            const Positioned(
-              left:  80,
-              child: Text('组编号：'),
-            ),
-          ],
-        )
-      ],
-    );
-  }
-
-  /*
    * show the members of the intercom group.
    * there are no more than 8 members and organized in two rows,
    * 4 members per row.
    * an avatar and a nickname of user represents him/her.
    */
   Widget _groupMemberWidget(BuildContext context) {
-    return GridView.builder (
-      shrinkWrap: true, // 在Column中使用时，确保GridView不会扩展以占据整个空间
-      physics: const NeverScrollableScrollPhysics(), // 禁用GridView滚动，避免与外部滚动冲突
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4, // 每行4个成员
-        childAspectRatio: 1, // 正方形的子项
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
+    return Center(
+      child: Container(
+      width: MediaQuery.of(context).size.width * 0.9, // Constrain to 90% of screen width
+      child: GridView.builder (
+        shrinkWrap: true, // When used in Column, ensure GridView doesn't expand to occupy entire space
+        physics: const NeverScrollableScrollPhysics(), // Disable GridView scrolling to avoid conflicts with external scrolling
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4, // 4 members per row
+          crossAxisSpacing: 0.0,
+          mainAxisSpacing: 20.0,
+        ),
+        itemCount: _members.length,
+        itemBuilder: (context, index) {
+          final member  = _members[index];
+          return Column(
+            children: [
+              FutureBuilder<Image>(
+                future: member.getAvatar(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircleAvatar(
+                      radius: 35.0,
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (snapshot.hasError || !snapshot.hasData) {
+                    return const CircleAvatar(
+                      radius: 35.0,
+                      child: Icon(Icons.error),
+                    );
+                  } else {
+                    return CircleAvatar(
+                      radius: 35.0,
+                      backgroundImage: snapshot.data?.image,
+                    );
+                  }
+                },
+              ),
+              const SizedBox(height: 2),
+              Text(
+                member.nickname,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 12.0,),
+              ),
+            ],
+          );
+        },
       ),
-      itemCount: _members.length,
-      itemBuilder: (context, index) {
-        final member  = _members[index];
-        return Column(
-          children: [
-            FutureBuilder<Image>(
-              future: member.getAvatar(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircleAvatar(
-                    radius: 30,
-                    child: CircularProgressIndicator(),
-                  );
-                } else if (snapshot.hasError || !snapshot.hasData) {
-                  return const CircleAvatar(
-                    radius: 30,
-                    child: Icon(Icons.error),
-                  );
-                } else {
-                  return CircleAvatar(
-                    radius: 30,
-                    backgroundImage: snapshot.data?.image,
-                  );
-                }
-              },
-            ),
-            const SizedBox(height: 2),
-            Text(
-              member.nickname,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12.0,),
-            ),
-          ],
-        );
-      },
+      ),
     );
   }
 
@@ -361,21 +328,39 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
       onTapUp: _onIntercomTapUp,
       onTapCancel: _onIntercomTapCancel,
       child: Container(
-        width: 200.0,
-        height: 200.0,
+        width: 250.0,
+        height: 250.0,
         decoration: BoxDecoration(
-          color: Colors.white,
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.greenAccent, width: 4),
           boxShadow: _isPressed
-              ? const [BoxShadow(color: Colors.grey, blurRadius: 10, offset: Offset(0, 4))]
+              ? [const BoxShadow(color: AppConstants.primaryColor300, blurRadius: 15, offset: const Offset(0, 0), spreadRadius: 5)]
               : [],
         ),
-        child: Center(
-          child: Text(
-            _isPressed ? '正在对讲' : '',
-            style: const TextStyle(color: Colors.black, fontSize: 16),
-          ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Background image
+            Container(
+              width: 250.0,
+              height: 250.0,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                image: DecorationImage(
+                  image: AssetImage('assets/images/intercom_button.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            // Text overlay
+            Text(
+              _isPressed ? '正在对讲' : '按住说话',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -386,7 +371,8 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('骑行对讲'),
+        title: Text(_groupCode ?? '骑行对讲'),
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -416,16 +402,24 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
               ];
             },
             icon: const Icon(Icons.more_vert),
-            color: Colors.black, // 菜单背景设置为黑色
+            color: Colors.black, // Set menu background to black
           ),
         ],
       ),
       body: Column (
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          Center(child: _groupNumberWidget(context),),
+          const SizedBox(height: 30.0),
           _groupMemberWidget(context),
-          const SizedBox(height: 20),
-          _intercomButton(),
+          Expanded(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 100.0),
+                child: _intercomButton(),
+              ),
+            ),
+          ),
         ],
       ),
     );

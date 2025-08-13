@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';

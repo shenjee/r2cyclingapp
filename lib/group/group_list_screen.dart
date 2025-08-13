@@ -21,7 +21,7 @@ class GroupListScreen extends StatelessWidget {
         children: [
           const Divider(),
           ListTile(
-            // 高度为120.0，均匀分布的垂直内边距为60.0，取其半
+            // Height is 120.0, evenly distributed vertical padding is 60.0, take half of it
             contentPadding: const EdgeInsets.symmetric(
                 vertical: 30.0,
                 horizontal: 16.0

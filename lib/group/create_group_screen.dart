@@ -151,11 +151,11 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
   Widget _groupMemberWidget(BuildContext context) {
     return GridView.builder (
-      shrinkWrap: true, // 在Column中使用时，确保GridView不会扩展以占据整个空间
-      physics: const NeverScrollableScrollPhysics(), // 禁用GridView滚动，避免与外部滚动冲突
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4, // 每行4个成员
-        childAspectRatio: 1, // 正方形的子项
+      shrinkWrap: true, // When used in Column, ensure GridView doesn't expand to occupy entire space
+            physics: const NeverScrollableScrollPhysics(), // Disable GridView scrolling to avoid conflicts with external scrolling
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4, // 4 members per row
+              childAspectRatio: 1, // Square child items
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
       ),
