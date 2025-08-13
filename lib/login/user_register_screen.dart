@@ -101,6 +101,7 @@ class _UserRegisterScreenState extends VerificationScreenState {
                 });
               },
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
                     width: 20,
@@ -117,11 +118,9 @@ class _UserRegisterScreenState extends VerificationScreenState {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      AppLocalizations.of(context)!.agreeTermsAndPrivacy,
-                      style: const TextStyle(color: Colors.black),
-                    ),
+                  Text(
+                    AppLocalizations.of(context)!.agreeTermsAndPrivacy,
+                    style: const TextStyle(color: Colors.black),
                   ),
                 ],
               ),
