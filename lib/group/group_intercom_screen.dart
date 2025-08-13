@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:r2cyclingapp/constants.dart';
+import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
@@ -320,6 +321,71 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   }
 
   /*
+   * Show leave group confirmation dialog
+   */
+  void _showLeaveGroupDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+             contentPadding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 0.0),
+             content: Container(
+               constraints: const BoxConstraints(
+                 maxHeight: 80.0,
+                 minHeight: 60.0,
+                 maxWidth: 320.0,
+                 minWidth: 280.0,
+               ),
+               child: Center(
+                 child: Text(
+                   AppLocalizations.of(context)!.confirmExitGroup,
+                   style: const TextStyle(
+                     fontSize: 20.0,
+                     color: AppConstants.textColor,
+                   ),
+                   textAlign: TextAlign.center,
+                 ),
+               ),
+             ),
+             actionsPadding: const EdgeInsets.fromLTRB(24.0, 0.0, 24.0, 16.0),
+             actionsAlignment: MainAxisAlignment.center,
+             actions: [
+               TextButton(
+                 onPressed: () {
+                   Navigator.of(context).pop();
+                 },
+                 child: Text(
+                   AppLocalizations.of(context)!.cancel,
+                   style: const TextStyle(
+                     fontSize: 16.0,
+                     color: AppConstants.textColor,
+                   ),
+                 ),
+               ),
+               const SizedBox(width: 20),
+               TextButton(
+                 onPressed: () {
+                   Navigator.of(context).pop();
+                   _leaveMyGroup();
+                   if (_r2intercom != null) {
+                     _r2intercom!.stopIntercom();
+                   }
+                 },
+                 child: Text(
+                   AppLocalizations.of(context)!.exit,
+                   style: const TextStyle(
+                     fontSize: 16.0,
+                     color: AppConstants.textColor,
+                   ),
+                 ),
+               ),
+             ],
+           );
+        },
+      );
+  }
+
+  /*
    * a rounded button that start intercom when it is tapped down.
    */
   Widget _intercomButton() {
@@ -353,7 +419,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
             ),
             // Text overlay
             Text(
-              _isPressed ? '正在对讲' : '按住说话',
+              _isPressed ? AppLocalizations.of(context)!.talking : AppLocalizations.of(context)!.holdToTalk,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20.0,
@@ -371,7 +437,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_groupCode ?? '骑行对讲'),
+        title: Text(_groupCode ?? AppLocalizations.of(context)!.cyclingIntercom),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -384,25 +450,15 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
           },
         ),
         actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) async {
-              if (value == 'quit') {
-                await _leaveMyGroup();
-                if (_r2intercom != null) {
-                  await _r2intercom!.stopIntercom();
-                }
-              }
+          IconButton(
+            icon: Image.asset(
+              'assets/icons/icon_leave_group.png',
+              width: 30.0,
+              height: 30.0,
+            ),
+            onPressed: () {
+              _showLeaveGroupDialog(context);
             },
-            itemBuilder: (BuildContext context) {
-              return [
-                const PopupMenuItem<String>(
-                  value: 'quit',
-                  child: Text('退出骑行组', style: TextStyle(color: Colors.white)),
-                ),
-              ];
-            },
-            icon: const Icon(Icons.more_vert),
-            color: Colors.black, // Set menu background to black
           ),
         ],
       ),

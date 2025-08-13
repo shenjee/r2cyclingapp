@@ -121,6 +121,10 @@ class AppLocalizations {
 
   // Home Screen
   String get emergencyContactHome => _localizedValues[locale.languageCode]!['emergency_contact_home']!;
+  String get confirmExitGroup => _localizedValues[locale.languageCode]!['confirm_exit_group']!;
+  String get exit => _localizedValues[locale.languageCode]!['exit']!;
+  String get holdToTalk => _localizedValues[locale.languageCode]!['hold_to_talk']!;
+  String get talking => _localizedValues[locale.languageCode]!['talking']!;
 
   static const Map<String, Map<String, String>> _localizedValues = {
     'en': {
@@ -213,6 +217,10 @@ class AppLocalizations {
       'complete': 'Complete',
       'sos_message_template': '[R2 Cycling] Your friend fell while cycling, click to view location:',
       'emergency_contact_home': 'Emergency Contact',
+      'confirm_exit_group': 'Are you sure you want to exit the cycling group?',
+      'exit': 'Exit',
+      'hold_to_talk': 'Hold to Talk',
+      'talking': 'Talking',
     },
     'zh': {
       'register_login': '注册/登录',
@@ -304,6 +312,10 @@ class AppLocalizations {
       'complete': '完成',
       'sos_message_template': '【R2 Cycling】您的好友骑行时摔倒了，点击查看位置：',
       'emergency_contact_home': '紧急联络',
+      'confirm_exit_group': '确定要退出骑行组吗？',
+      'exit': '退出',
+      'hold_to_talk': '按住说话',
+      'talking': '正在对讲',
     },
   };
 }
