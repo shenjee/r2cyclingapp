@@ -5,6 +5,8 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
+import 'package:r2cyclingapp/l10n/app_localizations.dart';
+import 'package:r2cyclingapp/constants.dart';
 
 import 'image_cut_screen.dart';
 
@@ -104,7 +106,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('骑行名片'),
+        title: Text(AppLocalizations.of(context)!.personalCenter),
         centerTitle: true,
       ),
       body: Column(
@@ -114,9 +116,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 vertical: 30.0,
                 horizontal: 16.0
             ),
-            title: const Padding(
-                padding: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                child: Text('更换头像', style: TextStyle(fontSize: 24.0)),
+            title: Padding(
+                padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                child: Text(AppLocalizations.of(context)!.avatar, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor)),
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min, // Ensures the row takes the minimum space needed
@@ -148,7 +150,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ),
             onTap: () => _showImageSourceActionSheet(context),
           ),
-          const Divider(),
+          const Divider(color: AppConstants.primaryColor200),
           ListTile(
             contentPadding: const EdgeInsets.symmetric(
                 vertical: 30.0,
@@ -156,7 +158,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ),
             title: const Padding(
                 padding: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                child: Text('昵称', style: TextStyle(fontSize: 24.0),)
+                child: Text('昵称', style: TextStyle(fontSize: 24.0, color: AppConstants.textColor),)
             ),
             trailing: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -207,7 +209,28 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               });
             },
           ),
-          const Divider(),
+          const Divider(color: AppConstants.primaryColor200),
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+                vertical: 30.0,
+                horizontal: 16.0
+            ),
+            title: const Padding(
+                padding: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                child: Text('账号管理', style: TextStyle(fontSize: 24.0, color: AppConstants.textColor)),
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(width: 20.0),
+                Icon(Icons.chevron_right, color: Colors.grey[500]),
+              ],
+            ),
+            onTap: () {
+              // Handle account management
+            },
+          ),
+          const Divider(color: AppConstants.primaryColor200),
         ],
       ),
     );

@@ -88,6 +88,8 @@ class AppLocalizations {
   String get version => _localizedValues[locale.languageCode]!['version']!;
   String get companyInfo => _localizedValues[locale.languageCode]!['company_info']!;
   String get settings => _localizedValues[locale.languageCode]!['settings']!;
+  String get personalCenter => _localizedValues[locale.languageCode]!['personal_center']!;
+  String get avatar => _localizedValues[locale.languageCode]!['avatar']!;
   String get logout => _localizedValues[locale.languageCode]!['logout']!;
   String get crop => _localizedValues[locale.languageCode]!['crop']!;
   String get cancel => _localizedValues[locale.languageCode]!['cancel']!;
@@ -190,6 +192,8 @@ class AppLocalizations {
       'version': 'Version',
       'company_info': 'Designed and developed by Rock Road (Shenzhen) Technology Co., Ltd.',
       'settings': 'Settings',
+      'personal_center': 'Personal Center',
+      'avatar': 'Avatar',
       'logout': 'Logout',
       'crop': 'Crop',
       'cancel': 'Cancel',
@@ -285,6 +289,8 @@ class AppLocalizations {
       'version': '版本',
       'company_info': '洛克之路（深圳）科技有限责任公司 设计开发',
       'settings': '设置',
+      'personal_center': '个人中心',
+      'avatar': '头像',
       'logout': '退出登录',
       'crop': '裁剪',
       'cancel': '取消',
