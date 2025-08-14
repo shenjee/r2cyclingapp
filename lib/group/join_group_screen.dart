@@ -7,6 +7,8 @@ import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/usermanager/r2_group.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
+import 'package:r2cyclingapp/constants.dart';
+import 'package:r2cyclingapp/l10n/app_localizations.dart';
 
 import 'group_intercom_screen.dart';
 
@@ -85,7 +87,8 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('加入一个骑行组'),
+        title: Text(AppLocalizations.of(context)!.joinCyclingGroup, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),),
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -96,9 +99,9 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(40.0, 40.0, 40.0, 10.0),
-            child: Text('输入四位组编号', style: TextStyle(fontSize: 18.0),),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(40.0, 40.0, 40.0, 10.0),
+            child: Text(AppLocalizations.of(context)!.enterFourDigitCode, style: const TextStyle(fontSize: 20.0),),
           ),
           Padding (
             padding: const EdgeInsets.fromLTRB(40.0, 10.0, 40.0, 10.0),
