@@ -286,7 +286,7 @@ class AppLocalizations {
       'emergency_contact_status': '紧急联络',
       'enabled': '已开启',
       'disabled': '已关闭',
-      'about_r2_cycling': '关于 R2 Cycling',
+      'about_r2_cycling': '关于R2骑行助手',
       'app_description': '专为骑行爱好者设计的智能伙伴，个性化您的骑行装备，让每次出行都充满乐趣。\n我们的使命是连接骑行世界，让沟通更便捷，让安全更有保障。',
       'version': '版本',
       'company_info': '洛克之路（深圳）科技有限责任公司 设计开发',

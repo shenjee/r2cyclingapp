@@ -4,6 +4,8 @@ import 'dart:io';
 import "package:r2cyclingapp/usermanager/r2_user_manager.dart";
 import "package:r2cyclingapp/usermanager/r2_account.dart";
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
+import 'package:r2cyclingapp/l10n/app_localizations.dart';
+import 'package:r2cyclingapp/constants.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -89,7 +91,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         },
       ),
       title: Text(_account?.nickname ?? 'User', style: const TextStyle(fontSize: 24.0),),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: Icon(Icons.chevron_right, color: Colors.grey[500],),
       onTap: () async {
         await Navigator.pushNamed(context, '/profile');
         _loadAvatar();
@@ -98,24 +100,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _aboutWidget(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding (
-          padding: EdgeInsets.all(10.0),
+          padding: const EdgeInsets.all(10.0),
           child:Text(
-            '关于 R2 Cycling',
-            style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+            AppLocalizations.of(context)!.aboutR2Cycling,
+            style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, color: AppConstants.textColor),
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Padding (
-          padding: EdgeInsets.fromLTRB(20.0,0.0,20.0,10.0),
+          padding: const EdgeInsets.fromLTRB(20.0,0.0,20.0,10.0),
           child: Text(
-            '专为骑行爱好者设计的智能伙伴，个性化您的骑行装备，让每次出行都充满乐趣。\n'
-                '我们的使命是连接骑行世界，让沟通更便捷，让安全更有保障。',
+            AppLocalizations.of(context)!.appDescription,
             textAlign: TextAlign.start,
-            style: TextStyle(fontSize: 18.0),
+            style: const TextStyle(fontSize: 20.0, color: AppConstants.textColor),
           ),
         ),
       ],
@@ -123,21 +124,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _versionWidget(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding (
-          padding: EdgeInsets.all(10.0),
+          padding: const EdgeInsets.all(10.0),
           child:Text(
-            '版本',
-            style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+            AppLocalizations.of(context)!.version,
+            style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, color: AppConstants.textColor),
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Center (
           child: Text(
             '1.0.0 Beta #build 24938',
-            style: TextStyle(
+            style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20.0,
                 color: Color(0xFF639765)
@@ -154,14 +155,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Text(
           '洛克之路（深圳）科技有限责任公司 设计开发',
           textAlign: TextAlign.center,
+          style: const TextStyle(color: AppConstants.textColor),
         ),
         Text(
           'Designed & Developed by RockRoad Tech.',
           textAlign: TextAlign.center,
+          style: TextStyle(color: AppConstants.textColor),
         ),
         Text(
           '© 2024 All Rights Reserved.',
           textAlign: TextAlign.center,
+          style: TextStyle(color: AppConstants.textColor),
         ),
       ],
     );
@@ -171,7 +175,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('设置'),
+        title: Text(AppLocalizations.of(context)!.settings),
         centerTitle: true,
       ),
       body: Padding(
@@ -182,12 +186,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // 1. User Avatar and Nickname
             if (true == _isLoggedIn)
               _userInfoWidget(),
-            const Divider(),
+            const Divider(color: AppConstants.primaryColor200),
             // 2. R2 Cycling Introduction
             const SizedBox(height:10.0),
             _aboutWidget(context),
             const SizedBox(height: 10.0),
-            const Divider(),
+            const Divider(color: AppConstants.primaryColor200),
             // 3. App Version
             const SizedBox(height:10.0),
             _versionWidget(context),
@@ -197,7 +201,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Expanded(
                 child:Center(
                   child: R2FlatButton(
-                    text: '退出登录',
+                    text: AppLocalizations.of(context)!.logout,
                     onPressed: () async {
                       Navigator.of(context).pop(true);
                       await _accountLogout();

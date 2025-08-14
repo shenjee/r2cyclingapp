@@ -129,23 +129,26 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const CircleAvatar(
                         radius: 30.0,
+                        backgroundColor: Colors.transparent,
                         child: CircularProgressIndicator(),
                       );
                     } else if (snapshot.hasError || !snapshot.hasData) {
                       return const CircleAvatar(
                         radius: 30.0,
+                        backgroundColor: Colors.transparent,
                         child: Icon(Icons.error),
                       );
                     } else {
                       return CircleAvatar(
                         radius: 30.0,
+                        backgroundColor: Colors.transparent,
                         backgroundImage: snapshot.data?.image,
                       );
                     }
                   },
                 ),
                 const SizedBox(width: 20.0),
-                const Icon(Icons.chevron_right),
+                Icon(Icons.chevron_right, color: Colors.grey[500]),
               ],
             ),
             onTap: () => _showImageSourceActionSheet(context),
