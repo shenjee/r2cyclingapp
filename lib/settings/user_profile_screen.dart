@@ -52,21 +52,21 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           child: Wrap(
             children: <Widget>[
               ListTile(
-                title: const Text('拍照'),
+                title: Text(AppLocalizations.of(context)!.takePhoto),
                 onTap: () {
                   _pickImage(ImageSource.camera);
                   Navigator.of(context).pop();
                 },
               ),
               ListTile(
-                title: const Text('从手机相册选择'),
+                title: Text(AppLocalizations.of(context)!.selectFromAlbum),
                 onTap: () {
                   _pickImage(ImageSource.gallery);
                   Navigator.of(context).pop();
                 },
               ),
               ListTile(
-                title: const Text('取消'),
+                title: Text(AppLocalizations.of(context)!.cancel),
                 onTap: () {
                   Navigator.of(context).pop();
                 },
@@ -156,9 +156,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 vertical: 30.0,
                 horizontal: 16.0
             ),
-            title: const Padding(
-                padding: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                child: Text('昵称', style: TextStyle(fontSize: 24.0, color: AppConstants.textColor),)
+            title: Padding(
+                padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                child: Text(AppLocalizations.of(context)!.nickname, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),)
             ),
             trailing: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -174,23 +174,23 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 builder: (BuildContext context) {
                   TextEditingController nicknameController = TextEditingController(); // Placeholder
                   return AlertDialog(
-                    title: const Text('修改昵称'),
+                    title: Text(AppLocalizations.of(context)!.modifyNickname),
                     content: TextField(
                       controller: nicknameController,
-                      decoration: const InputDecoration(hintText: "请输入新的昵称"),
+                      decoration: InputDecoration(hintText: AppLocalizations.of(context)!.enterNewNickname),
                       onSubmitted: (value) {
                         Navigator.pop(context, value);
                       },
                     ),
                     actions: [
                       TextButton(
-                        child: const Text("取消"),
+                        child: Text(AppLocalizations.of(context)!.cancel),
                         onPressed: () {
                           Navigator.pop(context);
                         },
                       ),
                       TextButton(
-                        child: const Text("保存"),
+                        child: Text(AppLocalizations.of(context)!.save),
                         onPressed: () {
                           Navigator.pop(context, nicknameController.text);
                         },
@@ -215,9 +215,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 vertical: 30.0,
                 horizontal: 16.0
             ),
-            title: const Padding(
-                padding: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                child: Text('账号管理', style: TextStyle(fontSize: 24.0, color: AppConstants.textColor)),
+            title: Padding(
+                padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                child: Text(AppLocalizations.of(context)!.accountManagement, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor)),
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,

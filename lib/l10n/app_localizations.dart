@@ -100,6 +100,7 @@ class AppLocalizations {
   String get nickname => _localizedValues[locale.languageCode]!['nickname']!;
   String get modifyNickname => _localizedValues[locale.languageCode]!['modify_nickname']!;
   String get enterNewNickname => _localizedValues[locale.languageCode]!['enter_new_nickname']!;
+  String get accountManagement => _localizedValues[locale.languageCode]!['account_management']!;
 
   // Bluetooth & Helmet
   String get startConnectHelmet => _localizedValues[locale.languageCode]!['start_connect_helmet']!;
@@ -204,6 +205,7 @@ class AppLocalizations {
       'nickname': 'Nickname',
       'modify_nickname': 'Modify Nickname',
       'enter_new_nickname': 'Enter new nickname',
+      'account_management': 'Account Management',
       'start_connect_helmet': 'Start connecting your smart helmet',
       'select_your_helmet': 'Please select your smart helmet',
       'connecting_helmet': 'Connecting your smart helmet',
@@ -301,6 +303,7 @@ class AppLocalizations {
       'nickname': '昵称',
       'modify_nickname': '修改昵称',
       'enter_new_nickname': '请输入新的昵称',
+      'account_management': '账号管理',
       'start_connect_helmet': '开始连接您的智能头盔',
       'select_your_helmet': '请选择您的智能头盔',
       'connecting_helmet': '正在连接您的智能头盔',
