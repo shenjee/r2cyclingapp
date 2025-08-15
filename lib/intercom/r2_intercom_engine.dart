@@ -7,7 +7,8 @@ import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
 
 // application id provide by Shengwang
-// const appId = "e861b361b8754affbe1cd3772b20d040";
+const swAppId = "";
+const swToken = "";
 
 typedef IntercomCallback = void Function(int value);
 
@@ -75,6 +76,9 @@ class R2IntercomEngine {
     if (true == r2response.success && 200 == r2response.code) {
       _rtcAppId = r2response.result['appId'];
       _rtcToken = r2response.result['token'];
+      
+      debugPrint('_rtcAppId: $_rtcAppId');
+      debugPrint('_rtcToken: $_rtcToken');
     }
   }
 

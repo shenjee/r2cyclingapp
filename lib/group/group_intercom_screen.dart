@@ -277,7 +277,8 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4, // 4 members per row
           crossAxisSpacing: 0.0,
-          mainAxisSpacing: 20.0,
+          mainAxisSpacing: 0.0,
+          childAspectRatio: 0.7, // Make items taller to provide more space for avatar and text
         ),
         itemCount: _members.length,
         itemBuilder: (context, index) {

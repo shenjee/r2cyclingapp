@@ -193,7 +193,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 4, // 4 members per row
             crossAxisSpacing: 0.0,
-            mainAxisSpacing: 20.0,
+            mainAxisSpacing: 0.0,
+            childAspectRatio: 0.7, 
           ),
           itemCount: _members.length,
           itemBuilder: (context, index) {

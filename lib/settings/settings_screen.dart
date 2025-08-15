@@ -3,7 +3,6 @@ import 'dart:io';
 
 import "package:r2cyclingapp/usermanager/r2_user_manager.dart";
 import "package:r2cyclingapp/usermanager/r2_account.dart";
-import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/constants.dart';
 
@@ -56,11 +55,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _isLoggedIn = false;
       });
     }
-  }
-
-  Future<void> _accountLogout() async {
-    _manager.deleteToken();
-    _manager.deleteUser(_account!.uid);
   }
 
   Widget _userInfoWidget() {
