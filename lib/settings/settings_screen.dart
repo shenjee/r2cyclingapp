@@ -135,10 +135,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 10),
-        Center (
+        const Center (
           child: Text(
             '1.0.0 Beta #build 24938',
-            style: const TextStyle(
+            style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20.0,
                 color: Color(0xFF639765)
@@ -155,7 +155,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Text(
           '洛克之路（深圳）科技有限责任公司 设计开发',
           textAlign: TextAlign.center,
-          style: const TextStyle(color: AppConstants.textColor),
+          style: TextStyle(color: AppConstants.textColor),
         ),
         Text(
           'Designed & Developed by RockRoad Tech.',
@@ -196,20 +196,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height:10.0),
             _versionWidget(context),
             const SizedBox(height: 10.0),
-            // 4. Logout Button
-            if (true == _isLoggedIn)
-              Expanded(
-                child:Center(
-                  child: R2FlatButton(
-                    text: AppLocalizations.of(context)!.logout,
-                    onPressed: () async {
-                      Navigator.of(context).pop(true);
-                      await _accountLogout();
-                      },
-                    backgroundColor: Colors.red,
-                  ),
-                ),
-              ),
+            // 4. Logout Button removed - moved to user profile screen
             // 5. Company Info and Copyright
             Center(child:_copyrightWidget(context)),
           ],

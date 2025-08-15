@@ -7,6 +7,8 @@ import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/constants.dart';
+import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
+import 'package:r2cyclingapp/login/user_login_screen.dart';
 
 import 'image_cut_screen.dart';
 
@@ -234,8 +236,42 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             },
           ),
           const Divider(color: AppConstants.primaryColor200),
+          // Add some spacing before the logout button
+          const Spacer(),
+          // Logout Button at the bottom
+          Expanded(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: R2FlatButton(
+                  text: AppLocalizations.of(context)!.logout,
+                  onPressed: () async {
+                    Navigator.of(context).pop(true);
+                    await _accountLogout();
+                  },
+                  backgroundColor: Colors.red,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _accountLogout() async {
+    final manager = R2UserManager();
+    final account = await manager.localAccount();
+    if (account != null) {
+      await manager.deleteToken();
+      await manager.deleteUser(account.uid);
+    }
+    if (mounted) {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/home',
+        (Route<dynamic> route) => false,
+      );
+    }
   }
 }

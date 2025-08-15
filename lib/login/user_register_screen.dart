@@ -59,10 +59,7 @@ class _UserRegisterScreenState extends VerificationScreenState {
             alignment: Alignment.centerRight,
             child: TextButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const UserLoginScreen()),
-                );
+                Navigator.pushNamed(context, '/login');
               },
               child: Text(AppLocalizations.of(context)!.passwordLogin, style: const TextStyle(color: AppConstants.textColor),),
             ),
