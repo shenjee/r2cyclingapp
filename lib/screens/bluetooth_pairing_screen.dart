@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:r2cyclingapp/connection/bt/bluetooth_manager.dart';
-import 'package:r2cyclingapp/database/r2_device.dart';
+import 'package:r2cyclingapp/devicemanager/r2_device.dart';
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/constants.dart';

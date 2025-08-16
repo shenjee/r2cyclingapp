@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'r2_device.dart';
+import 'package:r2cyclingapp/devicemanager/r2_device.dart';
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
 import 'package:r2cyclingapp/usermanager/r2_group.dart';
 

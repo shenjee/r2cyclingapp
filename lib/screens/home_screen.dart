@@ -7,7 +7,7 @@ import 'package:r2cyclingapp/connection/bt/bluetooth_manager.dart';
 import 'package:r2cyclingapp/service/r2_background_service.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
-import 'package:r2cyclingapp/database/r2_device.dart';
+import 'package:r2cyclingapp/devicemanager/r2_device.dart';
 
 import 'package:r2cyclingapp/permission/permission_dialog.dart';
 import 'package:r2cyclingapp/login/user_register_screen.dart';

@@ -6,7 +6,7 @@ import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
 import 'package:r2cyclingapp/usermanager/r2_group.dart';
-import 'package:r2cyclingapp/database/r2_device.dart';
+import 'package:r2cyclingapp/devicemanager/r2_device.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_profile.dart';
 
 class R2UserManager {

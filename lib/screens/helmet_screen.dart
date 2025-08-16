@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:r2cyclingapp/connection/bt/bluetooth_manager.dart';
-import 'package:r2cyclingapp/database/r2_device.dart';
+import 'package:r2cyclingapp/devicemanager/r2_device.dart';
 
 class HelmetScreen extends StatefulWidget {
 

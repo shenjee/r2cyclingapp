@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
-import 'package:r2cyclingapp/database/r2_device.dart';
+import 'package:r2cyclingapp/devicemanager/r2_device.dart';
 import 'r2_bluetooth_model.dart';
 
 enum HelmetRemoteOperation {
