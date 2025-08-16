@@ -9,6 +9,7 @@ class R2Account {
   String _phoneNumber;
   String _email;
   String _avatarPath; //
+  bool isPasswdSet; // Indicates if password is set, not saved to database
 
   R2Account({
     required int uid,
@@ -20,7 +21,8 @@ class R2Account {
         _phoneNumber = phoneNumber ?? '',
         _email = email ?? '',
         _nickname = _generateDefaultNickname(account ?? ''),
-        _avatarPath = '';
+        _avatarPath = '',
+        isPasswdSet = false;
 
   // Getter for id
   int get uid => _uid;
@@ -113,6 +115,7 @@ class R2Account {
       'email': _email,
       'nickname': _nickname,
       'avatarPath': _avatarPath,
+      'isPasswdSet': isPasswdSet ? 1 : 0,
     };
   }
 
@@ -122,6 +125,7 @@ class R2Account {
       ..phoneNumber = map['phoneNumber']
       ..email = map['email']
       ..nickname = map['nickname']
-      ..avatarPath = map['avatarPath'];
+      ..avatarPath = map['avatarPath']
+      ..isPasswdSet = (map['isPasswdSet'] ?? 0) == 1;
   }
 }

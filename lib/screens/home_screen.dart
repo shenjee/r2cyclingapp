@@ -30,6 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isUnbindMode = false;
   String emergencyContactStatus = '';
   Color emergencyContactColor = Colors.grey;
+  String groupStatus = '';
+  Color groupStatusColor = Colors.grey;
   File? _avatar;
 
   @override
@@ -44,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _service.initService();
     _checkBondedDevice();
     _loadEmergencyContactStatus();
+    _loadGroupStatus();
   }
 
   @override
@@ -138,6 +141,20 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> _loadGroupStatus() async {
+    final manager = R2UserManager();
+    final group = await manager.localGroup();
+    setState(() {
+      if (group != null && group.groupId != 0) {
+        groupStatus = group.groupCode.padLeft(4, '0');
+        groupStatusColor = AppConstants.primaryColor;
+      } else {
+        groupStatus = AppLocalizations.of(context)!.notJoinedGroup;
+        groupStatusColor = Colors.grey;
+      }
+    });
+  }
+
   Future<void> _checkBondedDevice() async {
     final device = await _btManager.getDevice();
     if (device != null) {
@@ -157,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _helmetConnected(R2Device device) async {
     // later, it should analyze the brand name from id and name
     try {
-      debugPrint('$runtimeType : device : ${device.id} - ${device.name}');
+      debugPrint('$runtimeType : device : ${device.deviceId} - ${device.name}');
       setState(() {
         _connectedDevice = device;
       });
@@ -395,18 +412,29 @@ class _HomeScreenState extends State<HomeScreen> {
                             padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
                             child: Text(AppLocalizations.of(context)!.cyclingIntercom, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),)
                         ),
-                        trailing: Icon(Icons.chevron_right, color: Colors.grey[500],),
+                        trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                groupStatus,
+                                style: TextStyle(fontSize: 16.0, color: groupStatusColor),
+                              ),
+                              const SizedBox(width: 10.0,),
+                              Icon(Icons.chevron_right, color: Colors.grey[500],),
+                            ]
+                        ),
                         onTap: () async {
                           final manager = R2UserManager();
                           final group = await manager.localGroup();
                           if (mounted) {
-                            if (null == group || 0 == group.gid) {
+                            if (null == group || 0 == group.groupId) {
                               // If user is not in a group, navigate to GroupListScreen
-                              Navigator.pushNamed(context, '/groupList');
+                              await Navigator.pushNamed(context, '/groupList');
                             } else {
                               // If user is in a group, navigate to GroupIntercomScreen
-                              Navigator.pushNamed(context, '/intercom');
+                              await Navigator.pushNamed(context, '/intercom');
                             }
+                            _loadGroupStatus();
                           }
                         }
                     ),

@@ -29,13 +29,13 @@ class R2DBHelper {
       version: 2, // Increment the version number to handle schema changes
       onCreate: (db, version) async {
         await db.execute(
-          'CREATE TABLE accounts(uid INTEGER PRIMARY KEY, account TEXT KEY, nickname TEXT, phoneNumber TEXT, email TEXT, avatarPath INTEGER)',
+          'CREATE TABLE accounts(uid INTEGER PRIMARY KEY, account TEXT KEY, nickname TEXT, phoneNumber TEXT, email TEXT, avatarPath TEXT, isPasswdSet INTEGER)',
         );
         await db.execute(
-          'CREATE TABLE groups(uid INTEGER PRIMARY KEY, gid INTEGER, gname TEXT, FOREIGN KEY(uid) REFERENCES accounts(uid))',
+          'CREATE TABLE groups(uid INTEGER PRIMARY KEY, groupId INTEGER, groupCode TEXT, FOREIGN KEY(uid) REFERENCES accounts(uid))',
         );
         await db.execute(
-          'CREATE TABLE devices(id TEXT PRIMARY KEY, brand TEXT, name TEXT, bleAddress TEXT, classicAddress TEXT)',
+          'CREATE TABLE devices(deviceId TEXT PRIMARY KEY, mac TEXT, model TEXT, brand TEXT, name TEXT, bleAddress TEXT, classicAddress TEXT)',
         );
         await db.execute(
           'CREATE TABLE emergency_contacts(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, phone TEXT)',
@@ -55,10 +55,13 @@ class R2DBHelper {
         }
         if (oldVersion < 3) {
           await db.execute(
-            'CREATE TABLE accounts(uid INTEGER PRIMARY KEY, account TEXT KEY, nickname TEXT, phoneNumber TEXT, email TEXT, avatarPath INTEGER)',
+            'CREATE TABLE accounts(uid INTEGER PRIMARY KEY, account TEXT KEY, nickname TEXT, phoneNumber TEXT, email TEXT, avatarPath TEXT, isPasswdSet INTEGER)',
           );
           await db.execute(
-            'CREATE TABLE groups(uid INTEGER PRIMARY KEY, gid INTEGER, gname TEXT, FOREIGN KEY(uid) REFERENCES accounts(uid))',
+            'CREATE TABLE groups(uid INTEGER PRIMARY KEY, groupId INTEGER, groupCode TEXT, FOREIGN KEY(uid) REFERENCES accounts(uid))',
+          );
+          await db.execute(
+            'CREATE TABLE devices(deviceId TEXT PRIMARY KEY, mac TEXT, model TEXT, brand TEXT, name TEXT, bleAddress TEXT, classicAddress TEXT)',
           );
         }
       },
@@ -104,7 +107,7 @@ class R2DBHelper {
     final db = await database;
 
     // Save the user profile
-    final map = {'uid': uid, 'gid': group.gid,};
+    final map = {'uid': uid, 'groupId': group.groupId, 'groupCode': group.groupCode};
 
     return await db.insert(
       'groups',
@@ -123,20 +126,21 @@ class R2DBHelper {
     );
     if (result.isNotEmpty) {
       Map<String, dynamic> data = result.first;
-      final gid = data['gid'];
-      group = R2Group(gid: gid);
+      final groupId = data['groupId'];
+      final groupCode = data['groupCode'];
+      group = R2Group(groupId: groupId, groupCode: groupCode);
     } else {
       group = null;
     }
     return group;
   }
 
-  Future<int> deleteGroup(int gid) async {
+  Future<int> deleteGroup(int groupId) async {
     final db = await database;
     return await db.delete(
       'groups',
-      where: 'gid = ?',
-      whereArgs: [gid],
+      where: 'groupId = ?',
+      whereArgs: [groupId],
     );
   }
 
@@ -198,5 +202,15 @@ class R2DBHelper {
     final db = await database;
     final result = await db.query('settings');
     return result.isNotEmpty ? result.first : null;
+  }
+
+  Future<void> saveEmergencyContactEnabled(String ifEmergencyContactEnable) async {
+    final db = await database;
+    final emergencyContactEnabled = ifEmergencyContactEnable == 'true' ? 1 : 0;
+    await db.insert(
+      'settings',
+      {'id': 1, 'emergencyContactEnabled': emergencyContactEnabled},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 }

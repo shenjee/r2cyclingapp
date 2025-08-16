@@ -27,7 +27,9 @@ class BluetoothManager {
       return discoveredDevices.map((discoveredDevice) {
         // Map DiscoveredDevice to R2Device
         return R2Device(
-          id: discoveredDevice.id,
+          deviceId: discoveredDevice.id,
+          mac: '',
+          model: '',
           brand: brand ?? '',
           name: discoveredDevice.name.isNotEmpty ? discoveredDevice.name : "Unknown",
           bleAddress: discoveredDevice.id,
@@ -81,15 +83,15 @@ class BluetoothManager {
     final device = await R2DBHelper().getDevice();
     switch(operation) {
       case HelmetRemoteOperation.appConnect:
-        _btModel.sendData(device!.id, [0x55, 0xB1, 0x03, 0x09, 0x00, 0x01, 0x10]);
+        _btModel.sendData(device!.deviceId, [0x55, 0xB1, 0x03, 0x09, 0x00, 0x01, 0x10]);
       case HelmetRemoteOperation.rightLight:
-        _btModel.sendData(device!.id, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x02, 0x1b]);
+        _btModel.sendData(device!.deviceId, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x02, 0x1b]);
       case HelmetRemoteOperation.leftLight:
-        _btModel.sendData(device!.id, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x01, 0x18]);
+        _btModel.sendData(device!.deviceId, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x01, 0x18]);
       case HelmetRemoteOperation.volumeUp:
-        _btModel.sendData(device!.id, [0x55, 0xB1, 0x03, 0x08, 0x00, 0x08, 0x18]);
+        _btModel.sendData(device!.deviceId, [0x55, 0xB1, 0x03, 0x08, 0x00, 0x08, 0x18]);
       case HelmetRemoteOperation.volumeDown:
-        _btModel.sendData(device!.id, [0x55, 0xB1, 0x03, 0x08, 0x00, 0x09, 0x19]);
+        _btModel.sendData(device!.deviceId, [0x55, 0xB1, 0x03, 0x08, 0x00, 0x09, 0x19]);
       default:
     }
   }

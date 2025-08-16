@@ -20,7 +20,7 @@ class _HelmetScreenState extends State<HelmetScreen> {
     super.initState();
     _fetchDevice();
     /*
-    bleModel.connectDevice(widget.device.id).then((_) {
+    bleModel.connectDevice(widget.device.deviceId).then((_) {
       // Successfully connected and initialized characteristic
     }).catchError((error) {
       print('Connection error: $error');
@@ -67,8 +67,10 @@ class _HelmetScreenState extends State<HelmetScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Brand: ${_helmet!.brand}'),
-        Text('ID: ${_helmet!.id}'),
+        Text('ID: ${_helmet!.deviceId}'),
         Text('Name: ${_helmet!.name}'),
+        Text('MAC Address: ${_helmet!.mac}'),
+        Text('Model: ${_helmet!.model}'),
         Text('BLE Address: ${_helmet!.bleAddress}'),
         Text('Classic Address: ${_helmet!.classicAddress}'),
       ],

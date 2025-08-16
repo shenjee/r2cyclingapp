@@ -1,34 +1,44 @@
 class R2Device {
-  final String _id;
+  final String _deviceId;
+  final String _mac;
+  final String _model;
   final String _brand;
   final String _name;
   String? _bleAddress;
   String? _classicAddress;
 
   R2Device({
-    required String id,
+    required String deviceId,
+    required String mac,
+    required String model,
     required String brand,
     required String name,
     String? bleAddress,
     String? classicAddress,
-  }) : _id = id,
+  }) : _deviceId = deviceId,
+        _mac = mac,
+        _model = model,
         _brand = brand,
         _name = name,
         _bleAddress = bleAddress,
         _classicAddress = classicAddress;
 
-  String get id => _id;
+  String get deviceId => _deviceId;
+
+  String get mac => _mac;
+
+  String get model => _model;
 
   String get brand => _brand;
 
   String get name => _name;
 
-  String get bleAddress => _bleAddress!;
+  String get bleAddress => _bleAddress ?? '';
   set bleAddress(String value) {
     _bleAddress = value;
   }
 
-  String get classicAddress => _classicAddress!;
+  String get classicAddress => _classicAddress ?? '';
   set classicAddress(String value) {
     _classicAddress = value;
   }
@@ -37,7 +47,9 @@ class R2Device {
   // Convert a R2Device into a Map.
   Map<String, dynamic> toMap() {
     return {
-      'id': _id,
+      'deviceId': _deviceId,
+      'mac': _mac,
+      'model': _model,
       'brand': _brand,
       'name': _name,
       'bleAddress': _bleAddress,
@@ -48,8 +60,10 @@ class R2Device {
   // Convert a Map into a R2Device.
   factory R2Device.fromMap(Map<String, dynamic> map) {
     return R2Device(
+      deviceId: map['deviceId'],
+      mac: map['mac'],
+      model: map['model'],
       brand: map['brand'],
-      id: map['id'],
       name: map['name'],
       bleAddress: map['bleAddress'],
       classicAddress: map['classicAddress']

@@ -1,7 +1,12 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:r2cyclingapp/constants.dart';
 
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
+import 'package:r2cyclingapp/usermanager/r2_account.dart';
+import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
+
 import 'verification_screen.dart';
 import 'user_login_screen.dart';
 import 'password_setting_screen.dart';
@@ -61,7 +66,9 @@ class _UserRegisterScreenState extends VerificationScreenState {
               onPressed: () {
                 Navigator.pushNamed(context, '/login');
               },
-              child: Text(AppLocalizations.of(context)!.passwordLogin, style: const TextStyle(color: AppConstants.textColor),),
+              child: Text(AppLocalizations.of(context)!.passwordLogin,
+                style: const TextStyle(color: AppConstants.textColor),
+              ),
             ),
           ),
         ]
@@ -130,19 +137,30 @@ class _UserRegisterScreenState extends VerificationScreenState {
   }
 
   @override
-  void onTokenHandled(String token, String account, bool needSetPassword) {
-    super.onTokenHandled(token, account, needSetPassword);
-    if (true == needSetPassword) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) =>
-            PasswordSettingScreen(
-              phoneNumber: account, title: AppLocalizations.of(context)!.setPassword,)),
-      );
-    } else {
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-    }
+  void onTokenRetrieved(String token) async {
+    final manager = R2UserManager();
+    
+    await manager.requestUserProfile();
+
+    final account = await manager.localAccount();
+    if (account != null) {
+      final needSetPassword = !account.isPasswdSet;
+      
+      if (needSetPassword) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) =>
+              PasswordSettingScreen(
+                phoneNumber: account.phoneNumber,
+                title: AppLocalizations.of(context)!.setPassword,
+              )
+          ),
+        );
+      } else {
+         if (mounted) {
+           Navigator.of(context).pop();
+         }
+       }
+     }
   }
 }

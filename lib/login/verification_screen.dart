@@ -127,7 +127,7 @@ class VerificationScreenState extends LoginBaseScreenState {
       final String vcode = _vcodeController.text;
       final request = R2HttpRequest();
       final response = await request.postRequest(
-        api: 'common/r2mobileLogin',
+        api: 'common/mobileLogin',
         body: {
           'sid': sid,
           'userMobile': phonenumber,
@@ -144,14 +144,14 @@ class VerificationScreenState extends LoginBaseScreenState {
         debugPrint(
             '$runtimeType : Response of token request by phone number + password');
         debugPrint('$runtimeType :  Code: ${response.code}');
-        debugPrint('$runtimeType :  Message: ${response.message}');
         debugPrint('$runtimeType :  result: ${response.result}');
 
-        final Map<String, dynamic> data = response.result;
-        final token = data['token'];
-        final setPassword = data['defaultPassword'];
+        final token = response.result;
+        final manager = R2UserManager();
+        // Save the token
+        manager.saveToken(token);
 
-        onTokenHandled(token, phonenumber, setPassword);
+        onTokenRetrieved(token);
       } else {
         debugPrint('$runtimeType : Failed to request token: ${response.code}');
         if (mounted) {
@@ -252,17 +252,10 @@ class VerificationScreenState extends LoginBaseScreenState {
   }
 
   /*
-   * it is called after token retrieved and handled.
-   * there are two values of the response, one is token, the other is bool value
-   * which indicates the user is a new register and must set the password.
+   * it is called after token retrieved.
    */
-  void onTokenHandled(String token, String account, bool needSetPassword) {
-    // save the account
-    final manager = R2UserManager();
-    manager.saveToken(token);
-    manager.saveAccountWithToken(token);
-    manager.requestUserProfile();
-    // TODO: implementaion
+  void onTokenRetrieved(String token) {
+    // Child classes should handle their own navigation
   }
 
   /*

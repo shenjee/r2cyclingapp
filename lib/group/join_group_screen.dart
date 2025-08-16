@@ -58,11 +58,11 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
       debugPrint('$runtimeType :   Result: ${response.result}');
 
       final account = await manager.localAccount();
-      final gid = response.result['cyclingGroupId'];
-      final gName = response.result['groupName'];
-      final group = R2Group(gid: gid);
+      final groupId = response.result['cyclingGroupId'];
+      final gCode = response.result['groupName'];
+      final group = R2Group(groupId: groupId);
       final ret = await manager.saveGroup(account!.uid, group);
-      debugPrint('$runtimeType : save group $gid : $ret');
+      debugPrint('$runtimeType : save group $groupId : $ret');
 
       if (mounted) {
         Navigator.of(context).pushReplacement(

@@ -34,9 +34,9 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
     });
   }
 
-  _initR2Intercom(int gid) {
+  _initR2Intercom(int groupId) {
     final account = _members.first;
-    _r2intercom = R2IntercomEngine.getInstance(groupID: gid, userID:account.uid);
+    _r2intercom = R2IntercomEngine.getInstance(groupID: groupId, userID:account.uid);
     _r2intercom!.initAgora();
   }
 
@@ -118,7 +118,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
         }
         // remove local cached invalid group
         final group = await _manager.localGroup();
-        final ret = await _manager.leaveGroup(group!.gid);
+        final ret = await _manager.leaveGroup(group!.groupId);
 
         // do not pop till flash finishes
         Future.delayed(const Duration(seconds: 3), () async {
@@ -131,11 +131,11 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
 
         // save group
         final account = await _manager.localAccount();
-        final gid = resultData['id'];
-        final name = resultData['groupName'];
-        final group = R2Group(gid: gid, groupName: name);
+        final groupId = resultData['id'];
+        final code = resultData['groupName'];
+        final group = R2Group(groupId: groupId, groupCode: code);
         final ret = await _manager.saveGroup(account!.uid, group);
-        debugPrint('$runtimeType : save group $gid : $ret');
+        debugPrint('$runtimeType : save group $groupId : $ret');
 
         String formattedString = groupNum.toString().padLeft(
             4, '0'); // Convert to 4-digit string
@@ -144,7 +144,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
           _groupCode = formattedString;
         });
         _decodeMemberList(resultData);
-        _initR2Intercom(gid);
+        _initR2Intercom(groupId);
       }
     } else {
       debugPrint('Failed to request my group: ${response.code}');
@@ -181,7 +181,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
 
       // delete local group data
       final group = await _manager.localGroup();
-      final ret = await _manager.leaveGroup(group!.gid);
+      final ret = await _manager.leaveGroup(group!.groupId);
       debugPrint('$runtimeType : remove local cached group data : $ret');
     } else {
       debugPrint('Failed to leave group code: ${response.code}');

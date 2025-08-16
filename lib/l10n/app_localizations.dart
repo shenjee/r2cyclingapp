@@ -129,6 +129,7 @@ class AppLocalizations {
   String get exit => _localizedValues[locale.languageCode]!['exit']!;
   String get holdToTalk => _localizedValues[locale.languageCode]!['hold_to_talk']!;
   String get talking => _localizedValues[locale.languageCode]!['talking']!;
+  String get notJoinedGroup => _localizedValues[locale.languageCode]!['not_joined_group']!;
 
   static const Map<String, Map<String, String>> _localizedValues = {
     'en': {
@@ -229,6 +230,7 @@ class AppLocalizations {
       'exit': 'Exit',
       'hold_to_talk': 'Hold to Talk',
       'talking': 'Talking',
+      'not_joined_group': 'Not joined group',
     },
     'zh': {
       'register_login': '注册/登录',
@@ -328,6 +330,7 @@ class AppLocalizations {
       'exit': '退出',
       'hold_to_talk': '按住说话',
       'talking': '正在对讲',
+      'not_joined_group': '未加入组',
     },
   };
 }

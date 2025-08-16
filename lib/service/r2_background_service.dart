@@ -111,7 +111,7 @@ class R2BackgroundService {
       
       // Connect to the bonded device
       try {
-        await _btModel.connectDevice(device.id);
+        await _btModel.connectDevice(device.deviceId);
         debugPrint('$runtimeType : Connected to device');
       } catch (e) {
         debugPrint('$runtimeType : Failed to connect to device: $e');
@@ -119,7 +119,7 @@ class R2BackgroundService {
       }
       
       // Turn on device notifications
-      await _btModel.sendData(device.id, [0x55, 0xB1, 0x03, 0x09, 0x00, 0x01, 0x10]);
+      await _btModel.sendData(device.deviceId, [0x55, 0xB1, 0x03, 0x09, 0x00, 0x01, 0x10]);
       
       // Enable background execution
       final hasPermission = await FlutterBackground.hasPermissions;
@@ -136,7 +136,7 @@ class R2BackgroundService {
       
       // Start listening for helmet notifications
       try {
-        _btModel.startListening(device.id, _onHelmetNotify);
+        _btModel.startListening(device.deviceId, _onHelmetNotify);
         debugPrint('$runtimeType : Background service started successfully');
         return true;
       } catch (e) {

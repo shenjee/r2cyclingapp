@@ -6,6 +6,7 @@ import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
 import 'package:r2cyclingapp/usermanager/r2_group.dart';
+import 'package:r2cyclingapp/database/r2_device.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_profile.dart';
 
 class R2UserManager {
@@ -131,12 +132,15 @@ class R2UserManager {
 
   Future<R2Group?> localGroup() async {
     final account = await _db.getAccount();
-    final group = await _db.getGroup(account!.uid);
+    if (account == null) {
+      return null;
+    }
+    final group = await _db.getGroup(account.uid);
     return group;
   }
 
-  Future<int?> leaveGroup(int gid) async {
-    return await _db.deleteGroup(gid);
+  Future<int?> leaveGroup(int groupId) async {
+    return await _db.deleteGroup(groupId);
   }
 
   Future<R2UserProfile?> requestUserProfile() async {
@@ -151,11 +155,45 @@ class R2UserManager {
     if (true == response.success) {
       debugPrint('$runtimeType : message ${response.message}');
       final Map<String, dynamic> data = response.result;
-      final groupId = data['cyclingGroupId'];
-      final group = R2Group(gid: groupId ?? 0);
-      final account = await _db.getAccount();
-      // save group info
-      _db.saveGroup(account!.uid, group);
+      
+      // Create and save R2Account from API response
+      final account = R2Account(
+        uid: data['userId'] ?? 0,
+        account: data['loginId'] ?? '',
+      )
+        ..phoneNumber = data['userMobile'] ?? ''
+        ..nickname = data['userName'] ?? ''
+        ..avatarPath = data['userAvatar'] ?? ''
+        ..isPasswdSet = data['defaultPassword'] != true;
+      
+      await _db.saveAccount(account);
+      
+      // Create and save R2Group from API response
+      if (data['cyclingGroupId'] != null && data['cyclingGroupId'] != 0) {
+        final group = R2Group(
+          groupId: data['cyclingGroupId'],
+          groupCode: data['groupNum']?.toString() ?? 'Group ${data['cyclingGroupId']}',
+        );
+        await _db.saveGroup(account.uid, group);
+      }
+      
+      // Create and save R2Device from API response
+      if (data['hwDeviceId'] != null && data['hwDeviceId'].toString().isNotEmpty) {
+        final device = R2Device(
+          deviceId: data['hwDeviceId']?.toString() ?? '',
+          mac: data['hwDeviceId']?.toString() ?? '',
+          model: data['hwDeviceModelId']?.toString() ?? '',
+          brand: data['manufacturerId']?.toString() ?? '',
+          name: 'Device ${data['hwDeviceId']?.toString() ?? ''}',
+        );
+        await _db.saveDevice(device);
+      }
+      
+      // Save emergency contact setting
+      if (data['ifEmergencyContactEnable'] != null) {
+        await _db.saveEmergencyContactEnabled(data['ifEmergencyContactEnable'].toString());
+      }
+      
     } else {
       debugPrint('$runtimeType : request profile info failed: ${response.code}');
     }
