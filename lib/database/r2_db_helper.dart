@@ -26,7 +26,7 @@ class R2DBHelper {
 
     return await openDatabase(
       path,
-      version: 2, // Increment the version number to handle schema changes
+      version: 3, // Increment the version number to handle schema changes
       onCreate: (db, version) async {
         await db.execute(
           'CREATE TABLE accounts(uid INTEGER PRIMARY KEY, account TEXT KEY, nickname TEXT, phoneNumber TEXT, email TEXT, avatarPath TEXT, isPasswdSet INTEGER)',
@@ -35,7 +35,7 @@ class R2DBHelper {
           'CREATE TABLE groups(uid INTEGER PRIMARY KEY, groupId INTEGER, groupCode TEXT, FOREIGN KEY(uid) REFERENCES accounts(uid))',
         );
         await db.execute(
-          'CREATE TABLE devices(deviceId TEXT PRIMARY KEY, mac TEXT, model TEXT, brand TEXT, name TEXT, bleAddress TEXT, classicAddress TEXT)',
+          'CREATE TABLE devices(deviceId TEXT PRIMARY KEY, mac TEXT, model TEXT, brand TEXT, name TEXT, bleAddress TEXT, classicAddress TEXT, imageUrl TEXT)',
         );
         await db.execute(
           'CREATE TABLE emergency_contacts(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, phone TEXT)',
@@ -55,13 +55,7 @@ class R2DBHelper {
         }
         if (oldVersion < 3) {
           await db.execute(
-            'CREATE TABLE accounts(uid INTEGER PRIMARY KEY, account TEXT KEY, nickname TEXT, phoneNumber TEXT, email TEXT, avatarPath TEXT, isPasswdSet INTEGER)',
-          );
-          await db.execute(
-            'CREATE TABLE groups(uid INTEGER PRIMARY KEY, groupId INTEGER, groupCode TEXT, FOREIGN KEY(uid) REFERENCES accounts(uid))',
-          );
-          await db.execute(
-            'CREATE TABLE devices(deviceId TEXT PRIMARY KEY, mac TEXT, model TEXT, brand TEXT, name TEXT, bleAddress TEXT, classicAddress TEXT)',
+            'ALTER TABLE devices ADD COLUMN imageUrl TEXT',
           );
         }
       },
@@ -154,13 +148,32 @@ class R2DBHelper {
     );
   }
 
-  Future<R2Device?> getDevice() async {
+  Future<R2Device?> getFirstDevice() async {
     final db = await database;
     final result = await db.query('devices');
     return result.isNotEmpty ? R2Device.fromMap(result.first) : null;
   }
 
-  Future<int> deleteDevice() async {
+  Future<R2Device?> getDevice(String deviceId) async {
+    final db = await database;
+    final result = await db.query(
+      'devices',
+      where: 'deviceId = ?',
+      whereArgs: [deviceId],
+    );
+    return result.isNotEmpty ? R2Device.fromMap(result.first) : null;
+  }
+
+  Future<int> deleteDevice(String deviceId) async {
+    final db = await database;
+    return await db.delete(
+      'devices',
+      where: 'deviceId = ?',
+      whereArgs: [deviceId],
+    );
+  }
+
+  Future<int> deleteAllDevices() async {
     final db = await database;
     return await db.delete('devices');
   }

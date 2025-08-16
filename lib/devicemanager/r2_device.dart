@@ -4,6 +4,7 @@ class R2Device {
   final String _model;
   final String _brand;
   final String _name;
+  final String? _imageUrl;
   String? _bleAddress;
   String? _classicAddress;
 
@@ -13,6 +14,7 @@ class R2Device {
     required String model,
     required String brand,
     required String name,
+    String? imageUrl,
     String? bleAddress,
     String? classicAddress,
   }) : _deviceId = deviceId,
@@ -20,6 +22,7 @@ class R2Device {
         _model = model,
         _brand = brand,
         _name = name,
+        _imageUrl = imageUrl,
         _bleAddress = bleAddress,
         _classicAddress = classicAddress;
 
@@ -32,6 +35,8 @@ class R2Device {
   String get brand => _brand;
 
   String get name => _name;
+
+  String get imageUrl => _imageUrl ?? '';
 
   String get bleAddress => _bleAddress ?? '';
   set bleAddress(String value) {
@@ -52,6 +57,7 @@ class R2Device {
       'model': _model,
       'brand': _brand,
       'name': _name,
+      'imageUrl': _imageUrl,
       'bleAddress': _bleAddress,
       'classicAddress': _classicAddress,
     };
@@ -65,6 +71,7 @@ class R2Device {
       model: map['model'],
       brand: map['brand'],
       name: map['name'],
+      imageUrl: map['imageUrl'] ?? '',
       bleAddress: map['bleAddress'],
       classicAddress: map['classicAddress']
     );

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
@@ -14,154 +13,133 @@ class R2DeviceManager {
     await _db.saveDevice(device);
   }
 
-  /// Get the local device from database
-  Future<R2Device?> localDevice() async {
-    final device = await _db.getDevice();
+  /// Get device by deviceId from database
+  Future<R2Device?> getDevice(String deviceId) async {
+    final device = await _db.getDevice(deviceId);
     return device;
   }
 
-  /// Delete all devices
-  Future<int> deleteDevice() async {
-    return await _db.deleteDevice();
+  /// Delete a specific device by deviceId
+  Future<int> deleteDevice(String deviceId) async {
+    return await _db.deleteDevice(deviceId);
   }
 
-  /// Request device information from server
-  Future<R2Device?> requestDeviceInfo() async {
-    R2Device? device;
+  // Upload bond device information to server
+  Future<int> requestBindDevice(R2Device device) async {
     final token = await R2Storage.read('authtoken');
     final request = R2HttpRequest();
-    final response = await request.getRequest(
-      api: 'device/getDevice',
+    final response = await request.postRequest(
+      api: 'api/member/bindDevice',
       token: token,
+      body: {
+        'hwDeviceId': device.deviceId,
+      },
     );
 
     if (true == response.success) {
-      debugPrint('$runtimeType : Device info retrieved: ${response.message}');
+      debugPrint('$runtimeType : Cloud bind device: ${response.message}');
       final Map<String, dynamic> data = response.result;
+      final imageUrl = data['modelPict'] ?? '';
       
-      // Create R2Device from API response
-      device = R2Device(
-        deviceId: data['hwDeviceId']?.toString() ?? '',
-        mac: data['hwDeviceId']?.toString() ?? '',
-        model: data['hwDeviceModelId']?.toString() ?? '',
-        brand: data['manufacturerId']?.toString() ?? '',
-        name: data['deviceName'] ?? 'Device ${data['hwDeviceId']?.toString() ?? ''}',
-        bleAddress: data['bleAddress'],
-        classicAddress: data['classicAddress'],
+      // Update device with imageUrl and save to database
+      final updatedDevice = R2Device(
+        deviceId: device.deviceId,
+        mac: device.mac,
+        model: device.model,
+        brand: device.brand,
+        name: device.name,
+        bleAddress: device.bleAddress,
+        classicAddress: device.classicAddress,
+        imageUrl: imageUrl,
       );
-      
-      // Save device to local database
-      await _db.saveDevice(device);
-      
+      await saveDevice(updatedDevice);
     } else {
-      debugPrint('$runtimeType : Request device info failed: ${response.code}');
+      debugPrint('$runtimeType : Request bind device failed: ${response.code}');
     }
 
-    return device;
+    return 0;
+  }
+
+  // Remove bond device information from server
+  Future<int> requestUnbindDevice(R2Device device) async {
+    final token = await R2Storage.read('authtoken');
+    final request = R2HttpRequest();
+    final response = await request.postRequest(
+      api: 'api/member/unBindDevice',
+      token: token,
+    );
+    
+    debugPrint('$runtimeType : Cloud unbind device: ${response.message}');
+    
+    return 0;
   }
 
   /// Update device name
   /// 
-  /// deviceId: the id of device.
-  ///          if it is not provided, default device is the local device.
+  /// deviceId: the id of device to update
   /// value:   new device name
-  Future<int> updateDeviceName({String? deviceId, String? value}) async {
-    if (null == deviceId) {
-      // update local device's name
-      final device = await localDevice();
-      if (device != null) {
-        final updatedDevice = R2Device(
-          deviceId: device.deviceId,
-          mac: device.mac,
-          model: device.model,
-          brand: device.brand,
-          name: value ?? device.name,
-          bleAddress: device.bleAddress,
-          classicAddress: device.classicAddress,
-        );
-        await _db.saveDevice(updatedDevice);
-        return 1; // Success
-      }
-      return 0;
-    } else {
-      // update specified device's name
-      // TODO: Implement specific device update
-      return 0;
+  Future<int> updateDeviceName({required String deviceId, String? value}) async {
+    final device = await getDevice(deviceId);
+    if (device != null) {
+      final updatedDevice = R2Device(
+        deviceId: device.deviceId,
+        mac: device.mac,
+        model: device.model,
+        brand: device.brand,
+        name: value ?? device.name,
+        bleAddress: device.bleAddress,
+        classicAddress: device.classicAddress,
+        imageUrl: device.imageUrl,
+      );
+      await _db.saveDevice(updatedDevice);
+      return 0; // Success
     }
+    return 1; // Failure
   }
 
   /// Update device BLE address
   /// 
-  /// deviceId: the id of device.
-  ///          if it is not provided, default device is the local device.
+  /// deviceId: the id of device to update
   /// value:   new BLE address
-  Future<int> updateBleAddress({String? deviceId, String? value}) async {
-    if (null == deviceId) {
-      // update local device's BLE address
-      final device = await localDevice();
-      if (device != null) {
-        final updatedDevice = R2Device(
-          deviceId: device.deviceId,
-          mac: device.mac,
-          model: device.model,
-          brand: device.brand,
-          name: device.name,
-          bleAddress: value,
-          classicAddress: device.classicAddress,
-        );
-        await _db.saveDevice(updatedDevice);
-        return 1; // Success
-      }
-      return 0;
-    } else {
-      // update specified device's BLE address
-      // TODO: Implement specific device update
-      return 0;
+  Future<int> updateBleAddress({required String deviceId, String? value}) async {
+    final device = await getDevice(deviceId);
+    if (device != null) {
+      final updatedDevice = R2Device(
+        deviceId: device.deviceId,
+        mac: device.mac,
+        model: device.model,
+        brand: device.brand,
+        name: device.name,
+        bleAddress: value,
+        classicAddress: device.classicAddress,
+        imageUrl: device.imageUrl,
+      );
+      await _db.saveDevice(updatedDevice);
+      return 0; // Success
     }
+    return 1; // Failure
   }
 
   /// Update device Classic address
   /// 
-  /// deviceId: the id of device.
-  ///          if it is not provided, default device is the local device.
+  /// deviceId: the id of device to update
   /// value:   new Classic address
-  Future<int> updateClassicAddress({String? deviceId, String? value}) async {
-    if (null == deviceId) {
-      // update local device's Classic address
-      final device = await localDevice();
-      if (device != null) {
-        final updatedDevice = R2Device(
-          deviceId: device.deviceId,
-          mac: device.mac,
-          model: device.model,
-          brand: device.brand,
-          name: device.name,
-          bleAddress: device.bleAddress,
-          classicAddress: value,
-        );
-        await _db.saveDevice(updatedDevice);
-        return 1; // Success
-      }
-      return 0;
-    } else {
-      // update specified device's Classic address
-      // TODO: Implement specific device update
-      return 0;
-    }
-  }
-
-  /// Check if device is paired/connected
-  Future<bool> isDeviceConnected() async {
-    final device = await localDevice();
+  Future<int> updateClassicAddress({required String deviceId, String? value}) async {
+    final device = await getDevice(deviceId);
     if (device != null) {
-      // Check if device has valid BLE or Classic address
-      return (device.bleAddress.isNotEmpty || device.classicAddress.isNotEmpty);
+      final updatedDevice = R2Device(
+        deviceId: device.deviceId,
+        mac: device.mac,
+        model: device.model,
+        brand: device.brand,
+        name: device.name,
+        bleAddress: device.bleAddress,
+        classicAddress: value,
+        imageUrl: device.imageUrl,
+      );
+      await _db.saveDevice(updatedDevice);
+      return 0; // Success
     }
-    return false;
-  }
-
-  /// Clear all device data
-  Future<void> clearDeviceData() async {
-    await deleteDevice();
+    return 1; // Failure
   }
 }

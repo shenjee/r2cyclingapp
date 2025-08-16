@@ -103,7 +103,7 @@ class R2BackgroundService {
       }
       
       // Get bonded device
-      final device = await R2DBHelper().getDevice();
+      final device = await R2DBHelper().getFirstDevice();
       if (device == null) {
         debugPrint('$runtimeType : No bonded device found');
         return false;

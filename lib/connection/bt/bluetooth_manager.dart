@@ -34,6 +34,7 @@ class BluetoothManager {
           name: discoveredDevice.name.isNotEmpty ? discoveredDevice.name : "Unknown",
           bleAddress: discoveredDevice.id,
           classicAddress: null,
+          imageUrl: '',
         );
       }).toList();
     });
@@ -63,7 +64,7 @@ class BluetoothManager {
   }
 
   Future<void> unbindDevice(R2Device device) async {
-    await R2DBHelper().deleteDevice();
+    await R2DBHelper().deleteAllDevices();
     if (device.classicAddress.isNotEmpty) {
       bool unpaired = await _btModel.unpairClassicBt(device.classicAddress);
       if (unpaired) {
@@ -75,12 +76,12 @@ class BluetoothManager {
   }
 
   Future<R2Device?> getDevice() async {
-    final device = await R2DBHelper().getDevice();
+    final device = await R2DBHelper().getFirstDevice();
     return device;
   }
 
   Future<void> remote(HelmetRemoteOperation operation) async {
-    final device = await R2DBHelper().getDevice();
+    final device = await R2DBHelper().getFirstDevice();
     switch(operation) {
       case HelmetRemoteOperation.appConnect:
         _btModel.sendData(device!.deviceId, [0x55, 0xB1, 0x03, 0x09, 0x00, 0x01, 0x10]);
