@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:r2cyclingapp/login/password_recover_screen.dart';
-import 'package:r2cyclingapp/login/user_register_screen.dart';
+
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
@@ -129,8 +129,8 @@ class _UserLoginScreenState extends LoginBaseScreenState {
         final token = response.result;
 
         final manager = R2UserManager();
-        manager.saveToken(token);
-        manager.requestUserProfile();
+        await manager.saveToken(token);
+        await manager.requestUserProfile();
 
         if (mounted) {
           Navigator.pushAndRemoveUntil(
