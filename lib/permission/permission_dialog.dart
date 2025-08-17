@@ -1,21 +1,19 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:r2cyclingapp/permission/r2_permission_model.dart';
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 
 class PermissionDialog extends StatelessWidget {
   final _permisson = R2PermissionModels();
-
-   Future<void> show(BuildContext context) async {
+  
+  Future<void> show(BuildContext context) async {
     bool granted = false;//await _permisson.requestPermissions();
     granted = false;
     if (!granted) {
       showDialog(
         context: context,
         builder: (context) => Dialog(
-          insetPadding: EdgeInsets.all(20),
+          insetPadding: const EdgeInsets.all(20),
           child: Stack (
             alignment: Alignment.center,
             children: <Widget>[
@@ -24,13 +22,13 @@ class PermissionDialog extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children:<Widget> [
                   Padding(
-                      padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
+                      padding: const EdgeInsets.fromLTRB(0, 50, 0, 0),
                       child: Text(AppLocalizations.of(context)!.needFollowingPermissions, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))
                   ),
                   _permissionitem(context, 'assets/icons/bluetooth.png', AppLocalizations.of(context)!.bluetooth, AppLocalizations.of(context)!.bluetoothDesc),
                   _permissionitem(context, 'assets/icons/mic.png', AppLocalizations.of(context)!.microphone, AppLocalizations.of(context)!.microphoneDesc),
                   _permissionitem(context, 'assets/icons/location.png', AppLocalizations.of(context)!.locationInfo, AppLocalizations.of(context)!.locationDesc),
-                  SizedBox(height: 50),
+                  const SizedBox(height: 50),
                   R2FlatButton(
                     text: AppLocalizations.of(context)!.confirm,
                     onPressed: () async {
@@ -38,7 +36,7 @@ class PermissionDialog extends StatelessWidget {
                         Navigator.of(context).pop(0);
                         },
                   ),
-                  SizedBox(height: 50),
+                  const SizedBox(height: 50),
                 ],
               ),
             ]
@@ -60,18 +58,18 @@ class PermissionDialog extends StatelessWidget {
          Row (
            children: <Widget>[
              Padding(
-                 padding: EdgeInsets.fromLTRB(100, 20, 0, 0),
+                 padding: const EdgeInsets.fromLTRB(100, 20, 0, 0),
                  child: Image.asset(icon, width: 29, height: 29)
              ),
              Padding(
-               padding: EdgeInsets.fromLTRB(5, 20, 0, 0),
-               child: Text(title, style: TextStyle(fontSize: 20)),
+               padding: const EdgeInsets.fromLTRB(5, 20, 0, 0),
+               child: Text(title, style: const TextStyle(fontSize: 20)),
              )
            ]
          ),
          Padding(
-           padding: EdgeInsets.all(10.0),
-           child: Text(subtitle, style: TextStyle(fontSize: 18)),
+           padding: const EdgeInsets.all(10.0),
+           child: Text(subtitle, style: const TextStyle(fontSize: 18)),
          )
        ],
      );
@@ -80,7 +78,7 @@ class PermissionDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      insetPadding: EdgeInsets.all(20),
+      insetPadding: const EdgeInsets.all(20),
       child: Stack (
           alignment: Alignment.center,
           children: <Widget>[
@@ -89,13 +87,13 @@ class PermissionDialog extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children:<Widget> [
                 Padding(
-                    padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
+                    padding: const EdgeInsets.fromLTRB(0, 50, 0, 0),
                     child: Text(AppLocalizations.of(context)!.needFollowingPermissions, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))
                 ),
                 _permissionitem(context, 'assets/icons/bluetooth.png', AppLocalizations.of(context)!.bluetooth, AppLocalizations.of(context)!.bluetoothDesc),
                  _permissionitem(context, 'assets/icons/mic.png', AppLocalizations.of(context)!.microphone, AppLocalizations.of(context)!.microphoneDesc),
                  _permissionitem(context, 'assets/icons/location.png', AppLocalizations.of(context)!.locationInfo, AppLocalizations.of(context)!.locationDesc),
-                SizedBox(height: 50),
+                const SizedBox(height: 50),
                 R2FlatButton(
                   text: AppLocalizations.of(context)!.confirm,
                   onPressed: () async {
@@ -103,7 +101,7 @@ class PermissionDialog extends StatelessWidget {
                     Navigator.of(context).pop(0);
                   },
                 ),
-                SizedBox(height: 50),
+                const SizedBox(height: 50),
               ],
             ),
           ]
