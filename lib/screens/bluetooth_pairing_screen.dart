@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import 'package:r2cyclingapp/connection/bt/bluetooth_manager.dart';
+import 'package:r2cyclingapp/devicemanager/r2_device_manager.dart';
 import 'package:r2cyclingapp/devicemanager/r2_device.dart';
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
@@ -16,7 +16,7 @@ class BluetoothPairingScreen extends StatefulWidget {
 }
 
 class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with TickerProviderStateMixin {
-  final _btManager = BluetoothManager();
+  final _btManager = R2DeviceManager();
   Stream<List<R2Device>>? _scannedDevices;
   R2Device? _bondedDevice;
 

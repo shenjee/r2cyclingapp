@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 
-import 'package:r2cyclingapp/connection/bt/bluetooth_manager.dart';
+import 'package:r2cyclingapp/devicemanager/r2_device_manager.dart';
 import 'package:r2cyclingapp/service/r2_background_service.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
@@ -24,7 +24,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _btManager = BluetoothManager();
+  final _btManager = R2DeviceManager();
   final _service = R2BackgroundService();
   R2Device? _connectedDevice;
   bool _isUnbindMode = false;
@@ -156,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _checkBondedDevice() async {
-    final device = await _btManager.getDevice();
+    final device = await _btManager.getFirstDevice();
     if (device != null) {
       // Connect to the bonded device
       setState(() {

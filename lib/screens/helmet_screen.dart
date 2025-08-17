@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:r2cyclingapp/connection/bt/bluetooth_manager.dart';
+import 'package:r2cyclingapp/devicemanager/r2_device_manager.dart';
 import 'package:r2cyclingapp/devicemanager/r2_device.dart';
 
 class HelmetScreen extends StatefulWidget {
@@ -12,7 +12,7 @@ class HelmetScreen extends StatefulWidget {
 }
 
 class _HelmetScreenState extends State<HelmetScreen> {
-  final _btManager = BluetoothManager();
+  final _btManager = R2DeviceManager();
   R2Device? _helmet;
 
   @override
@@ -30,7 +30,7 @@ class _HelmetScreenState extends State<HelmetScreen> {
 
   // Separate async method
   Future<void> _fetchDevice() async {
-    R2Device? device = await _btManager.getDevice();
+    R2Device? device = await _btManager.getFirstDevice();
     if (device != null) {
       setState(() {
         _helmet = device;
