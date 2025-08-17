@@ -179,12 +179,16 @@ class R2UserManager {
       
       // Create and save R2Device from API response
       if (data['hwDeviceId'] != null && data['hwDeviceId'].toString().isNotEmpty) {
+        final address = _formatMacAddress(data['hwDeviceId']?.toString() ?? '');
         final device = R2Device(
           deviceId: data['hwDeviceId']?.toString() ?? '',
-          mac: data['hwDeviceId']?.toString() ?? '',
           model: data['hwDeviceModelId']?.toString() ?? '',
           brand: data['manufacturerId']?.toString() ?? '',
-          name: 'Device ${data['hwDeviceId']?.toString() ?? ''}',
+          name: '${data['manufacturerId']?.toString()} ${data['hwDeviceId']?.toString() ?? ''}',
+          // so now deviceId is ble address, format is '9AD3B79F27A6'
+          // it should be converted to '9A:D3:B7:9F:27:A6'
+          // todo: Refactor device class on server side to improve data structure and consistency
+          bleAddress: address,
         );
         await _db.saveDevice(device);
       }
@@ -237,5 +241,18 @@ class R2UserManager {
       // update specified user's nickname
       return 0;
     }
+  }
+
+  // Helper method to format device ID to MAC address format
+  String _formatMacAddress(String deviceId) {
+    if (deviceId.isEmpty || deviceId.length != 12) {
+      return deviceId; // Return original if not valid format
+    }
+    
+    // Insert colons every 2 characters
+    return deviceId.replaceAllMapped(
+      RegExp(r'(.{2})'),
+      (match) => '${match.group(1)}:'
+    ).substring(0, 17); // Remove trailing colon
   }
 }

@@ -1,6 +1,5 @@
 class R2Device {
   final String _deviceId;
-  final String _mac;
   final String _model;
   final String _brand;
   final String _name;
@@ -10,7 +9,6 @@ class R2Device {
 
   R2Device({
     required String deviceId,
-    required String mac,
     required String model,
     required String brand,
     required String name,
@@ -18,7 +16,6 @@ class R2Device {
     String? bleAddress,
     String? classicAddress,
   }) : _deviceId = deviceId,
-        _mac = mac,
         _model = model,
         _brand = brand,
         _name = name,
@@ -27,8 +24,6 @@ class R2Device {
         _classicAddress = classicAddress;
 
   String get deviceId => _deviceId;
-
-  String get mac => _mac;
 
   String get model => _model;
 
@@ -53,7 +48,6 @@ class R2Device {
   Map<String, dynamic> toMap() {
     return {
       'deviceId': _deviceId,
-      'mac': _mac,
       'model': _model,
       'brand': _brand,
       'name': _name,
@@ -67,7 +61,6 @@ class R2Device {
   factory R2Device.fromMap(Map<String, dynamic> map) {
     return R2Device(
       deviceId: map['deviceId'],
-      mac: map['mac'],
       model: map['model'],
       brand: map['brand'],
       name: map['name'],

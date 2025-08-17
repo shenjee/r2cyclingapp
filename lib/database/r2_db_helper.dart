@@ -26,7 +26,7 @@ class R2DBHelper {
 
     return await openDatabase(
       path,
-      version: 3, // Increment the version number to handle schema changes
+      version: 4, // Increment the version number to handle schema changes
       onCreate: (db, version) async {
         await db.execute(
           'CREATE TABLE accounts(uid INTEGER PRIMARY KEY, account TEXT KEY, nickname TEXT, phoneNumber TEXT, email TEXT, avatarPath TEXT, isPasswdSet INTEGER)',
@@ -35,7 +35,7 @@ class R2DBHelper {
           'CREATE TABLE groups(uid INTEGER PRIMARY KEY, groupId INTEGER, groupCode TEXT, FOREIGN KEY(uid) REFERENCES accounts(uid))',
         );
         await db.execute(
-          'CREATE TABLE devices(deviceId TEXT PRIMARY KEY, mac TEXT, model TEXT, brand TEXT, name TEXT, bleAddress TEXT, classicAddress TEXT, imageUrl TEXT)',
+          'CREATE TABLE devices(deviceId TEXT PRIMARY KEY, model TEXT, brand TEXT, name TEXT, bleAddress TEXT, classicAddress TEXT, imageUrl TEXT)',
         );
         await db.execute(
           'CREATE TABLE emergency_contacts(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, phone TEXT)',
@@ -57,6 +57,17 @@ class R2DBHelper {
           await db.execute(
             'ALTER TABLE devices ADD COLUMN imageUrl TEXT',
           );
+        }
+        if (oldVersion < 4) {
+          // Remove mac column from devices table
+          await db.execute(
+            'CREATE TABLE devices_new(deviceId TEXT PRIMARY KEY, model TEXT, brand TEXT, name TEXT, bleAddress TEXT, classicAddress TEXT, imageUrl TEXT)',
+          );
+          await db.execute(
+            'INSERT INTO devices_new(deviceId, model, brand, name, bleAddress, classicAddress, imageUrl) SELECT deviceId, model, brand, name, bleAddress, classicAddress, imageUrl FROM devices',
+          );
+          await db.execute('DROP TABLE devices');
+          await db.execute('ALTER TABLE devices_new RENAME TO devices');
         }
       },
     );

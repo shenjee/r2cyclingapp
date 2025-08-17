@@ -117,6 +117,7 @@ class R2BluetoothModel {
     }
   }
 
+  // todo: deviceId is the address of BLE
   Future<void> sendData(String deviceId, List<int> data) async {
     debugPrint('$runtimeType : sending data to device: $deviceId');
     try {

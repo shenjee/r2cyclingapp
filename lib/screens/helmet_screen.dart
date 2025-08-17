@@ -38,12 +38,6 @@ class _HelmetScreenState extends State<HelmetScreen> {
     }
   }
 
-  void _sendDataAppConnection() {
-    // App sends 0x55B10309000110
-    // Left Light 0x55B10301000110
-    _btManager.remote(HelmetRemoteOperation.appConnect);
-  }
-
   void _volumeUp() {
     _btManager.remote(HelmetRemoteOperation.volumeUp);
   }
@@ -69,7 +63,6 @@ class _HelmetScreenState extends State<HelmetScreen> {
         Text('Brand: ${_helmet!.brand}'),
         Text('ID: ${_helmet!.deviceId}'),
         Text('Name: ${_helmet!.name}'),
-        Text('MAC Address: ${_helmet!.mac}'),
         Text('Model: ${_helmet!.model}'),
         Text('BLE Address: ${_helmet!.bleAddress}'),
         Text('Classic Address: ${_helmet!.classicAddress}'),

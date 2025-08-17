@@ -29,8 +29,7 @@ class R2DeviceManager {
       return discoveredDevices.map((discoveredDevice) {
         // Map DiscoveredDevice to R2Device
         return R2Device(
-          deviceId: discoveredDevice.id,
-          mac: '',
+          deviceId: discoveredDevice.id.replaceAll(RegExp(r'[^a-zA-Z0-9]'), ''),
           model: '',
           brand: brand ?? '',
           name: discoveredDevice.name.isNotEmpty ? discoveredDevice.name : "Unknown",
@@ -57,15 +56,13 @@ class R2DeviceManager {
       device.classicAddress = deviceAddress;
       // update with classic bt info
       await saveDevice(device);
-      
-      onBond(device);
     });
 
     if (device.name.isNotEmpty) {
       await _btModel.pairClassicBt(device.name);
     }
-
-    //await requestBindDevice(device);
+    await requestBindDevice(device);
+    onBond(device);
   }
 
   Future<void> unbindDevice(R2Device device) async {    
@@ -115,7 +112,6 @@ class R2DeviceManager {
     if (device != null) {
       final updatedDevice = R2Device(
         deviceId: device.deviceId,
-        mac: device.mac,
         model: device.model,
         brand: device.brand,
         name: value ?? device.name,
@@ -138,7 +134,6 @@ class R2DeviceManager {
     if (device != null) {
       final updatedDevice = R2Device(
         deviceId: device.deviceId,
-        mac: device.mac,
         model: device.model,
         brand: device.brand,
         name: device.name,
@@ -161,7 +156,6 @@ class R2DeviceManager {
     if (device != null) {
       final updatedDevice = R2Device(
         deviceId: device.deviceId,
-        mac: device.mac,
         model: device.model,
         brand: device.brand,
         name: device.name,
@@ -184,18 +178,18 @@ class R2DeviceManager {
       token: token,
       body: {
         'hwDeviceId': device.deviceId,
+        'hwDeviceVer': '',
       },
     );
 
     if (true == response.success) {
-      debugPrint('$runtimeType : Cloud bind device: ${response.message}');
+      debugPrint('$runtimeType : Cloud bind device: ${response.code}');
       final Map<String, dynamic> data = response.result;
       final imageUrl = data['modelPict'] ?? '';
       
       // Update device with imageUrl and save to database
       final updatedDevice = R2Device(
         deviceId: device.deviceId,
-        mac: device.mac,
         model: device.model,
         brand: device.brand,
         name: device.name,
@@ -229,15 +223,15 @@ class R2DeviceManager {
     final device = await R2DBHelper().getFirstDevice();
     switch(operation) {
       case HelmetRemoteOperation.appConnect:
-        _btModel.sendData(device!.deviceId, [0x55, 0xB1, 0x03, 0x09, 0x00, 0x01, 0x10]);
+        _btModel.sendData(device!.bleAddress, [0x55, 0xB1, 0x03, 0x09, 0x00, 0x01, 0x10]);
       case HelmetRemoteOperation.rightLight:
-        _btModel.sendData(device!.deviceId, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x02, 0x1b]);
+        _btModel.sendData(device!.bleAddress, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x02, 0x1b]);
       case HelmetRemoteOperation.leftLight:
-        _btModel.sendData(device!.deviceId, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x01, 0x18]);
+        _btModel.sendData(device!.bleAddress, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x01, 0x18]);
       case HelmetRemoteOperation.volumeUp:
-        _btModel.sendData(device!.deviceId, [0x55, 0xB1, 0x03, 0x08, 0x00, 0x08, 0x18]);
+        _btModel.sendData(device!.bleAddress, [0x55, 0xB1, 0x03, 0x08, 0x00, 0x08, 0x18]);
       case HelmetRemoteOperation.volumeDown:
-        _btModel.sendData(device!.deviceId, [0x55, 0xB1, 0x03, 0x08, 0x00, 0x09, 0x19]);
+        _btModel.sendData(device!.bleAddress, [0x55, 0xB1, 0x03, 0x08, 0x00, 0x09, 0x19]);
       default:
     }
   }
