@@ -105,7 +105,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
 
       final request = R2HttpRequest();
       final response = await request.postRequest(
-        api: 'common/r2passwordLogin',
+        api: 'common/passwordLogin',
         body: {
           'sid': sid,
           'loginId': phonenumber,
@@ -126,14 +126,10 @@ class _UserLoginScreenState extends LoginBaseScreenState {
         debugPrint('  Result: ${response.result}');
 
         // retrieve the token and password-setting indicator
-        final Map<String, dynamic> data = response.result;
-        final token = data['token'];
-        debugPrint('$runtimeType :  parse result:');
-        debugPrint('$runtimeType :    token:\n $token');
+        final token = response.result;
 
         final manager = R2UserManager();
         manager.saveToken(token);
-        manager.saveAccountWithToken(token);
         manager.requestUserProfile();
 
         if (mounted) {
