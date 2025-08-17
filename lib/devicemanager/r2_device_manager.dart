@@ -5,7 +5,7 @@ import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/devicemanager/r2_device.dart';
-import '../connection/bt/r2_bluetooth_model.dart';
+import 'package:r2cyclingapp/connection/bt/r2_bluetooth_model.dart';
 
 enum HelmetRemoteOperation {
   appConnect,
@@ -48,14 +48,15 @@ class R2DeviceManager {
 
   Future<void> bindDevice(R2Device device, {required Function(R2Device) onBond}) async {
     // Listen to pairing events
+    // BLE is ready, now pair with classic bt
     _btModel.pairingStream.listen((pairingInfo) async {
-      String deviceName = pairingInfo['name']!;
-      String deviceAddress = pairingInfo['address']!;
+      String deviceName = pairingInfo['name']!;  // classic bt name
+      String deviceAddress = pairingInfo['address']!; // classic bt address
       debugPrint("Paired with classic bt : $deviceName $deviceAddress");
 
       device.classicAddress = deviceAddress;
-      // save ble and bt classic
-      await R2DBHelper().saveDevice(device);
+      // update with classic bt info
+      await saveDevice(device);
       
       onBond(device);
     });
@@ -63,10 +64,11 @@ class R2DeviceManager {
     if (device.name.isNotEmpty) {
       await _btModel.pairClassicBt(device.name);
     }
+
+    //await requestBindDevice(device);
   }
 
-  Future<void> unbindDevice(R2Device device) async {
-    await R2DBHelper().deleteAllDevices();
+  Future<void> unbindDevice(R2Device device) async {    
     if (device.classicAddress.isNotEmpty) {
       bool unpaired = await _btModel.unpairClassicBt(device.classicAddress);
       if (unpaired) {
@@ -75,6 +77,11 @@ class R2DeviceManager {
         debugPrint("Failed to unpair the device");
       }
     }
+
+    // delete the device locally
+    await deleteDevice(device.deviceId);
+    // delete the device remotely on server
+    await requestUnbindDevice(device);
   }
 
   Future<R2Device?> getFirstDevice() async {
@@ -173,7 +180,7 @@ class R2DeviceManager {
     final token = await R2Storage.read('authtoken');
     final request = R2HttpRequest();
     final response = await request.postRequest(
-      api: 'api/member/bindDevice',
+      api: 'member/bindDevice',
       token: token,
       body: {
         'hwDeviceId': device.deviceId,
@@ -209,11 +216,11 @@ class R2DeviceManager {
     final token = await R2Storage.read('authtoken');
     final request = R2HttpRequest();
     final response = await request.postRequest(
-      api: 'api/member/unBindDevice',
+      api: 'member/unBindDevice',
       token: token,
     );
     
-    debugPrint('$runtimeType : Cloud unbind device: ${response.message}');
+    debugPrint('$runtimeType : Cloud unbind device: ${response.code}');
     
     return 0;
   }

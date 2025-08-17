@@ -7,15 +7,15 @@ import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/constants.dart';
 
-class BluetoothPairingScreen extends StatefulWidget {
+class DevicePairingScreen extends StatefulWidget {
 
-  const BluetoothPairingScreen({super.key});
+  const DevicePairingScreen({super.key});
 
   @override
-  State<BluetoothPairingScreen> createState() => _BluetoothPairingScreenState();
+  State<DevicePairingScreen> createState() => _DevicePairingScreenState();
 }
 
-class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with TickerProviderStateMixin {
+class _DevicePairingScreenState extends State<DevicePairingScreen> with TickerProviderStateMixin {
   final _btManager = R2DeviceManager();
   Stream<List<R2Device>>? _scannedDevices;
   R2Device? _bondedDevice;
@@ -117,7 +117,7 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
       }
     });
 
-    // bind device, especially pairing classic bt
+    // bind ble, and start pairing classic bt
     await _btManager.bindDevice(device, onBond: _helmetBonded);
   }
 
@@ -218,7 +218,7 @@ class _BluetoothPairingScreenState extends State<BluetoothPairingScreen> with Ti
                   return Container(
                     margin: const EdgeInsets.symmetric(vertical: 8.0),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF539765),
+                      color: AppConstants.primaryColor,
                       borderRadius: BorderRadius.circular(20.0),
                     ),
                     child: ListTile(

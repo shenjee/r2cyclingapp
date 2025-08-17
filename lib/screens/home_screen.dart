@@ -3,8 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 
-import 'package:r2cyclingapp/devicemanager/r2_device_manager.dart';
 import 'package:r2cyclingapp/service/r2_background_service.dart';
+import 'package:r2cyclingapp/devicemanager/r2_device_manager.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/devicemanager/r2_device.dart';
@@ -195,42 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   /*
-   * it shows a button for adding a smart helmet
-   */
-  Widget _addHelmetWidget() {
-    return Align(
-      alignment: Alignment.center,
-      child:GestureDetector(
-        onTap: () async {
-          final isFound = await Navigator.pushNamed(
-              context,
-              '/bluetooth_pairing'
-          );
-          if (true == isFound) {
-            await _checkBondedDevice();
-          }
-        },
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              'assets/images/add_device_button.png',
-              width: 180,
-              height: 180,
-            ),
-            const SizedBox(height: 30.0),
-            Text(
-              AppLocalizations.of(context)!.clickAddHelmet,
-              style: TextStyle(fontSize: 24.0, color: Colors.grey[700]),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /*
-   *
+   * the left button in AppBar
    */
   Future<Widget> _leftNavigationButton() async {
     final manager = R2UserManager();
@@ -271,6 +236,41 @@ class _HomeScreenState extends State<HomeScreen> {
             _loadAvatar();
           });
     }
+  }
+
+    /*
+   * it shows a button for adding a smart helmet
+   */
+  Widget _addHelmetWidget() {
+    return Align(
+      alignment: Alignment.center,
+      child:GestureDetector(
+        onTap: () async {
+          final isFound = await Navigator.pushNamed(
+              context,
+              '/bluetooth_pairing'
+          );
+          if (true == isFound) {
+            await _checkBondedDevice();
+          }
+        },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/images/add_device_button.png',
+              width: 180,
+              height: 180,
+            ),
+            const SizedBox(height: 30.0),
+            Text(
+              AppLocalizations.of(context)!.clickAddHelmet,
+              style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   /*

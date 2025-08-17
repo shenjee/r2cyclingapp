@@ -6,7 +6,7 @@ import 'package:r2cyclingapp/constants.dart';
 
 import 'package:r2cyclingapp/emergency/emergency_contact_screen.dart';
 import 'package:r2cyclingapp/screens/home_screen.dart';
-import 'package:r2cyclingapp/screens/bluetooth_pairing_screen.dart';
+import 'package:r2cyclingapp/screens/device_pairing_screen.dart';
 import 'package:r2cyclingapp/group/group_list_screen.dart';
 import 'package:r2cyclingapp/group/group_intercom_screen.dart';
 import 'package:r2cyclingapp/login/user_register_screen.dart';
@@ -51,7 +51,7 @@ class R2CyclingApp extends StatelessWidget {
         '/home':(context) => const HomeScreen(),
         '/register':(context) => const UserRegisterScreen(),
         '/login':(context) => const UserLoginScreen(),
-        '/bluetooth_pairing':(context) => const BluetoothPairingScreen(),
+        '/bluetooth_pairing':(context) => const DevicePairingScreen(),
         '/groupList':(context) => const GroupListScreen(),
         '/intercom':(context) => const GroupIntercomScreen(),
         '/emergencyContact':(context) => const EmergencyContactScreen(),
