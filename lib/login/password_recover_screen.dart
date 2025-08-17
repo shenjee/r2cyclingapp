@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'verification_screen.dart';
 import 'password_setting_screen.dart';
+import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
+import 'package:r2cyclingapp/l10n/app_localizations.dart';
 
 class PasswordRecoverScreen extends VerificationScreen {
   const PasswordRecoverScreen({super.key});
@@ -14,15 +16,24 @@ class PasswordRecoverScreenState extends VerificationScreenState {
   @override
   void initState() {
     super.initState();
-    mainButtonTitle = '下一步';
+    // mainButtonTitle will be set in build method using localization
   }
 
   @override
-  void onTokenHandled(String token, String account, bool needSetPassword) {
+  Widget build(BuildContext context) {
+    mainButtonTitle = AppLocalizations.of(context)!.nextStep;
+    return super.build(context);
+  }
+
+  @override
+  void onTokenRetrieved(String token) async {
+    final userManager = R2UserManager();
+    final currentAccount = await userManager.localAccount();
+    
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => PasswordSettingScreen(
-          phoneNumber: account, title: '重置密码',)),
+          phoneNumber: currentAccount?.phoneNumber, title: AppLocalizations.of(context)!.resetPassword,)),
     );
   }
 }

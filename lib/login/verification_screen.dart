@@ -300,7 +300,6 @@ class VerificationScreenState extends LoginBaseScreenState {
    */
   @override
   void mainButtonClicked() {
-    // TODO: override
     _requestToken();
   }
 }

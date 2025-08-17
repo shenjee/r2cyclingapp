@@ -10,6 +10,7 @@ import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/screens/home_screen.dart';
+import 'package:r2cyclingapp/constants.dart';
 import 'login_base_screen.dart';
 
 class PasswordSettingScreen extends LoginBaseScreen {
@@ -138,7 +139,7 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
       if (0 != isSame) {
         warning = '两次密码输入不一致';
       } else {
-        warning = '密码为不少于6位的数字和字符组合';
+        warning = '密码为不少于8位的数字和字符组合';
       }
       R2Flash.showBasicFlash(
           context: context,
@@ -167,11 +168,11 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
           Container (
             width: 340,
             alignment: Alignment.centerLeft,
-            child: const Text('密码至少6位，包含数字和字母\n'),
+            child: const Text('密码至少8位，包含数字和字母\n'),
           ),
           // text field for entering phone number
           R2UserTextField(
-            prefixWidget: const Icon(Icons.password, color: Colors.grey,),
+            prefixWidget: Image.asset('assets/icons/icon_password.png', width: 24, height: 24),
             hintText: '输入新密码',
             controller: _passwordController,
             keyboardType: TextInputType.text,
@@ -179,7 +180,7 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
             suffixWidget: IconButton(
               icon: Icon(
                 _isPasswordHidden ? Icons.visibility_off : Icons.visibility ,
-                color: Colors.grey,
+                color: AppConstants.primaryColor200,
               ),
               onPressed: () {
                 setState(() {
@@ -188,10 +189,10 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
               },
             ),
           ),
-          const SizedBox(height:20),
+          const SizedBox(height:40.0),
           // text field for entering password
           R2UserTextField(
-            prefixWidget: const Icon(Icons.password, color: Colors.grey,),
+            prefixWidget: Image.asset('assets/icons/icon_password.png', width: 24, height: 24),
             hintText: '再次确认',
             controller: _confirmController,
             keyboardType: TextInputType.text,
@@ -199,7 +200,7 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
             suffixWidget: IconButton(
               icon: Icon(
                 _isConfirmHidden ? Icons.visibility_off : Icons.visibility ,
-                color: Colors.grey,
+                color: AppConstants.primaryColor200,
               ),
               onPressed: () {
                 setState(() {
@@ -208,8 +209,6 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
               },
             ),
           ),
-          const SizedBox(height: 30.0),
-          const SizedBox(height: 48.0),
         ]
     );
   }
