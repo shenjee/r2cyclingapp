@@ -1,14 +1,10 @@
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:r2cyclingapp/constants.dart';
 
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
-import 'package:r2cyclingapp/usermanager/r2_account.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 
 import 'verification_screen.dart';
-import 'user_login_screen.dart';
 import 'password_setting_screen.dart';
 
 class UserRegisterScreen extends VerificationScreen {
