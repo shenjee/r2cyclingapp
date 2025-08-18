@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
+import 'package:r2cyclingapp/l10n/app_localizations.dart';
+import 'package:r2cyclingapp/constants.dart';
 
 import 'contact_widget.dart';
 
@@ -49,6 +51,9 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
     setState(() {
       isEmergencyContactEnabled = value;
     });
+
+    // enable / disable its emegency function remotely
+    await _requestEnableEmergency(value);
   }
 
   Future<void> _checkContactsAfterClose() async {
@@ -68,16 +73,17 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              const Expanded (
+              Expanded (
                 child: Padding(
-                  padding:EdgeInsets.fromLTRB(20.0, 20.0, 0.0, 10.0),
-                  child:Text('SOS 紧急联络', style: TextStyle(fontSize: 24.0),),
+                  padding:const EdgeInsets.fromLTRB(20.0, 20.0, 0.0, 10.0),
+                  child:Text(AppLocalizations.of(context)!.sosEmergencyContact, style: TextStyle(fontSize: 24.0),),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(00.0, 20.0, 20.0, 10.0),
                 child:Switch(
                   value: isEmergencyContactEnabled,
+                  activeTrackColor: AppConstants.primaryColor200,
                   onChanged: (value) {
                     setState(() {
                       isEmergencyContactEnabled = value;
@@ -89,14 +95,13 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
             ]
         ),
         if (!isEmergencyContactEnabled)
-          const Padding(
-            padding: EdgeInsets.fromLTRB(30.0, 10.0, 30.0, 0.0),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(30.0, 10.0, 30.0, 0.0),
             child:Text(
-              '开启SOS紧急联络，您在骑行过程中若摔倒，'
-                  '将自动将您的位置信息以短信方式发给您的紧急联系人，并尝试拨打紧急联系人的电话。',
-              style: TextStyle(
+              AppLocalizations.of(context)!.sosDescription,
+              style: const TextStyle(
                 fontSize: 16.0,
-                color: Colors.grey,
+                color: AppConstants.textColor,
               ),
             ),
           ),
@@ -150,12 +155,29 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
       final contact = arrayContacts[i];
       contactListItems.add(
           Container(
-            height: 80.0,
+            height: 100.0,
             child: ListTile(
-              leading: CircleAvatar(
-                radius: 30.0,
-                backgroundColor: Colors.grey[200],
-                child: Text('${i + 1}', style: const TextStyle(fontSize: 22.0),),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+              leading: Container(
+                width: 60.0,
+                height: 60.0,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppConstants.primaryColor200,
+                    width: 2.5,
+                  ),
+                  color: Colors.transparent,
+                ),
+                child: Center(
+                  child: Text(
+                    '${i + 1}',
+                    style: const TextStyle(
+                      color: AppConstants.primaryColor200,
+                      fontSize: 22.0,
+                    ),
+                  ),
+                ),
               ),
               title: Text(contact['name'], style: const TextStyle(fontSize: 22.0),),
               trailing: const Icon(Icons.keyboard_arrow_right),
@@ -168,13 +190,28 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
     if (arrayContacts.length < 3) {
       contactListItems.add(
         Container(
-          height: 80.0,
+          height: 100.0,
           child:ListTile(
-            leading: CircleAvatar(
-              radius: 30.0,
-              backgroundColor: Colors.grey[200],
-              child: const Icon(Icons.add),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+            leading: Container(
+              width: 60.0,
+              height: 60.0,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppConstants.primaryColor200,
+                  width: 2.5,
+                ),
+                color: Colors.transparent,
+              ),
+              child: const Center(
+                child: Icon(Icons.add, color: AppConstants.primaryColor200,),
+              ),
             ),
+            title: Text(
+              AppLocalizations.of(context)!.addEmergencyContact,
+              style: const TextStyle(fontSize: 22.0),
+              ),
             onTap: _showAddContactDialog,
           ),
         ),
@@ -191,7 +228,8 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SOS 紧急联络'),
+        title: Text(AppLocalizations.of(context)!.sosEmergencyContact),
+        centerTitle: true,
       ),
       body: Center(
         child: Column(
@@ -203,9 +241,6 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
     );
   }
 
-  // the following methods handle the data of contacts
-  // fixme: the following methods are should be in a separate class
-  
   /*
    * @description: add contact both to server and local database
    * @paramters: name: the name of the contact
@@ -249,6 +284,27 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
     errorRet = await _requestDeleteContact(contactId);
     if (errorRet == 0) {
       await dbHelper.deleteContact(contactId);
+    }
+    return errorRet;
+  }
+
+    // the following methods handle the data of contacts
+  // fixme: the following methods are should be in a separate class
+  
+  Future<int> _requestEnableEmergency(bool enabled) async {
+    int errorRet = 0;
+    final token = await R2Storage.read('authtoken');
+    final request = R2HttpRequest();
+    final response = await request.postRequest(
+      api: 'member/switchContactEnabled',
+      token: token,
+      body: {
+        'emergencyContactEnabled': enabled? 'true':'false',
+      }
+    );
+
+    if (false == response.success) {
+      errorRet = response.code;
     }
     return errorRet;
   }

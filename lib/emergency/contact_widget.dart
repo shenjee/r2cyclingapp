@@ -1,6 +1,8 @@
 // contact_widget.dart
 
 import 'package:flutter/material.dart';
+import 'package:r2cyclingapp/l10n/app_localizations.dart';
+import 'package:r2cyclingapp/constants.dart';
 
 class ContactWidget extends StatefulWidget {
   final Map<String, dynamic>? contact;
@@ -54,7 +56,7 @@ class _ContactWidgetState extends State<ContactWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  widget.contact == null ? '添加紧急联系人' : '紧急联系人',
+                  widget.contact == null ? AppLocalizations.of(context)!.addEmergencyContact : AppLocalizations.of(context)!.emergencyContact,
                   style: const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
                 ),
                 IconButton(
@@ -65,14 +67,17 @@ class _ContactWidgetState extends State<ContactWidget> {
             ),
             const SizedBox(height: 8.0),
             if (widget.contact == null)
-              const Text(
-                '开启SOS紧急联络，需要添加至少一名紧急联系人。',
-                style: TextStyle(fontSize: 18.0,color: Colors.grey),
+              Text(
+                AppLocalizations.of(context)!.sosEmergencyContactDesc,
+                style: const TextStyle(fontSize: 18.0,color: AppConstants.textColor),
               ),
-            if (widget.contact == null) SizedBox(height: 20.0),
+            if (widget.contact == null) const SizedBox(height: 20.0),
             Row(
                 children: <Widget>[
-                  const Text('姓名', style: TextStyle(fontSize: 16.0, color: Colors.grey),),
+                  Text(
+                    AppLocalizations.of(context)!.name, 
+                    style: const TextStyle(fontSize: 16.0, color: AppConstants.textColor),
+                    ),
                   const SizedBox(width: 10.0,),
                   Expanded (
                     child:TextField(controller: _nameController,style: const TextStyle(fontSize: 22.0),),
@@ -82,7 +87,10 @@ class _ContactWidgetState extends State<ContactWidget> {
             const SizedBox(height: 20.0,),
             Row(
                 children: <Widget>[
-                  const Text('电话', style: TextStyle(fontSize: 16.0, color: Colors.grey),),
+                  Text(
+                    AppLocalizations.of(context)!.phone,
+                    style: const TextStyle(fontSize: 16.0,color: AppConstants.textColor),
+                    ),
                   const SizedBox(width: 10.0,),
                   Expanded (
                     child:TextField(controller: _phoneController,style: const TextStyle(fontSize: 22.0),),
@@ -101,7 +109,10 @@ class _ContactWidgetState extends State<ContactWidget> {
                         widget.onDelete!();
                       }
                     },
-                    child: const Text('删除'),
+                    child: Text(
+                      AppLocalizations.of(context)!.delete, 
+                      style: const TextStyle(fontSize: 20.0, color: AppConstants.primaryColor)
+                      ),
                   ),
                 const Spacer(),
                 Align(
@@ -110,7 +121,10 @@ class _ContactWidgetState extends State<ContactWidget> {
                     onPressed: () {
                       widget.onSave(_nameController.text, _phoneController.text);
                     },
-                    child: const Text('保存'),
+                    child: Text(
+                      AppLocalizations.of(context)!.save, 
+                      style: const TextStyle(fontSize: 20.0, color: AppConstants.primaryColor)
+                      ),
                   ),
                 ),
               ],

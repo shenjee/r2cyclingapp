@@ -6,7 +6,7 @@ class R2HttpRequest {
   final String _baseUrl = 'https://rock.r2cycling.com/api/';
 
   // Method to send the POST request.
-  Future<R2HttpResponse> postRequest({String? token, required String api, Map<String, String>? body}) async {
+  Future<R2HttpResponse> postRequest({String? token, required String api, Map<String, dynamic>? body}) async {
     final String url = '$_baseUrl$api'; // Construct the full URL.
 
     // Initialize headers with content type.
