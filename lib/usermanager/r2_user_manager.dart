@@ -195,7 +195,8 @@ class R2UserManager {
       
       // Save emergency contact setting
       if (data['ifEmergencyContactEnable'] != null) {
-        await _db.saveEmergencyContactEnabled(data['ifEmergencyContactEnable'].toString());
+        final isEnabled = data['ifEmergencyContactEnable'].toString() == 'Y';
+        await _db.saveEmergencyContactEnabled(isEnabled);
       }
       
     } else {

@@ -228,9 +228,9 @@ class R2DBHelper {
     return result.isNotEmpty ? result.first : null;
   }
 
-  Future<void> saveEmergencyContactEnabled(String ifEmergencyContactEnable) async {
+  Future<void> saveEmergencyContactEnabled(bool enabled) async {
     final db = await database;
-    final emergencyContactEnabled = ifEmergencyContactEnable == 'true' ? 1 : 0;
+    final emergencyContactEnabled = enabled ? 1 : 0;
     await db.insert(
       'settings',
       {'id': 1, 'emergencyContactEnabled': emergencyContactEnabled},
