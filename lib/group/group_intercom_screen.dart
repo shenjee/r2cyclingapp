@@ -206,7 +206,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
    * uid: local user id allocated by Agora
    */
   void _onLocalJoined(int uid) {
-    // TODO: implementation
+    // todo: implementation
   }
 
   /*
@@ -214,7 +214,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
    * uid: user id allocated by Agora
    */
   void _onMemberJoined(int uid) {
-    // TODO: implementation
+    // todo: implementation
   }
 
   /*
@@ -223,7 +223,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
    * uid: user id allocated by Agora
    */
   void _onMemberLeft(int uid) {
-    // TODO: implementation
+    // todo: implementation
   }
 
   /*

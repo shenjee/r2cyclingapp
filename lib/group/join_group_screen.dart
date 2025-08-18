@@ -60,7 +60,7 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
       final account = await manager.localAccount();
       final groupId = response.result['cyclingGroupId'];
       final gCode = response.result['groupName'];
-      final group = R2Group(groupId: groupId);
+      final group = R2Group(groupId: groupId, groupCode: gCode);
       final ret = await manager.saveGroup(account!.uid, group);
       debugPrint('$runtimeType : save group $groupId : $ret');
 
