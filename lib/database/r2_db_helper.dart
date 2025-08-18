@@ -26,7 +26,7 @@ class R2DBHelper {
 
     return await openDatabase(
       path,
-      version: 4, // Increment the version number to handle schema changes
+      version: 1,
       onCreate: (db, version) async {
         await db.execute(
           'CREATE TABLE accounts(uid INTEGER PRIMARY KEY, account TEXT KEY, nickname TEXT, phoneNumber TEXT, email TEXT, avatarPath TEXT, isPasswdSet INTEGER)',
@@ -38,37 +38,11 @@ class R2DBHelper {
           'CREATE TABLE devices(deviceId TEXT PRIMARY KEY, model TEXT, brand TEXT, name TEXT, bleAddress TEXT, classicAddress TEXT, imageUrl TEXT)',
         );
         await db.execute(
-          'CREATE TABLE emergency_contacts(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, phone TEXT)',
+          'CREATE TABLE emergency_contacts(contactId INTEGER PRIMARY KEY, name TEXT, phone TEXT)',
         );
         await db.execute(
           'CREATE TABLE settings(id INTEGER PRIMARY KEY, emergencyContactEnabled INTEGER)',
         );
-      },
-      onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 2) {
-          await db.execute(
-            'CREATE TABLE emergency_contacts(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, phone TEXT)',
-          );
-          await db.execute(
-            'CREATE TABLE settings(id INTEGER PRIMARY KEY, emergencyContactEnabled INTEGER)',
-          );
-        }
-        if (oldVersion < 3) {
-          await db.execute(
-            'ALTER TABLE devices ADD COLUMN imageUrl TEXT',
-          );
-        }
-        if (oldVersion < 4) {
-          // Remove mac column from devices table
-          await db.execute(
-            'CREATE TABLE devices_new(deviceId TEXT PRIMARY KEY, model TEXT, brand TEXT, name TEXT, bleAddress TEXT, classicAddress TEXT, imageUrl TEXT)',
-          );
-          await db.execute(
-            'INSERT INTO devices_new(deviceId, model, brand, name, bleAddress, classicAddress, imageUrl) SELECT deviceId, model, brand, name, bleAddress, classicAddress, imageUrl FROM devices',
-          );
-          await db.execute('DROP TABLE devices');
-          await db.execute('ALTER TABLE devices_new RENAME TO devices');
-        }
       },
     );
   }
@@ -190,15 +164,29 @@ class R2DBHelper {
   }
 
   // operation for emergency contacts
-  Future<int> saveContact(Map<String, dynamic> contact) async {
+  Future<int> saveContact(int contactId, String name, String phone) async {
     final db = await database;
-    if (contact.containsKey('id')) {
+    
+    final contact = {
+      'contactId': contactId,
+      'name': name,
+      'phone': phone,
+    };
+    
+    // Check if contact with this contactId already exists
+    final existingContacts = await db.query(
+      'emergency_contacts',
+      where: 'contactId = ?',
+      whereArgs: [contactId],
+    );
+    
+    if (existingContacts.isNotEmpty) {
       // Update existing contact
       return await db.update(
         'emergency_contacts',
         contact,
-        where: 'id = ?',
-        whereArgs: [contact['id']],
+        where: 'contactId = ?',
+        whereArgs: [contactId],
       );
     } else {
       // Insert new contact
@@ -211,9 +199,9 @@ class R2DBHelper {
     return await db.query('emergency_contacts');
   }
 
-  Future<int> deleteContact(int id) async {
+  Future<int> deleteContact(int contactId) async {
     final db = await database;
-    return await db.delete('emergency_contacts', where: 'id = ?', whereArgs: [id]);
+    return await db.delete('emergency_contacts', where: 'contactId = ?', whereArgs: [contactId]);
   }
 
   // operations for settings

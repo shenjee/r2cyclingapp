@@ -15,7 +15,7 @@ class EmergencyContactScreen extends StatefulWidget {
 class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
   bool isEmergencyContactEnabled = false;
   final dbHelper = R2DBHelper();
-  List<Map<String, dynamic>> contacts = [];
+  List<Map<String, dynamic>> arrayContacts = [];
 
   @override
   void initState() {
@@ -28,21 +28,22 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
     final contactList = await dbHelper.getContacts();
 
     setState(() {
-      contacts = contactList;
+      arrayContacts = contactList;
       isEmergencyContactEnabled = setting != null && setting['emergencyContactEnabled'] == 1;
     });
 
     // if the emergency contact is enabled and the contact list is empty, 
     // request the emergency contacts from the server
     if (isEmergencyContactEnabled == true && contactList.isEmpty) {
-      await _requestEmergencyContacts();
+      await _requestAllEmergencyContacts();
+      _loadEmergencyContactStatus();
     }
   }
 
   Future<void> _updateEmergencyContactStatus(bool value) async {
     final setting = {'id': 1, 'emergencyContactEnabled': value ? 1 : 0};
     await dbHelper.saveSetting(setting);
-    if (value && contacts.isEmpty) {
+    if (value && arrayContacts.isEmpty) {
       _showAddContactDialog();
     }
     setState(() {
@@ -53,8 +54,8 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
   Future<void> _checkContactsAfterClose() async {
     final contactList = await dbHelper.getContacts();
     setState(() {
-      contacts = contactList;
-      if (contacts.isEmpty) {
+      arrayContacts = contactList;
+      if (arrayContacts.isEmpty) {
         _updateEmergencyContactStatus(false);
       }
     });
@@ -108,8 +109,9 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
       context: context,
       builder: (context) => ContactWidget(
         onSave: (name, phone) async {
-          await dbHelper.saveContact({'name': name, 'phone': phone});
+          await _addContact(name, phone);
           _loadEmergencyContactStatus();
+          _checkContactsAfterClose();
           Navigator.of(context).pop();
         },
         onClose: () {
@@ -125,17 +127,17 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
       builder: (context) => ContactWidget(
         contact: contact,
         onSave: (name, phone) async {
-          await dbHelper.saveContact({'id': contact['id'], 'name': name, 'phone': phone});
+          await _updateContact(contact['contactId'], name, phone);
           _loadEmergencyContactStatus();
           Navigator.of(context).pop();
         },
         onDelete: () async {
-          await dbHelper.deleteContact(contact['id']);
+          await _deleteContact(contact['contactId']);
           _loadEmergencyContactStatus();
+          _checkContactsAfterClose();
           Navigator.of(context).pop();
         },
         onClose: () {
-          _checkContactsAfterClose();
         },
       ),
     );
@@ -143,8 +145,9 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
 
   Widget _buildContactList() {
     List<Widget> contactListItems = [];
-    for (int i = 0; i < contacts.length; i++) {
-      final contact = contacts[i];
+
+    for (int i = 0; i < arrayContacts.length; i++) {
+      final contact = arrayContacts[i];
       contactListItems.add(
           Container(
             height: 80.0,
@@ -162,7 +165,7 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
       );
     }
 
-    if (contacts.length < 3) {
+    if (arrayContacts.length < 3) {
       contactListItems.add(
         Container(
           height: 80.0,
@@ -202,7 +205,139 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
 
   // the following methods handle the data of contacts
   // fixme: the following methods are should be in a separate class
-  Future<void> _requestEmergencyContacts() async {
+  
+  /*
+   * @description: add contact both to server and local database
+   * @paramters: name: the name of the contact
+   * @paramters: phone: the phone number of the contact
+   * @return: void
+   */
+  Future<void> _addContact(String name, String phone) async {
+    // 1. Request contactId and upload name/phone to server
+    int contactId = await _requestAddContact(name, phone);
+
+    if (contactId != 0) {
+      // 2. Save contact to local database
+      await dbHelper.saveContact(contactId, name, phone);
+    }
+  }
+
+    /*
+   * @description: save contact both to server and local database
+   * @paramters: name: the name of the contact
+   * @paramters: phone: the phone number of the contact
+   * @return: void
+   */
+  Future<void> _updateContact(int contactId, String name, String phone) async {
+    // 1. Request contactId and upload name/phone to server
+    int errorRet = 0;
+    errorRet = await _requestUpdateContact(contactId, name, phone);
+    if (0 == errorRet) {
+      await dbHelper.saveContact(contactId, name, phone);
+    }
+  }
+
+  /*
+   * @description: delete contact both from server and local database
+   * @paramters: contactId: the id of the contact to delete
+   * @return: 
+   * success: 0
+   * fail: the value of error code of http reqeust 
+   */
+  Future<int> _deleteContact(int contactId) async {
+    int errorRet = 0;
+    errorRet = await _requestDeleteContact(contactId);
+    if (errorRet == 0) {
+      await dbHelper.deleteContact(contactId);
+    }
+    return errorRet;
+  }
+
+  /*
+   * @description: add a emergency contact remotely
+   * @paramters: name: the name of the contact
+   * @paramters: phone: the phone number of the contact
+   * @return: 
+   * success: contact id
+   * fail: 0 
+   */
+  Future<int> _requestAddContact(String name, String phone) async {
+    int contactId = 0;
+    final token = await R2Storage.read('authtoken');
+    final request = R2HttpRequest();
+    final response = await request.postRequest(
+      api: 'emergencyContact/saveEmergencyContact',
+      token: token,
+      body: {
+        'emergencyContactId': '',
+        'contactMan': name,
+        'contactManMobile': phone,
+      }
+    );
+
+    if (response.success == true) {
+      contactId = response.result['emergencyContactId'] ?? 0;
+    }
+
+    return contactId;
+  }
+
+  /*
+   * @description: update a emergency contact remotely
+   * @paramters: contactId: the id of the contact
+   * @paramters: name: the name of the contact
+   * @paramters: phone: the phone number of the contact
+   * @return: 
+   * success: 0
+   * fail: the value of error code of http reqeust 
+   */
+  Future<int> _requestUpdateContact(int contactId, String name, String phone) async {
+    int errorRet = 0;
+    final token = await R2Storage.read('authtoken');
+    final request = R2HttpRequest();
+    final response = await request.postRequest(
+      api: 'emergencyContact/saveEmergencyContact',
+      token: token,
+      body: {
+        'emergencyContactId': contactId.toString(),
+        'contactMan': name,
+        'contactManMobile': phone,
+      }
+    );
+
+    if (response.success != true) {
+      errorRet = response.code;
+    }
+
+    return errorRet;
+  }
+
+  Future<int> _requestDeleteContact(int contactId) async {
+    int errorRet = 0;
+    final token = await R2Storage.read('authtoken');
+    final request = R2HttpRequest();
+    final response = await request.postRequest(
+      api: 'emergencyContact/deleteEmergencyContact',
+      token: token,
+      body: {
+        'emergencyContactId': contactId.toString(),
+      }
+    );
+
+    if (response.success == false) {
+      errorRet = response.code;
+    }
+
+    return errorRet;
+  }
+
+  /*
+   * @description: request all emergency contacts from remote server
+   * and save them to local database
+   * @paramters: none
+   * @return: void
+   */
+  Future<void> _requestAllEmergencyContacts() async {
     final token = await R2Storage.read('authtoken');
     final request = R2HttpRequest();
     final response = await request.getRequest(
@@ -218,13 +353,12 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
       for (final contactData in contactList) {
         final String name = contactData['contactMan'] ?? '';
         final String phone = contactData['contactManMobile'] ?? '';
+        final int contactId = contactData['emergencyContactId'] ?? 0;
         
-        if (name.isNotEmpty && phone.isNotEmpty) {
-          await dbHelper.saveContact({'name': name, 'phone': phone});
+        if (name.isNotEmpty && phone.isNotEmpty && contactId != 0) {
+          await dbHelper.saveContact(contactId, name, phone);
         }
       }
-      _loadEmergencyContactStatus();
     }
   }
-
 }
