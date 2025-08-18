@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
+import 'package:r2cyclingapp/database/r2_storage.dart';
+import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 
 import 'contact_widget.dart';
 
@@ -24,10 +26,17 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
   Future<void> _loadEmergencyContactStatus() async {
     final setting = await dbHelper.getSetting();
     final contactList = await dbHelper.getContacts();
+
     setState(() {
       contacts = contactList;
       isEmergencyContactEnabled = setting != null && setting['emergencyContactEnabled'] == 1;
     });
+
+    // if the emergency contact is enabled and the contact list is empty, 
+    // request the emergency contacts from the server
+    if (isEmergencyContactEnabled == true && contactList.isEmpty) {
+      await _requestEmergencyContacts();
+    }
   }
 
   Future<void> _updateEmergencyContactStatus(bool value) async {
@@ -190,4 +199,32 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
       ),
     );
   }
+
+  // the following methods handle the data of contacts
+  // fixme: the following methods are should be in a separate class
+  Future<void> _requestEmergencyContacts() async {
+    final token = await R2Storage.read('authtoken');
+    final request = R2HttpRequest();
+    final response = await request.getRequest(
+      api: 'emergencyContact/listEmergencyContact',
+      token: token,
+    );
+
+    if (response.success == true) {
+      // response.result is a JSON array containing contact information
+      final List<dynamic> contactList = response.result;
+      
+      // Save each contact to the database
+      for (final contactData in contactList) {
+        final String name = contactData['contactMan'] ?? '';
+        final String phone = contactData['contactManMobile'] ?? '';
+        
+        if (name.isNotEmpty && phone.isNotEmpty) {
+          await dbHelper.saveContact({'name': name, 'phone': phone});
+        }
+      }
+      _loadEmergencyContactStatus();
+    }
+  }
+
 }
