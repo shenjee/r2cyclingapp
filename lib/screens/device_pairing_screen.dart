@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
 import 'package:r2cyclingapp/devicemanager/r2_device_manager.dart';
 import 'package:r2cyclingapp/devicemanager/r2_device.dart';
@@ -163,9 +164,66 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> with TickerPr
           ),
         ),
         const SizedBox(width: 16),
-        Text(
-            text,
-            style: const TextStyle(fontSize: 22.0),
+        Expanded(
+          child: AutoSizeText(
+              text,
+              style: const TextStyle(fontSize: 22.0),
+              maxLines: 3,
+              minFontSize: 12.0,
+              maxFontSize: 22.0,
+              overflow: TextOverflow.ellipsis,
+              group: AutoSizeGroup(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Shared AutoSizeGroup for consistent text sizing across all instruction items
+  final AutoSizeGroup _instructionGroup = AutoSizeGroup();
+
+  /*
+   * Items of instruction guide, an item features a rounded number and
+   * instruction content.
+   * number - number
+   * text - instruction content
+   */
+  Widget _instructionItemWithGroup(String number, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 50.0,
+          height: 50.0,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: AppConstants.primaryColor200,
+              width: 2.5,
+            ),
+            color: Colors.transparent,
+          ),
+          child: Center(
+            child: Text(
+              number,
+              style: const TextStyle(
+                color: AppConstants.primaryColor200,
+                fontSize: 22.0,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: AutoSizeText(
+              text,
+              style: const TextStyle(fontSize: 22.0),
+              maxLines: 3,
+              minFontSize: 12.0,
+              maxFontSize: 22.0,
+              overflow: TextOverflow.ellipsis,
+              group: _instructionGroup,
+          ),
         ),
       ],
     );
@@ -181,11 +239,11 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> with TickerPr
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _instructionItem('1', AppLocalizations.of(context)!.ensureBluetoothOn),
+          _instructionItemWithGroup('1', AppLocalizations.of(context)!.ensureBluetoothOn),
           const SizedBox(height: 50.0),
-          _instructionItem('2', AppLocalizations.of(context)!.longPressHelmetButton),
+          _instructionItemWithGroup('2', AppLocalizations.of(context)!.longPressHelmetButton),
           const SizedBox(height: 50.0),
-         _instructionItem('3', AppLocalizations.of(context)!.bringPhoneClose),
+         _instructionItemWithGroup('3', AppLocalizations.of(context)!.bringPhoneClose),
         ],
       ),
     );
@@ -257,7 +315,6 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> with TickerPr
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // fuck it, stupid flutter , u have to ... use sized box.
               const SizedBox(height:140.0),
               Icon(Icons.bluetooth_searching, size: 36, color: Colors.grey[700]),
               const SizedBox(height: 8.0,),
@@ -321,10 +378,14 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> with TickerPr
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 0.0),
-              child:Text(
+              child: AutoSizeText(
                 _title,
                 style: const TextStyle(fontSize: 28.0),
                 textAlign: TextAlign.left,
+                maxLines: 1,
+                minFontSize: 16.0,
+                maxFontSize: 28.0,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(height: 30.0),
