@@ -1,4 +1,4 @@
-# r2cyclingapp
+# R2Cycling App
 
 R2 Cycling App project for Android and iOS smartphone.
 
