@@ -30,6 +30,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
   final TextEditingController _passwordController = TextEditingController();
   // toggle for password visibility
   bool _isPasswordHidden = true;
+  bool _isAgreed = false;
 
   @override
   void initState() {
@@ -246,19 +247,65 @@ class _UserLoginScreenState extends LoginBaseScreenState {
 
   @override
   Widget bottomWidget(BuildContext context) {
-    return Container (
-        width: 340,
-        padding: const EdgeInsets.fromLTRB(0, 30, 0, 0),
-        alignment: Alignment.topRight,
-        child: TextButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const PasswordRecoverScreen()),
-          );
-          },
-          child: Text(AppLocalizations.of(context)!.forgotPassword),
-        )
+    return Column(
+      children: [
+        Container (
+            width: 340,
+            padding: const EdgeInsets.fromLTRB(0, 30, 0, 0),
+            alignment: Alignment.topRight,
+            child: TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PasswordRecoverScreen()),
+              );
+              },
+              child: Text(
+                AppLocalizations.of(context)!.forgotPassword, 
+                style: const TextStyle(color: AppConstants.textColor),
+                ),
+            )
+        ),
+        Expanded(
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isAgreed = !_isAgreed;
+                  });
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(10.0),
+                        color: _isAgreed ? Colors.grey : Colors.transparent,
+                      ),
+                      child: Icon(
+                        Icons.check,
+                        size: 16,
+                        color: _isAgreed ? Colors.white : Colors.transparent,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      AppLocalizations.of(context)!.agreeTermsAndPrivacy,
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

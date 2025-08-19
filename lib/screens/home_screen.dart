@@ -407,7 +407,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             vertical: 30.0,
                             horizontal: 16.0
                         ),
-                        leading: const Icon(Icons.group, size: 50.0, color: AppConstants.primaryColor200,),
+                        leading: Image.asset(
+                          'assets/icons/icon_intercom.png', 
+                          width: 50.0, height: 50.0, color: AppConstants.primaryColor200,),
                         title: Padding(
                             padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
                             child: Text(AppLocalizations.of(context)!.cyclingIntercom, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),)
@@ -444,7 +446,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             vertical: 30.0,
                             horizontal: 16.0
                         ),
-                        leading: const Icon(Icons.sos, size: 50.0, color: AppConstants.primaryColor200,),
+                        leading: Image.asset(
+                          'assets/icons/icon_sos.png', 
+                          width: 50.0, height: 50.0, color: AppConstants.primaryColor200,),
                         title: Padding(
                             padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
                             child: Text(AppLocalizations.of(context)!.emergencyContactHome, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),)

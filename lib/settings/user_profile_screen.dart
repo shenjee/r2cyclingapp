@@ -8,7 +8,6 @@ import 'package:r2cyclingapp/usermanager/r2_account.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/constants.dart';
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
-import 'package:r2cyclingapp/login/user_login_screen.dart';
 
 import 'image_cut_screen.dart';
 
@@ -189,13 +188,19 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     ),
                     actions: [
                       TextButton(
-                        child: Text(AppLocalizations.of(context)!.cancel),
+                        child: Text(
+                          AppLocalizations.of(context)!.cancel,
+                          style: const TextStyle(fontSize: 20.0,color: AppConstants.primaryColor),
+                        ),
                         onPressed: () {
                           Navigator.pop(context);
                         },
                       ),
                       TextButton(
-                        child: Text(AppLocalizations.of(context)!.save),
+                        child: Text(
+                          AppLocalizations.of(context)!.save,
+                          style: const TextStyle(fontSize: 20.0, color: AppConstants.primaryColor),
+                        ),
                         onPressed: () {
                           Navigator.pop(context, nicknameController.text);
                         },

@@ -79,6 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           } else {
             return CircleAvatar(
               radius: 30.0,
+              backgroundColor: Colors.transparent,
               backgroundImage: snapshot.data?.image,
             );
           }
