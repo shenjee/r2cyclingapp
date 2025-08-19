@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'dart:io';
 
 import 'package:r2cyclingapp/service/r2_background_service.dart';
@@ -263,9 +264,16 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 180,
             ),
             const SizedBox(height: 30.0),
-            Text(
-              AppLocalizations.of(context)!.clickAddHelmet,
-              style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: AutoSizeText(
+                AppLocalizations.of(context)!.clickAddHelmet,
+                style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),
+                maxLines: 1,
+                minFontSize: 16.0,
+                maxFontSize: 24.0,
+                textAlign: TextAlign.center,
+              ),
             ),
           ],
         ),
@@ -411,9 +419,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           width: 50.0, height: 50.0, color: AppConstants.primaryColor200,),
                         title: Padding(
                             padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                            child: Text(
+                            child: AutoSizeText(
                               AppLocalizations.of(context)!.cyclingIntercom, 
                               style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),
+                              maxLines: 1,
+                              minFontSize: 12.0,
+                              maxFontSize: 24.0,
                               )
                         ),
                         trailing: Row(
@@ -453,9 +464,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           width: 50.0, height: 50.0, color: AppConstants.primaryColor200,),
                         title: Padding(
                             padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                            child: Text(
+                            child: AutoSizeText(
                               AppLocalizations.of(context)!.emergencyContactHome, 
                               style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),
+                              maxLines: 1,
+                              minFontSize: 12.0,
+                              maxFontSize: 24.0,
                               )
                         ),
                         trailing: Row(

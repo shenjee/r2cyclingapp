@@ -32,8 +32,8 @@ class GroupListScreen extends StatelessWidget {
               ),
               leading: Image.asset(
                 'assets/icons/icon_create_group.png',
-              width: 50.0,
-              height: 50.0,
+                width: 50.0,
+                height: 50.0,
               ),
               title: Text(
                 AppLocalizations.of(context)!.createCyclingGroup, 

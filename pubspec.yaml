@@ -52,6 +52,7 @@ dependencies:
   image_cropper: ^8.0.1
   uuid: ^4.4.2
   pin_code_fields: ^8.0.1
+  auto_size_text: ^3.0.0
 
 
   # The following adds the Cupertino Icons font to your application.
