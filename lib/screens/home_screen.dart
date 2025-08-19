@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       if (setting != null && setting['emergencyContactEnabled'] == 1) {
         emergencyContactStatus = AppLocalizations.of(context)!.enabled;
-        emergencyContactColor = const Color(0xFF539765);
+        emergencyContactColor = AppConstants.primaryColor;
       } else {
         emergencyContactStatus = AppLocalizations.of(context)!.disabled;
         emergencyContactColor = Colors.grey;
@@ -378,7 +378,6 @@ class _HomeScreenState extends State<HomeScreen> {
             }
           },
         ),
-        title: const Text('R2 Cycling'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings, size: 34.0,),
@@ -412,7 +411,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           width: 50.0, height: 50.0, color: AppConstants.primaryColor200,),
                         title: Padding(
                             padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                            child: Text(AppLocalizations.of(context)!.cyclingIntercom, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),)
+                            child: Text(
+                              AppLocalizations.of(context)!.cyclingIntercom, 
+                              style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),
+                              )
                         ),
                         trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -422,7 +424,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 style: TextStyle(fontSize: 16.0, color: groupStatusColor),
                               ),
                               const SizedBox(width: 10.0,),
-                              Icon(Icons.chevron_right, color: Colors.grey[500],),
+                              const Icon(Icons.chevron_right, color: AppConstants.textColor200,),
                             ]
                         ),
                         onTap: () async {
@@ -451,7 +453,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           width: 50.0, height: 50.0, color: AppConstants.primaryColor200,),
                         title: Padding(
                             padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                            child: Text(AppLocalizations.of(context)!.emergencyContactHome, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),)
+                            child: Text(
+                              AppLocalizations.of(context)!.emergencyContactHome, 
+                              style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),
+                              )
                         ),
                         trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -461,7 +466,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 style: TextStyle(fontSize: 16.0, color: emergencyContactColor),
                               ),
                               const SizedBox(width: 10.0,),
-                              Icon(Icons.chevron_right, color: Colors.grey[500],),
+                              const Icon(Icons.chevron_right, color: AppConstants.textColor200,),
                             ]
                         ),
                         onTap: () async {
