@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:core';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
@@ -295,9 +296,14 @@ class _UserLoginScreenState extends LoginBaseScreenState {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    Text(
-                      AppLocalizations.of(context)!.agreeTermsAndPrivacy,
-                      style: const TextStyle(color: Colors.black),
+                    Expanded(
+                      child: AutoSizeText(
+                        AppLocalizations.of(context)!.agreeTermsAndPrivacy,
+                        style: const TextStyle(color: Colors.black),
+                        maxLines: 1,
+                        minFontSize: 10.0,
+                        maxFontSize: 16.0,
+                      ),
                     ),
                   ],
                 ),

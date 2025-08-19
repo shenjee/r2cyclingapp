@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:r2cyclingapp/constants.dart';
 
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
@@ -87,6 +88,7 @@ class _UserRegisterScreenState extends VerificationScreenState {
             child: Text(
               AppLocalizations.of(context)!.unregisteredPhoneAutoCreate,
               textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 14.0, color: AppConstants.textColor),
             ),
           ),
         ),
@@ -119,9 +121,14 @@ class _UserRegisterScreenState extends VerificationScreenState {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Text(
-                    AppLocalizations.of(context)!.agreeTermsAndPrivacy,
-                    style: const TextStyle(color: Colors.black),
+                  Expanded(
+                    child: AutoSizeText(
+                      AppLocalizations.of(context)!.agreeTermsAndPrivacy,
+                      style: const TextStyle(color: Colors.black),
+                      maxLines: 1,
+                      minFontSize: 10.0,
+                      maxFontSize: 16.0,
+                    ),
                   ),
                 ],
               ),
