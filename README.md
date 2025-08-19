@@ -2,6 +2,8 @@
 
 R2 Cycling App project for Android and iOS smartphone.
 
+[English](README.md) | [中文](README-zh.md)
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
