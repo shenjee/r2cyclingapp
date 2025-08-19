@@ -3,6 +3,7 @@ import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
@@ -11,6 +12,7 @@ import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/screens/home_screen.dart';
 import 'package:r2cyclingapp/constants.dart';
+import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'login_base_screen.dart';
 
 class PasswordSettingScreen extends LoginBaseScreen {
@@ -39,9 +41,14 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
   @override
   void initState() {
     super.initState();
-    mainButtonTitle = '保存';
     _phoneNumber = (widget as PasswordSettingScreen).phoneNumber;
     _title = (widget as PasswordSettingScreen).title;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    mainButtonTitle = AppLocalizations.of(context)!.save;
   }
 
   String _hashPassword(String password) {
@@ -137,9 +144,9 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
     } else {
       String warning;
       if (0 != isSame) {
-        warning = '两次密码输入不一致';
+        warning = AppLocalizations.of(context)!.passwordMismatch;
       } else {
-        warning = '密码为不少于8位的数字和字符组合';
+        warning = AppLocalizations.of(context)!.passwordRequirement;
       }
       R2Flash.showBasicFlash(
           context: context,
@@ -153,9 +160,13 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
   Widget topWidget(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.fromLTRB(40.0, 40.0, 40.0, 20.0),
-        child:Text(
+        child: AutoSizeText(
+            _title ?? AppLocalizations.of(context)!.setPassword,
             style: const TextStyle(fontSize: 46, fontWeight: FontWeight.bold),
-            _title ??'设置密码'
+            maxLines: 1,
+            minFontSize: 20.0,
+            maxFontSize: 46.0,
+            overflow: TextOverflow.ellipsis,
         ),
     );
   }
@@ -168,12 +179,12 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
           Container (
             width: 340,
             alignment: Alignment.centerLeft,
-            child: const Text('密码至少8位，包含数字和字母\n'),
+            child: Text('${AppLocalizations.of(context)!.passwordRequirement}\n'),
           ),
           // text field for entering phone number
           R2UserTextField(
             prefixWidget: Image.asset('assets/icons/icon_password.png', width: 24, height: 24),
-            hintText: '输入新密码',
+            hintText: AppLocalizations.of(context)!.enterNewPassword,
             controller: _passwordController,
             keyboardType: TextInputType.text,
             textVisible: _isPasswordHidden,
@@ -193,7 +204,7 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
           // text field for entering password
           R2UserTextField(
             prefixWidget: Image.asset('assets/icons/icon_password.png', width: 24, height: 24),
-            hintText: '再次确认',
+            hintText: AppLocalizations.of(context)!.confirmAgain,
             controller: _confirmController,
             keyboardType: TextInputType.text,
             textVisible: _isConfirmHidden,
