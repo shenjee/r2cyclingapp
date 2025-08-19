@@ -94,22 +94,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _intercomSetting(BuildContext context) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-          vertical: 30.0,
-          horizontal: 16.0
-      ),
-      title: Padding(
-          padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-          child: Text(AppLocalizations.of(context)!.intercomSetting, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor)),
-      ),
-      trailing: Icon(Icons.chevron_right, color: Colors.grey[500]),
-      onTap: () {
-        // TODO: Implement intercom setting functionality
-      },
-    );
-  }
+
 
   Widget _aboutWidget(BuildContext context) {
     return Column(
@@ -200,19 +185,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
             if (true == _isLoggedIn)
               _userInfoWidget(),
             const Divider(color: AppConstants.primaryColor200),
-            // 2. Intercom Setting
-            _intercomSetting(context),
-            const Divider(color: AppConstants.primaryColor200),
-            // 3. R2 Cycling Introduction
+            // 2. R2 Cycling Introduction
             const SizedBox(height:10.0),
             _aboutWidget(context),
             const SizedBox(height: 10.0),
             const Divider(color: AppConstants.primaryColor200),
-            // 4. App Version
+            // 3. App Version
             const SizedBox(height:10.0),
             _versionWidget(context),
             const SizedBox(height: 10.0),
-            // 5. Company Info and Copyright
+            // 4. Company Info and Copyright
             Center(child:_copyrightWidget(context)),
           ],
         ),
