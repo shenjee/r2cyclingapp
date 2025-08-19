@@ -76,7 +76,10 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
               Expanded (
                 child: Padding(
                   padding:const EdgeInsets.fromLTRB(20.0, 20.0, 0.0, 10.0),
-                  child:Text(AppLocalizations.of(context)!.sosEmergencyContact, style: TextStyle(fontSize: 24.0),),
+                  child:Text(
+                    AppLocalizations.of(context)!.sosEmergency, 
+                    style: const TextStyle(fontSize: 24.0),
+                    ),
                 ),
               ),
               Padding(
@@ -105,7 +108,22 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
               ),
             ),
           ),
-        if (isEmergencyContactEnabled) _buildContactList(),
+        if (isEmergencyContactEnabled) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 10.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                AppLocalizations.of(context)!.sosEmergencyContact,
+                style: const TextStyle(
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          _buildContactList(),
+        ],
       ]);
   }
 
@@ -228,7 +246,7 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.sosEmergencyContact),
+        title: Text(AppLocalizations.of(context)!.sosEmergency),
         centerTitle: true,
       ),
       body: Center(

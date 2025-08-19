@@ -75,6 +75,7 @@ class AppLocalizations {
   String get name => _localizedValues[locale.languageCode]!['name']!;
   String get phone => _localizedValues[locale.languageCode]!['phone']!;
   String get delete => _localizedValues[locale.languageCode]!['delete']!;
+  String get sosEmergency => _localizedValues[locale.languageCode]!['sos_emergency']!;
   String get sosEmergencyContact => _localizedValues[locale.languageCode]!['sos_emergency_contact']!;
   String get sosDescription => _localizedValues[locale.languageCode]!['sos_description']!;
   String get emergencyContactTitle => _localizedValues[locale.languageCode]!['emergency_contact_title']!;
@@ -184,9 +185,10 @@ class AppLocalizations {
       'name': 'Name',
       'phone': 'Phone',
       'delete': 'Delete',
-      'sos_emergency_contact': 'SOS Emergency Contact',
-      'sos_description': 'When SOS emergency contact is enabled, if you fall while cycling, your location information will be automatically sent to your emergency contacts via SMS, and we will attempt to call your emergency contacts.',
-      'emergency_contact_title': 'SOS Emergency Contact',
+      'sos_emergency': 'Emergency SOS',
+      'sos_emergency_contact': 'Emergency Contact',
+      'sos_description': 'Your emergency contacts will receive a message saying that you have experienced an unexpected fall during your ride when you use Emergency SOS. Your current location will be included in these messages.',
+      'emergency_contact_title': 'Emergency SOS',
       'emergency_contact_status': 'Emergency Contact',
       'enabled': 'On',
       'disabled': 'Off',
@@ -284,7 +286,8 @@ class AppLocalizations {
       'name': '姓名',
       'phone': '电话',
       'delete': '删除',
-      'sos_emergency_contact': 'SOS 紧急联络',
+      'sos_emergency': 'SOS紧急联络',
+      'sos_emergency_contact': '紧急联系人',
       'sos_description': '开启SOS紧急联络，您在骑行过程中若摔倒，将自动将您的位置信息以短信方式发给您的紧急联系人，并尝试拨打紧急联系人的电话。',
       'emergency_contact_title': 'SOS 紧急联络',
       'emergency_contact_status': '紧急联络',
