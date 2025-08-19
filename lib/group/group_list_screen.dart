@@ -19,49 +19,55 @@ class GroupListScreen extends StatelessWidget {
             },
         ),
       ),
-      body: ListView(
-        children: [
-          const Divider(color: AppConstants.primaryColor200),
-          ListTile(
-            // Height is 120.0, evenly distributed vertical padding is 60.0, take half of it
-            contentPadding: const EdgeInsets.symmetric(
-                vertical: 30.0,
-                horizontal: 16.0
-            ),
-            leading: Image.asset(
-              'assets/icons/icon_create_group.png',
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
+        child: ListView(
+          children: [
+            const Divider(color: AppConstants.primaryColor200),
+            ListTile(
+              // Height is 120.0, evenly distributed vertical padding is 60.0, take half of it
+              contentPadding: const EdgeInsets.symmetric(
+                  vertical: 30.0,
+                  horizontal: 16.0
+              ),
+              leading: Image.asset(
+                'assets/icons/icon_create_group.png',
               width: 50.0,
               height: 50.0,
+              ),
+              title: Text(
+                AppLocalizations.of(context)!.createCyclingGroup, 
+                style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),
+                ),
+              trailing: const Icon(Icons.chevron_right, color: AppConstants.textColor200,),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => CreateGroupScreen()),
+                  );
+                  },
             ),
-            title: Text(AppLocalizations.of(context)!.createCyclingGroup, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),),
-            trailing: Icon(Icons.chevron_right, color: Colors.grey[500],),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => CreateGroupScreen()),
-              );
-            },
-          ),
-          const Divider(color: AppConstants.primaryColor200),
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(
-                vertical: 30.0,
-                horizontal: 16.0
+            const Divider(color: AppConstants.primaryColor200),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                  vertical: 30.0,
+                  horizontal: 16.0
+              ),
+              leading: Image.asset(
+                'assets/icons/icon_join_group.png',
+                width: 50.0,
+                height: 50.0,
+              ),
+              title: Text(AppLocalizations.of(context)!.joinCyclingGroup, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),),
+              trailing: Icon(Icons.keyboard_arrow_right, color: Colors.grey[500],),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const JoinGroupScreen()),
+                );
+              },
             ),
-            leading: Image.asset(
-              'assets/icons/icon_join_group.png',
-              width: 50.0,
-              height: 50.0,
-            ),
-            title: Text(AppLocalizations.of(context)!.joinCyclingGroup, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),),
-            trailing: Icon(Icons.keyboard_arrow_right, color: Colors.grey[500],),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const JoinGroupScreen()),
-              );
-            },
-          ),
-          const Divider(color: AppConstants.primaryColor200),
-        ],
+            const Divider(color: AppConstants.primaryColor200),
+          ],
+        ),
       ),
     );
   }
