@@ -369,6 +369,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> with TickerPr
         leading: IconButton(
           icon: const Icon(Icons.close, size: 34.0,),
           onPressed: () {
+            _btManager.stopScan();
             Navigator.of(context).pop(false);
             },
         ),
