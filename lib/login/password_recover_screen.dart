@@ -16,13 +16,12 @@ class PasswordRecoverScreenState extends VerificationScreenState {
   @override
   void initState() {
     super.initState();
-    // mainButtonTitle will be set in build method using localization
   }
 
   @override
-  Widget build(BuildContext context) {
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     mainButtonTitle = AppLocalizations.of(context)!.nextStep;
-    return super.build(context);
   }
 
   @override

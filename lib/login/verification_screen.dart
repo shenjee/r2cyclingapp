@@ -34,6 +34,12 @@ class VerificationScreenState extends LoginBaseScreenState {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    mainButtonTitle = AppLocalizations.of(context)!.registerLogin;
+  }
+
+  @override
   void dispose() {
     _timer?.cancel();
     super.dispose();
@@ -264,7 +270,7 @@ class VerificationScreenState extends LoginBaseScreenState {
   @override
   Widget centerWidget(BuildContext context) {
     // Set the main button title using localization
-    mainButtonTitle = AppLocalizations.of(context)!.registerLogin;
+    //mainButtonTitle = AppLocalizations.of(context)!.registerLogin;
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
