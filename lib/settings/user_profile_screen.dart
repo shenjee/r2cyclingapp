@@ -110,158 +110,161 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         title: Text(AppLocalizations.of(context)!.personalCenter),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(
-                vertical: 30.0,
-                horizontal: 16.0
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
+        child: Column(
+          children: [
+            const Divider(color: AppConstants.primaryColor200),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                  vertical: 30.0,
+                  horizontal: 16.0
+              ),
+              title: Padding(
+                  padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                  child: Text(AppLocalizations.of(context)!.avatar, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor)),
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min, // Ensures the row takes the minimum space needed
+                children: [
+                  FutureBuilder<Image>(
+                    future: _account?.getAvatar(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircleAvatar(
+                          radius: 30.0,
+                          backgroundColor: Colors.transparent,
+                          child: CircularProgressIndicator(),
+                        );
+                      } else if (snapshot.hasError || !snapshot.hasData) {
+                        return const CircleAvatar(
+                          radius: 30.0,
+                          backgroundColor: Colors.transparent,
+                          child: Icon(Icons.error),
+                        );
+                      } else {
+                        return CircleAvatar(
+                          radius: 30.0,
+                          backgroundColor: Colors.transparent,
+                          backgroundImage: snapshot.data?.image,
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(width: 20.0),
+                  Icon(Icons.chevron_right, color: Colors.grey[500]),
+                ],
+              ),
+              onTap: () => _showImageSourceActionSheet(context),
             ),
-            title: Padding(
-                padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                child: Text(AppLocalizations.of(context)!.avatar, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor)),
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min, // Ensures the row takes the minimum space needed
-              children: [
-                FutureBuilder<Image>(
-                  future: _account?.getAvatar(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircleAvatar(
-                        radius: 30.0,
-                        backgroundColor: Colors.transparent,
-                        child: CircularProgressIndicator(),
-                      );
-                    } else if (snapshot.hasError || !snapshot.hasData) {
-                      return const CircleAvatar(
-                        radius: 30.0,
-                        backgroundColor: Colors.transparent,
-                        child: Icon(Icons.error),
-                      );
-                    } else {
-                      return CircleAvatar(
-                        radius: 30.0,
-                        backgroundColor: Colors.transparent,
-                        backgroundImage: snapshot.data?.image,
-                      );
-                    }
+            const Divider(color: AppConstants.primaryColor200),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                  vertical: 30.0,
+                  horizontal: 16.0
+              ),
+              title: Padding(
+                  padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                  child: Text(AppLocalizations.of(context)!.nickname, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),)
+              ),
+              trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('${_account?.nickname}', style: const TextStyle(fontSize: 24.0),),
+                    const SizedBox(width: 20.0,),
+                    Icon(Icons.chevron_right, color: Colors.grey[500],),
+                  ]), // Placeholder for nickname
+              onTap: () {
+                // Handle nickname modification
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    TextEditingController nicknameController = TextEditingController(); // Placeholder
+                    return AlertDialog(
+                      title: Text(AppLocalizations.of(context)!.modifyNickname),
+                      content: TextField(
+                        controller: nicknameController,
+                        decoration: InputDecoration(hintText: AppLocalizations.of(context)!.enterNewNickname),
+                        onSubmitted: (value) {
+                          Navigator.pop(context, value);
+                        },
+                      ),
+                      actions: [
+                        TextButton(
+                          child: Text(
+                            AppLocalizations.of(context)!.cancel,
+                            style: const TextStyle(fontSize: 20.0,color: AppConstants.primaryColor),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                        TextButton(
+                          child: Text(
+                            AppLocalizations.of(context)!.save,
+                            style: const TextStyle(fontSize: 20.0, color: AppConstants.primaryColor),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context, nicknameController.text);
+                          },
+                        ),
+                      ],
+                    );
                   },
-                ),
-                const SizedBox(width: 20.0),
-                Icon(Icons.chevron_right, color: Colors.grey[500]),
-              ],
+                ).then((newNickname) {
+                  if (newNickname != null && newNickname.isNotEmpty) {
+                    setState(() {
+                      // Save the new nickname
+                      _account?.nickname = newNickname;
+                      _manager.updateNickname(value: newNickname);
+                    });
+                  }
+                });
+              },
             ),
-            onTap: () => _showImageSourceActionSheet(context),
-          ),
-          const Divider(color: AppConstants.primaryColor200),
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(
-                vertical: 30.0,
-                horizontal: 16.0
-            ),
-            title: Padding(
-                padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                child: Text(AppLocalizations.of(context)!.nickname, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),)
-            ),
-            trailing: Row(
+            const Divider(color: AppConstants.primaryColor200),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                  vertical: 30.0,
+                  horizontal: 16.0
+              ),
+              title: Padding(
+                  padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                  child: Text(AppLocalizations.of(context)!.accountManagement, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor)),
+              ),
+              trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('${_account?.nickname}', style: const TextStyle(fontSize: 24.0),),
-                  const SizedBox(width: 20.0,),
-                  Icon(Icons.chevron_right, color: Colors.grey[500],),
-                ]), // Placeholder for nickname
-            onTap: () {
-              // Handle nickname modification
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  TextEditingController nicknameController = TextEditingController(); // Placeholder
-                  return AlertDialog(
-                    title: Text(AppLocalizations.of(context)!.modifyNickname),
-                    content: TextField(
-                      controller: nicknameController,
-                      decoration: InputDecoration(hintText: AppLocalizations.of(context)!.enterNewNickname),
-                      onSubmitted: (value) {
-                        Navigator.pop(context, value);
-                      },
-                    ),
-                    actions: [
-                      TextButton(
-                        child: Text(
-                          AppLocalizations.of(context)!.cancel,
-                          style: const TextStyle(fontSize: 20.0,color: AppConstants.primaryColor),
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                      TextButton(
-                        child: Text(
-                          AppLocalizations.of(context)!.save,
-                          style: const TextStyle(fontSize: 20.0, color: AppConstants.primaryColor),
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context, nicknameController.text);
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ).then((newNickname) {
-                if (newNickname != null && newNickname.isNotEmpty) {
-                  setState(() {
-                    // Save the new nickname
-                    _account?.nickname = newNickname;
-                    _manager.updateNickname(value: newNickname);
-                  });
-                }
-              });
-            },
-          ),
-          const Divider(color: AppConstants.primaryColor200),
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(
-                vertical: 30.0,
-                horizontal: 16.0
+                  const SizedBox(width: 20.0),
+                  Icon(Icons.chevron_right, color: Colors.grey[500]),
+                ],
+              ),
+              onTap: () {
+                // Handle account management
+              },
             ),
-            title: Padding(
-                padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                child: Text(AppLocalizations.of(context)!.accountManagement, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor)),
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(width: 20.0),
-                Icon(Icons.chevron_right, color: Colors.grey[500]),
-              ],
-            ),
-            onTap: () {
-              // Handle account management
-            },
-          ),
-          const Divider(color: AppConstants.primaryColor200),
-          // Add some spacing before the logout button
-          const Spacer(),
-          // Logout Button at the bottom
-          Expanded(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: R2FlatButton(
-                  text: AppLocalizations.of(context)!.logout,
-                  onPressed: () async {
-                    Navigator.of(context).pop(true);
-                    await _accountLogout();
-                  },
-                  backgroundColor: Colors.red,
+            const Divider(color: AppConstants.primaryColor200),
+            // Add some spacing before the logout button
+            const Spacer(),
+            // Logout Button at the bottom
+            Expanded(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: R2FlatButton(
+                    text: AppLocalizations.of(context)!.logout,
+                    onPressed: () async {
+                      Navigator.of(context).pop(true);
+                      await _accountLogout();
+                    },
+                    backgroundColor: Colors.red,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+    ),);
   }
 
   Future<void> _accountLogout() async {
