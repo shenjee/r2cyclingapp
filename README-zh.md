@@ -372,3 +372,40 @@ if (device.name!.startsWith('NewHelmet-$lastPart')) {
 - 按键通话功能（按住按钮说话）
 - 不说话时自动静音麦克风
 - 支持每组最多 8 名成员
+
+## Android和iOS的当前编译配置是什么？
+
+在此配置下，源代码已成功编译并部署到Android手机和iPhone上。
+
+### Android配置
+Android构建配置在`android/app/build.gradle`中定义：
+
+- **编译SDK**: 34
+- **最低SDK**: 21 (Android 5.0 Lollipop)
+- **目标SDK**: 34 (Android 14)
+- **命名空间**: `com.rockroad.r2cycling`
+- **Kotlin版本**: 1.7.10
+- **Gradle版本**: 7.5
+- **Android Gradle插件**: 7.3.0
+
+### iOS配置
+iOS构建配置在`ios/Runner.xcodeproj/project.pbxproj`中定义：
+
+- **部署目标**: ≥ iOS 12.0
+- **Swift版本**: 5.0
+- **Bundle标识符**: `com.rockroad.r2cycling`
+- **支持平台**: iPhone和iPad (iphoneos, iphonesimulator)
+- **设备系列**: 通用 (iPhone和iPad)
+- **Bitcode**: 已禁用
+- **开发团队**: ULA5K9X4NU
+
+### Flutter配置
+`pubspec.yaml`中的Flutter项目配置：
+
+- **Flutter SDK**: 最新稳定版本
+- **Dart SDK**: '>=3.1.0 <4.0.0'
+- **主要依赖项**:
+  - `agora_rtc_engine: ^6.3.2`
+  - `flutter_reactive_ble: ^5.3.1`
+  - `geolocator: ^10.1.0`
+  - `permission_handler: ^11.3.1`

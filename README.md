@@ -375,3 +375,40 @@ The voice intercom functionality is primarily handled by these core files:
 - Push-to-talk functionality (hold button to speak)
 - Automatic microphone muting when not speaking
 - Support for up to 8 members per group
+
+## What are the current compilation configurations for Android and iOS?
+
+With this configuration, the source code is successfully compiled and deployed on Android phones and iPhones.
+
+### Android Configuration
+The Android build configuration is defined in `android/app/build.gradle`:
+
+- **Compile SDK**: 34
+- **Minimum SDK**: 21 (Android 5.0 Lollipop)
+- **Target SDK**: 34 (Android 14)
+- **Namespace**: `com.rockroad.r2cycling`
+- **Kotlin Version**: 1.7.10
+- **Gradle Version**: 7.5
+- **Android Gradle Plugin**: 7.3.0
+
+### iOS Configuration
+The iOS build configuration is defined in `ios/Runner.xcodeproj/project.pbxproj`:
+
+- **Deployment Target**: ≥ iOS 12.0
+- **Swift Version**: 5.0
+- **Bundle Identifier**: `com.rockroad.r2cycling`
+- **Supported Platforms**: iPhone and iPad (iphoneos, iphonesimulator)
+- **Device Family**: Universal (iPhone and iPad)
+- **Bitcode**: Disabled
+- **Development Team**: ULA5K9X4NU
+
+### Flutter Configuration
+The Flutter project configuration in `pubspec.yaml`:
+
+- **Flutter SDK**: Latest stable version
+- **Dart SDK**: '>=3.1.0 <4.0.0'
+- **Key Dependencies**:
+  - `agora_rtc_engine: ^6.3.2`
+  - `flutter_reactive_ble: ^5.3.1`
+  - `geolocator: ^10.1.0`
+  - `permission_handler: ^11.3.1`
