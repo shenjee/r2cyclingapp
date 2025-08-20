@@ -307,7 +307,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             child:Column(
               children: <Widget>[
-                Image.asset('assets/images/y2red.png'),
+                Image.asset('assets/images/helmet_sample.png'),
                 Text(_connectedDevice!.name),
               ]
             ),
@@ -329,7 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               child:Column(
                   children: <Widget>[
-                    Image.asset('assets/images/y2red.png', width: 250.0,),
+                    Image.asset('assets/images/helmet_sample.png', width: 250.0,),
                     TextButton(
                       onPressed: _unbindDevice,
                       style: const ButtonStyle(
