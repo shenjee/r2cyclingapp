@@ -46,7 +46,7 @@ R2 Cycling App 是一个专为骑行爱好者设计的开源综合性 Flutter �
 	•	本开源协议不授予任何商标使用权；
 	•	与本项目API交互所需的生产环境服务由各厂商自行部署或使用官方服务。
 
-详见 LICENSE 文件。
+详见 [LICENSE](LICENSE) 文件。
 
 ## 快速开始指南
 
@@ -161,5 +161,167 @@ flutter build ios --release
 - 使用 `flutter logs` 进行调试
 - 在 Android 和 iOS 设备上测试以确保最佳兼容性
 - 确保授予所有必需权限以实现完整功能
-
 更多 Flutter 开发资源，请访问[官方文档](https://docs.flutter.dev/)。
+
+## 仓库目录树
+
+```
+r2cyclingapp/                    # 项目根目录
+├── android/                     # Android 平台配置
+│   ├── app/                     # Android 应用模块
+│   │   ├── build.gradle         # Android 应用构建配置
+│   │   └── src/                 # Android 源代码
+│   ├── build.gradle             # Android 项目构建配置
+│   ├── gradle/                  # Gradle 包装器
+│   ├── gradle.properties        # Gradle 属性
+│   └── settings.gradle          # Gradle 设置
+├── ios/                         # iOS 平台配置
+│   ├── Flutter/                 # Flutter iOS 配置
+│   ├── Runner/                  # iOS 应用目标
+│   │   ├── AppDelegate.swift    # iOS 应用委托
+│   │   ├── Assets.xcassets/     # iOS 应用资源
+│   │   ├── Base.lproj/          # iOS 本地化
+│   │   └── Info.plist           # iOS 应用信息
+│   ├── Runner.xcodeproj/        # Xcode 项目
+│   └── RunnerTests/             # iOS 单元测试
+├── lib/                         # Flutter Dart 源代码
+│   ├── connection/              # 网络和蓝牙连接
+│   │   ├── bt/                  # 蓝牙连接模块
+│   │   └── http/                # HTTP API 连接模块
+│   ├── database/                # 本地数据库管理
+│   │   ├── r2_db_helper.dart    # SQLite 数据库助手
+│   │   └── r2_storage.dart      # 本地存储工具
+│   ├── devicemanager/           # 智能头盔设备管理
+│   │   ├── r2_device.dart       # 设备模型
+│   │   └── r2_device_manager.dart # 设备连接管理器
+│   ├── emergency/               # 紧急和 SOS 功能
+│   │   ├── contact_widget.dart  # 紧急联系人 UI
+│   │   ├── emergency_contact_screen.dart # 紧急联系人屏幕
+│   │   ├── r2_sms.dart          # 短信发送功能
+│   │   ├── r2_sos_sender.dart   # SOS 消息发送器
+│   │   └── sos_widget.dart      # SOS 按钮 UI
+│   ├── group/                   # 群组通信功能
+│   │   ├── create_group_screen.dart # 创建群组屏幕
+│   │   ├── group_intercom_screen.dart # 群组对讲屏幕
+│   │   ├── group_list_screen.dart # 群组列表屏幕
+│   │   └── join_group_screen.dart # 加入群组屏幕
+│   ├── intercom/                # 实时语音通信
+│   │   └── r2_intercom_engine.dart # Agora RTC 引擎包装器
+│   ├── l10n/                    # 国际化
+│   │   └── app_localizations.dart # 应用本地化字符串
+│   ├── login/                   # 用户认证
+│   │   ├── login_base_screen.dart # 基础登录屏幕
+│   │   ├── password_recover_screen.dart # 密码恢复
+│   │   ├── password_setting_screen.dart # 密码设置
+│   │   ├── user_login_screen.dart # 用户登录屏幕
+│   │   ├── user_register_screen.dart # 用户注册屏幕
+│   │   └── verification_screen.dart # 验证码屏幕
+│   ├── permission/              # 应用权限管理
+│   │   ├── permission_dialog.dart # 权限请求对话框
+│   │   ├── r2_permission_manager.dart # 权限管理器
+│   │   └── r2_permission_model.dart # 权限模型
+│   ├── r2controls/              # 自定义 UI 组件
+│   │   ├── r2_flash.dart        # 闪现消息组件
+│   │   ├── r2_flat_button.dart  # 自定义按钮组件
+│   │   ├── r2_loading_indicator.dart # 加载指示器
+│   │   └── r2_user_text_field.dart # 自定义文本字段
+│   ├── screens/                 # 主要应用屏幕
+│   │   ├── device_pairing_screen.dart # 设备配对屏幕
+│   │   ├── helmet_screen.dart   # 头盔管理屏幕
+│   │   ├── home_screen.dart     # 主页屏幕
+│   │   └── splash_screen.dart   # 应用启动屏幕
+│   ├── service/                 # 后台服务
+│   │   └── r2_background_service.dart # 后台任务服务
+│   ├── settings/                # 应用设置和用户资料
+│   │   ├── image_cut_screen.dart # 图像裁剪屏幕
+│   │   ├── settings_screen.dart # 应用设置屏幕
+│   │   └── user_profile_screen.dart # 用户资料屏幕
+│   ├── usermanager/             # 用户管理
+│   │   ├── r2_account.dart      # 用户账户模型
+│   │   ├── r2_group.dart        # 群组模型
+│   │   ├── r2_user_manager.dart # 用户管理服务
+│   │   └── r2_user_profile.dart # 用户资料模型
+│   ├── constants.dart           # 应用常量
+│   └── main.dart                # 应用入口点
+├── assets/                      # 静态资源
+│   ├── icons/                   # 应用图标
+│   └── images/                  # 应用图片
+├── test/                        # 单元测试
+│   └── widget_test.dart         # 组件测试
+├── .gitignore                   # Git 忽略规则
+├── .metadata                    # Flutter 元数据
+├── analysis_options.yaml        # Dart 分析选项
+├── pubspec.yaml                 # Flutter 依赖
+├── pubspec.lock                 # 依赖锁定文件
+├── LICENSE                      # Apache License 2.0
+├── README.md                    # 英文文档
+└── README-zh.md                 # 中文文档
+```
+
+## R2 Cycling App 中的蓝牙配对工作流程是怎样的？
+蓝牙配对遵循两阶段流程：首先进行 BLE 发现，然后进行经典蓝牙配对以支持音频配置文件。
+
+### 1. 蓝牙配对相关文件
+
+**核心实现文件：**
+- `lib/connection/bt/r2_bluetooth_model.dart` - 处理 BLE 和经典蓝牙的主要蓝牙模型
+- `lib/devicemanager/r2_device_manager.dart` - 设备管理和配对编排
+- `lib/screens/device_pairing_screen.dart` - 设备扫描和选择的用户界面
+- `android/app/src/main/kotlin/com/rockroad/r2cyclingapp/MainActivity.kt` - Android 原生蓝牙配置文件
+- `lib/permission/r2_permission_manager.dart` - 蓝牙权限处理
+
+### 2. 库和文档
+
+**主要蓝牙库：**
+- **flutter_reactive_ble**：用于 BLE 操作（扫描、连接、数据传输）
+  - 文档：https://pub.dev/packages/flutter_reactive_ble
+- **flutter_blue_classic**：用于经典蓝牙操作（配对、音频配置文件）
+  - 文档：https://pub.dev/packages/flutter_blue_classic
+- **permission_handler**：用于运行时蓝牙权限
+  - 文档：https://pub.dev/packages/permission_handler
+
+### 3. 配对工作流程
+
+**步骤 1：BLE 发现**
+```
+1. 请求蓝牙权限
+2. 开始 BLE 扫描，使用品牌过滤器（例如 'EH201'）
+3. 用户选择发现的 BLE 设备
+4. 停止 BLE 扫描
+```
+
+**步骤 2：经典蓝牙配对**
+```
+1. 从 BLE 名称中提取设备标识符（最后 6 个字符）
+2. 开始经典蓝牙扫描
+3. 查找名称模式为 'Helmet-{标识符}' 的设备
+4. 与经典蓝牙设备绑定
+5. 启用 A2DP 和耳机音频配置文件
+6. 将设备信息保存到本地数据库
+```
+
+### 4. 代码示例：更改产品型号
+
+**将产品型号从 'EH201' 更改为其他型号：**
+
+在 `lib/screens/device_pairing_screen.dart` 第 89 行：
+```dart
+// 当前代码：
+_scannedDevices = _btManager.scanDevices(brand: 'EH201');
+
+// 更改为新型号（例如 'EH202'）：
+_scannedDevices = _btManager.scanDevices(brand: 'EH202');
+```
+
+在 `lib/connection/bt/r2_bluetooth_model.dart` 第 169 行（经典蓝牙配对逻辑）：
+```dart
+// 当前代码查找：
+if (device.name!.startsWith('Helmet-$lastPart')) {
+
+// 如果头盔命名约定发生变化，修改模式：
+if (device.name!.startsWith('NewHelmet-$lastPart')) {
+```
+
+**关键要点：**
+- EH201 是智能头盔的开发板型号
+- 设备名称可由客户自定义（无严格格式要求）
