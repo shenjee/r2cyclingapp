@@ -412,3 +412,16 @@ The Flutter project configuration in `pubspec.yaml`:
   - `flutter_reactive_ble: ^5.3.1`
   - `geolocator: ^10.1.0`
   - `permission_handler: ^11.3.1`
+
+# Citation
+If you use R2 Cycling App in your research or project, please cite:
+
+```bibtex
+@software{R2Cycling,
+  author       = {Shen Ji and R2Cycling Contributors},
+  title        = {R2Cycling: An Open Source Cycling App and Cloud API for Smart Helmets},
+  year         = {2025},
+  publisher    = {GitHub},
+  url          = {https://github.com/shenjee/r2cyclingapp}
+}
+```
