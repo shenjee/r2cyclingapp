@@ -400,7 +400,6 @@ The iOS build configuration is defined in `ios/Runner.xcodeproj/project.pbxproj`
 - **Supported Platforms**: iPhone and iPad (iphoneos, iphonesimulator)
 - **Device Family**: Universal (iPhone and iPad)
 - **Bitcode**: Disabled
-- **Development Team**: ULA5K9X4NU
 
 ### Flutter Configuration
 The Flutter project configuration in `pubspec.yaml`:

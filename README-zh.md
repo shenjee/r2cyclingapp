@@ -397,7 +397,6 @@ iOS构建配置在`ios/Runner.xcodeproj/project.pbxproj`中定义：
 - **支持平台**: iPhone和iPad (iphoneos, iphonesimulator)
 - **设备系列**: 通用 (iPhone和iPad)
 - **Bitcode**: 已禁用
-- **开发团队**: ULA5K9X4NU
 
 ### Flutter配置
 `pubspec.yaml`中的Flutter项目配置：
