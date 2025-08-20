@@ -361,8 +361,7 @@ The voice intercom functionality is primarily handled by these core files:
   const String swAppId = "your_agora_app_id_here";
   const String swToken = "your_agora_token_here";
   ```
-- **Dynamic Configuration:** App automatically requests tokens from server via `groupRoom/getVoiceToken` API endpoint
-- **Token Management:** Tokens are obtained through the `_requestRTCToken()` method which calls the backend API
+- **Dynamic Configuration:** App automatically requests tokens from server through the `_requestRTCToken()` method which calls the backend API
 
 **Important Note:** Developers and manufacturers are highly recommended to apply for their own Agora app key/token and test with hardcoded configuration. The server-based token requests are only for testing purposes and have very limited time availability for intercom functionality.
 

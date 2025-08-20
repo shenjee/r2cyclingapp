@@ -358,8 +358,7 @@ if (device.name!.startsWith('NewHelmet-$lastPart')) {
   const String swAppId = "your_agora_app_id_here";
   const String swToken = "your_agora_token_here";
   ```
-- **动态配置：** 应用通过 `groupRoom/getVoiceToken` API 端点自动从服务器请求令牌
-- **令牌管理：** 通过调用后端 API 的 `_requestRTCToken()` 方法获取令牌
+- **动态配置：** 应用通过调用后端 API 的 `_requestRTCToken()` 方法自动从服务器请求令牌
 
 **重要提示：** 强烈建议开发者和制造商申请自己的 Agora app key/token 并使用硬编码配置进行测试。基于服务器的令牌请求仅用于测试目的，对讲功能的可用时间非常有限。
 
