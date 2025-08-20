@@ -107,13 +107,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, color: AppConstants.textColor),
           ),
         ),
-        const SizedBox(height: 10),
         Padding (
           padding: const EdgeInsets.fromLTRB(20.0,0.0,20.0,10.0),
           child: Text(
             AppLocalizations.of(context)!.appDescription,
             textAlign: TextAlign.start,
-            style: const TextStyle(fontSize: 20.0, color: AppConstants.textColor),
+            style: const TextStyle(fontSize: 18.0, color: AppConstants.textColor),
           ),
         ),
       ],
@@ -128,13 +127,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
           padding: const EdgeInsets.all(10.0),
           child:Text(
             AppLocalizations.of(context)!.version,
-            style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, color: AppConstants.textColor),
+            style: const TextStyle(
+              fontSize: 24.0, 
+              fontWeight: FontWeight.bold, 
+              color: AppConstants.textColor
+              ),
           ),
         ),
-        const SizedBox(height: 10),
+
+      ],
+    );
+  }
+
+  Widget _copyrightWidget(BuildContext context) {
+    return Column(
+      children: [
         const Center (
           child: Text(
-            '1.0.0 Beta #build 24938',
+            '1.0.0 Alpha build 24938',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20.0,
@@ -142,25 +152,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _copyrightWidget(BuildContext context) {
-    return const Column(
-      children: [
+        const SizedBox(height: 10),
         Text(
-          '洛克之路（深圳）科技有限责任公司 设计开发',
+          AppLocalizations.of(context)!.companyInfo,
           textAlign: TextAlign.center,
-          style: TextStyle(color: AppConstants.textColor),
+          style: const TextStyle(color: AppConstants.textColor),
         ),
-        Text(
-          'Designed & Developed by RockRoad Tech.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: AppConstants.textColor),
-        ),
-        Text(
-          '© 2024 All Rights Reserved.',
+        const Text(
+          '© 2025 All Rights Reserved.',
           textAlign: TextAlign.center,
           style: TextStyle(color: AppConstants.textColor),
         ),
@@ -186,16 +185,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _userInfoWidget(),
             const Divider(color: AppConstants.primaryColor200),
             // 2. R2 Cycling Introduction
-            const SizedBox(height:10.0),
             _aboutWidget(context),
-            const SizedBox(height: 10.0),
-            const Divider(color: AppConstants.primaryColor200),
+            //const Divider(color: AppConstants.primaryColor200),
             // 3. App Version
-            const SizedBox(height:10.0),
-            _versionWidget(context),
-            const SizedBox(height: 10.0),
+            //_versionWidget(context),
             // 4. Company Info and Copyright
+            const Spacer(),
             Center(child:_copyrightWidget(context)),
+            const SizedBox(height: 16.0),
           ],
         ),
       ),
