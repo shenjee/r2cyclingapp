@@ -325,3 +325,51 @@ if (device.name!.startsWith('NewHelmet-$lastPart')) {
 **关键要点：**
 - EH201 是智能头盔的开发板型号
 - 设备名称可由客户自定义（无严格格式要求）
+
+## R2 骑行应用中的实时语音对讲技术是如何工作的？
+
+### 1. 语音对讲相关文件和模块
+
+语音对讲功能主要由以下核心文件处理：
+- `lib/intercom/r2_intercom_engine.dart` - 主要的 Agora RTC 引擎包装器和语音通信逻辑
+- `lib/group/group_intercom_screen.dart` - 群组语音对讲的 UI 界面，具有按键通话功能
+- `lib/connection/http/r2_http_request.dart` - 从服务器获取 RTC 令牌的 HTTP 请求
+
+### 2. Agora RTC 引擎
+
+**Agora RTC 引擎** 是一个实时通信平台，提供语音和视频通话功能。它由声网（Agora）开发，提供：
+- 超低延迟语音通信
+- 高质量音频传输
+- 多平台支持（iOS、Android、Web 等）
+- 可扩展的群组语音聊天（支持数千名参与者）
+
+**开发者资源：**
+- 官方网站：[https://www.agora.io](https://www.agora.io)
+- 文档：[https://docs.agora.io](https://docs.agora.io)
+- Flutter SDK 指南：[https://docs.agora.io/en/voice-calling/get-started/get-started-sdk?platform=flutter](https://docs.agora.io/en/voice-calling/get-started/get-started-sdk?platform=flutter)
+
+### 3. Agora 配置
+
+**当前版本：** `agora_rtc_engine: ^6.3.2`（在 pubspec.yaml 中指定）
+
+**App Key 和 Token 配置：**
+- **硬编码配置（推荐）：** 在 `lib/intercom/r2_intercom_engine.dart` 中设置 `swAppId` 和 `swToken` 常量（第 10-11 行）
+  ```dart
+  const String swAppId = "your_agora_app_id_here";
+  const String swToken = "your_agora_token_here";
+  ```
+- **动态配置：** 应用通过 `groupRoom/getVoiceToken` API 端点自动从服务器请求令牌
+- **令牌管理：** 通过调用后端 API 的 `_requestRTCToken()` 方法获取令牌
+
+**重要提示：** 强烈建议开发者和制造商申请自己的 Agora app key/token 并使用硬编码配置进行测试。基于服务器的令牌请求仅用于测试目的，对讲功能的可用时间非常有限。
+
+**如何获取 Agora 凭据：**
+1. 在 [Agora 控制台](https://console.agora.io) 注册
+2. 创建新项目以获取您的 App ID
+3. 生成用于测试的临时令牌或为生产环境实现令牌服务器
+4. 在 `r2_intercom_engine.dart` 顶部的常量中配置凭据
+
+**主要功能：**
+- 按键通话功能（按住按钮说话）
+- 不说话时自动静音麦克风
+- 支持每组最多 8 名成员

@@ -329,4 +329,50 @@ if (device.name!.startsWith('NewHelmet-$lastPart')) {
 - EH201 is the development board model for smart helmet
 - Device names can be customized by customers (no strict format requirement)
 
-##
+## How does the realtime voice intercom technology work in the R2 Cycling App?
+
+### 1. Files and Modules for Voice Intercom
+
+The voice intercom functionality is primarily handled by these core files:
+- <mcfile name="r2_intercom_engine.dart" path="/Users/jishen/development/r2cyclingapp/lib/intercom/r2_intercom_engine.dart"></mcfile> - Main Agora RTC engine wrapper and voice communication logic
+- <mcfile name="group_intercom_screen.dart" path="/Users/jishen/development/r2cyclingapp/lib/group/group_intercom_screen.dart"></mcfile> - UI screen for group voice intercom with push-to-talk functionality
+- <mcfile name="r2_http_request.dart" path="/Users/jishen/development/r2cyclingapp/lib/connection/http/r2_http_request.dart"></mcfile> - HTTP requests for obtaining RTC tokens from server
+
+### 2. Agora RTC Engine
+
+**Agora RTC Engine** is a real-time communication platform that provides voice and video calling capabilities. It's developed by Agora (声网) and offers:
+- Ultra-low latency voice communication
+- High-quality audio transmission
+- Multi-platform support (iOS, Android, Web, etc.)
+- Scalable group voice chat (up to thousands of participants)
+
+**Developer Resources:**
+- Official Website: [https://www.agora.io](https://www.agora.io)
+- Documentation: [https://docs.agora.io](https://docs.agora.io)
+- Flutter SDK Guide: [https://docs.agora.io/en/voice-calling/get-started/get-started-sdk?platform=flutter](https://docs.agora.io/en/voice-calling/get-started/get-started-sdk?platform=flutter)
+
+### 3. Agora Configuration
+
+**Current Version:** `agora_rtc_engine: ^6.3.2` (as specified in pubspec.yaml)
+
+**App Key and Token Configuration:**
+- **Hardcoded Configuration (Recommended):** Set `swAppId` and `swToken` constants in <mcfile name="r2_intercom_engine.dart" path="/Users/jishen/development/r2cyclingapp/lib/intercom/r2_intercom_engine.dart"></mcfile> (lines 10-11)
+  ```dart
+  const String swAppId = "your_agora_app_id_here";
+  const String swToken = "your_agora_token_here";
+  ```
+- **Dynamic Configuration:** App automatically requests tokens from server via `groupRoom/getVoiceToken` API endpoint
+- **Token Management:** Tokens are obtained through the `_requestRTCToken()` method which calls the backend API
+
+**Important Note:** Developers and manufacturers are highly recommended to apply for their own Agora app key/token and test with hardcoded configuration. The server-based token requests are only for testing purposes and have very limited time availability for intercom functionality.
+
+**Where to obtain Agora credentials:**
+1. Register at [Agora Console](https://console.agora.io)
+2. Create a new project to get your App ID
+3. Generate temporary tokens for testing or implement token server for production
+4. Configure the credentials in the constants at the top of `r2_intercom_engine.dart`
+
+**Key Features:**
+- Push-to-talk functionality (hold button to speak)
+- Automatic microphone muting when not speaking
+- Support for up to 8 members per group
