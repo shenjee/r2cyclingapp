@@ -32,20 +32,20 @@ This project R2 Cycling App is released under the Apache License 2.0.
 The server-side implementation is not open-sourced; only the API specifications are published for developers and manufacturers to integrate.
 
 ✅ You are allowed to:
-	•	Use the App source code in personal or commercial products;
-	•	Modify, distribute, and redistribute the code;
-	•	Integrate with the R2Cycling API (following the published documentation).
+- Use the App source code in personal or commercial products;
+- Modify, distribute, and redistribute the code;
+- Integrate with the R2Cycling API (following the published documentation).
 
 ⚠️ You must:
-	•	Retain the original copyright and license notice in redistributions;
-	•	Record any code modifications in the NOTICE file;
-	•	Not use the “R2Cycling” name or logo as trademarks without explicit permission;
-	•	By contributing to this project, you grant the necessary patent rights as described in Apache-2.0.
+- Retain the original copyright and license notice in redistributions;
+- Record any code modifications in the NOTICE file;
+- Not use the “R2Cycling” name or logo as trademarks without explicit permission;
+- By contributing to this project, you grant the necessary patent rights as described in Apache-2.0.
 
 ❌ Not included:
-	•	The server-side implementation is not part of this repository;
-	•	This license does not grant any trademark rights;
-	•	Production backend services must be self-hosted or use official offerings.
+- The server-side implementation is not part of this repository;
+- This license does not grant any trademark rights;
+- Production backend services must be self-hosted or use official offerings.
 
 See [LICENSE](LICENSE) file for details.
 
