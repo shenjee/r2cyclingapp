@@ -126,7 +126,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
         if (mounted) {
           R2Flash.showBasicFlash(
             context: context,
-            message: '您已退出该骑行组 (${response.code})',
+            message: '${AppLocalizations.of(context)!.exitGroupMessage} (${response.code})',
             duration: const Duration(seconds: 3),
           );
         }

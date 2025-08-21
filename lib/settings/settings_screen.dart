@@ -133,26 +133,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _versionWidget(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding (
-          padding: const EdgeInsets.all(10.0),
-          child:Text(
-            AppLocalizations.of(context)!.version,
-            style: const TextStyle(
-              fontSize: 24.0, 
-              fontWeight: FontWeight.bold, 
-              color: AppConstants.textColor
-              ),
-          ),
-        ),
-
-      ],
-    );
-  }
-
   Widget _copyrightWidget(BuildContext context) {
     return Column(
       children: [

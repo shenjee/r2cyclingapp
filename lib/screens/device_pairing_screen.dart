@@ -145,54 +145,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> with TickerPr
       Navigator.of(context).pop(true);
     }
   }
-
-  /*
-   * Items of instruction guide, an item features a rounded number and
-   * instruction content.
-   * number - number
-   * text - instruction content
-   */
-  Widget _instructionItem(String number, String text) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 50.0,
-          height: 50.0,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: AppConstants.primaryColor200,
-              width: 2.5,
-            ),
-            color: Colors.transparent,
-          ),
-          child: Center(
-            child: Text(
-              number,
-              style: const TextStyle(
-                color: AppConstants.primaryColor200,
-                fontSize: 22.0,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: AutoSizeText(
-              text,
-              style: const TextStyle(fontSize: 22.0),
-              maxLines: 3,
-              minFontSize: 12.0,
-              maxFontSize: 22.0,
-              overflow: TextOverflow.ellipsis,
-              group: AutoSizeGroup(),
-          ),
-        ),
-      ],
-    );
-  }
-
+  
   // Shared AutoSizeGroup for consistent text sizing across all instruction items
   final AutoSizeGroup _instructionGroup = AutoSizeGroup();
 

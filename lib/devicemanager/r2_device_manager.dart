@@ -246,7 +246,6 @@ class R2DeviceManager {
         _btModel.sendData(device!.bleAddress, [0x55, 0xB1, 0x03, 0x08, 0x00, 0x08, 0x18]);
       case HelmetRemoteOperation.volumeDown:
         _btModel.sendData(device!.bleAddress, [0x55, 0xB1, 0x03, 0x08, 0x00, 0x09, 0x19]);
-      default:
     }
   }
 }
