@@ -105,9 +105,13 @@ class R2DBHelper {
     );
     if (result.isNotEmpty) {
       Map<String, dynamic> data = result.first;
-      final groupId = data['groupId'];
-      final groupCode = data['groupCode'];
-      group = R2Group(groupId: groupId, groupCode: groupCode);
+      final groupId = data['groupId'] as int?;
+      final groupCode = data['groupCode'] as String?;
+      if (groupId != null) {
+        group = R2Group(groupId: groupId, groupCode: groupCode);
+      } else {
+        group = null;
+      }
     } else {
       group = null;
     }

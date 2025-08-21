@@ -1,0 +1,3 @@
+/* Localized versions of Info.plist keys */
+
+"NSMicrophoneUsageDescription" = "使用麦克风进行骑行团队成员间的对讲通信。";

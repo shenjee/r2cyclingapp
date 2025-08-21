@@ -279,7 +279,6 @@ class VerificationScreenState extends LoginBaseScreenState {
             prefixWidget: const Text(
               '+86',
               style: TextStyle(
-                fontWeight: FontWeight.bold,
                 fontSize: 20,
                 color: AppConstants.primaryColor200,
               ),
