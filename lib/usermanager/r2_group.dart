@@ -33,7 +33,7 @@ class R2Group {
   Map<String, dynamic> toMap() {
     return {
       'groupId': _groupId,
-      'groupCode': _groupCode ?? 'G$_groupId',
+      'groupCode': _groupCode,
     };
   }
 
