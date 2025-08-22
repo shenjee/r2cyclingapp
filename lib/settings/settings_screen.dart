@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import "package:r2cyclingapp/usermanager/r2_user_manager.dart";
 import "package:r2cyclingapp/usermanager/r2_account.dart";
@@ -136,14 +137,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _copyrightWidget(BuildContext context) {
     return Column(
       children: [
-        const Center (
-          child: Text(
-            '1.0.0 Alpha build 24938',
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20.0,
-                color: AppConstants.primaryColor
-            ),
+        Center(
+          child: FutureBuilder<PackageInfo>(
+            future: PackageInfo.fromPlatform(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final packageInfo = snapshot.data!;
+                return Text(
+                   '${AppLocalizations.of(context)!.version}: ${packageInfo.version} build ${packageInfo.buildNumber}',
+                  style: const TextStyle(
+                    fontSize: 18.0,
+                    color: AppConstants.primaryColor
+                  ),
+                );
+              } else {
+                return const Text(
+                  'Loading version...',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20.0,
+                    color: AppConstants.primaryColor
+                  ),
+                );
+              }
+            },
           ),
         ),
         const SizedBox(height: 10),
