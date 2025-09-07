@@ -48,6 +48,7 @@ dependencies:
   agora_rtc_engine: ^6.3.2
   flutter_background: ^1.2.0
   geolocator: ^13.0.1
+  flutter_markdown: ^0.6.18
   package_info_plus: ^4.2.0
   image_picker: ^1.1.2
   image_cropper: ^8.0.1
@@ -86,6 +87,10 @@ flutter:
   assets:
     - assets/icons/
     - assets/images/
+    - TermsofService.md
+    - TermsofService-zh.md
+    - PrivacyPolicy.md
+    - PrivacyPolicy-zh.md
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

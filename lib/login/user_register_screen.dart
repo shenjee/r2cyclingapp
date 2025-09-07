@@ -13,8 +13,10 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:r2cyclingapp/constants.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
@@ -36,6 +38,92 @@ class _UserRegisterScreenState extends VerificationScreenState {
   void initState() {
     super.initState();
     // mainButtonTitle will be set in didChangeDependencies
+  }
+  
+  // Build the clickable text spans for Terms of Service and Privacy Policy
+  Widget _buildTermsAndPrivacyText(BuildContext context) {
+    final String fullText = AppLocalizations.of(context)!.agreeTermsAndPrivacy;
+    final String termsText = Localizations.localeOf(context).languageCode == 'zh' ? '《用户协议》' : 'Terms of Service';
+    final String privacyText = Localizations.localeOf(context).languageCode == 'zh' ? '《隐私策略》' : 'Privacy Policy';
+    
+    // Find the positions of the terms and privacy text in the full text
+    final int termsIndex = fullText.indexOf(termsText);
+    final int privacyIndex = fullText.indexOf(privacyText);
+    
+    if (termsIndex == -1 || privacyIndex == -1) {
+      // If we can't find the exact text, just return the full text
+      return AutoSizeText(
+        fullText,
+        minFontSize: 10.0,
+        maxFontSize: 16.0,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+    
+    // Create the rich text with clickable links
+    final richText = TextSpan(
+      style: const TextStyle(color: Colors.black),
+      children: [
+        TextSpan(text: fullText.substring(0, termsIndex)),
+        TextSpan(
+          text: termsText,
+          style: const TextStyle(
+            decoration: TextDecoration.underline,
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              _showTermsOrPrivacy(
+                context, 
+                Localizations.localeOf(context).languageCode == 'zh' ? 'TermsofService-zh.md' : 'TermsofService.md',
+                Localizations.localeOf(context).languageCode == 'zh' ? '用户协议' : 'Terms of Service'
+              );
+            },
+        ),
+        TextSpan(text: fullText.substring(termsIndex + termsText.length, privacyIndex)),
+        TextSpan(
+          text: privacyText,
+          style: const TextStyle(
+            decoration: TextDecoration.underline,
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              _showTermsOrPrivacy(
+                context, 
+                Localizations.localeOf(context).languageCode == 'zh' ? 'PrivacyPolicy-zh.md' : 'PrivacyPolicy.md',
+                Localizations.localeOf(context).languageCode == 'zh' ? '隐私策略' : 'Privacy Policy'
+              );
+            },
+        ),
+        TextSpan(text: fullText.substring(privacyIndex + privacyText.length)),
+      ],
+    );
+
+    return AutoSizeText.rich(
+      richText,
+      minFontSize: 10.0,
+      maxFontSize: 16.0,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+  
+  // Show the Terms of Service or Privacy Policy in a full screen dialog
+  void _showTermsOrPrivacy(BuildContext context, String fileName, String title) async {
+    try {
+      // Load the file from assets
+      final String content = await DefaultAssetBundle.of(context).loadString(fileName);
+      
+      if (mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => _TermsPrivacyScreen(content: content, title: title),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error loading $fileName: $e');
+    }
   }
 
   @override
@@ -136,13 +224,7 @@ class _UserRegisterScreenState extends VerificationScreenState {
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: AutoSizeText(
-                      AppLocalizations.of(context)!.agreeTermsAndPrivacy,
-                      style: const TextStyle(color: Colors.black),
-                      maxLines: 1,
-                      minFontSize: 10.0,
-                      maxFontSize: 16.0,
-                    ),
+                    child: _buildTermsAndPrivacyText(context),
                   ),
                 ],
               ),
@@ -179,5 +261,51 @@ class _UserRegisterScreenState extends VerificationScreenState {
          }
        }
      }
+  }
+}
+
+// Screen to display Terms of Service or Privacy Policy
+class _TermsPrivacyScreen extends StatelessWidget {
+  final String content;
+  final String title;
+
+  const _TermsPrivacyScreen({required this.content, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Markdown(
+              data: content,
+              padding: const EdgeInsets.all(16.0),
+            ),
+          ),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppConstants.primaryColor,
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
+              ),
+              child: Text(
+                AppLocalizations.of(context)!.confirm,
+                style: const TextStyle(fontSize: 16.0, color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
