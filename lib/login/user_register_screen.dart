@@ -40,7 +40,9 @@ class _UserRegisterScreenState extends VerificationScreenState {
     // mainButtonTitle will be set in didChangeDependencies
   }
   
-  // Build the clickable text spans for Terms of Service and Privacy Policy
+  /*
+   * Build the clickable text spans for Terms of Service and Privacy Policy
+   */
   Widget _buildTermsAndPrivacyText(BuildContext context) {
     final String fullText = AppLocalizations.of(context)!.agreeTermsAndPrivacy;
     final String termsText = AppLocalizations.of(context)!.termsOfService;
@@ -122,7 +124,7 @@ class _UserRegisterScreenState extends VerificationScreenState {
         );
       }
     } catch (e) {
-      print('Error loading $fileName: $e');
+      debugPrint('Error loading $fileName: $e');
     }
   }
 
