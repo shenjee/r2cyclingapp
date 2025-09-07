@@ -59,7 +59,10 @@ class AppLocalizations {
   String get confirmAgain => _localizedValues[locale.languageCode]!['confirm_again']!;
   String get agreeTermsAndPrivacy => _localizedValues[locale.languageCode]!['agree_terms_and_privacy']!;
 
-  // Permissions
+  String get termsOfService => _localizedValues[locale.languageCode]!['terms_of_service']!;
+
+  String get privacyPolicy => _localizedValues[locale.languageCode]!['privacy_policy']!;
+
   String get needFollowingPermissions => _localizedValues[locale.languageCode]!['need_following_permissions']!;
   String get bluetooth => _localizedValues[locale.languageCode]!['bluetooth']!;
   String get bluetoothDesc => _localizedValues[locale.languageCode]!['bluetooth_desc']!;
@@ -172,7 +175,8 @@ class AppLocalizations {
       'password_hint': 'Password must be at least 8 characters, including numbers and letters\n',
       'enter_new_password': 'New password',
       'confirm_again': 'Confirm again',
-      'agree_terms_and_privacy': 'I agree to the Terms of Service & Privacy Policy',
+      'agree_terms_and_privacy': 'I agree to the Terms of Service & Privacy Policy',      'terms_of_service': 'Terms of Service',
+      'privacy_policy': 'Privacy Policy',
       'need_following_permissions': 'Need the following permissions',
       'bluetooth': 'Bluetooth',
       'bluetooth_desc': 'Connect to your smart helmet',
@@ -273,6 +277,8 @@ class AppLocalizations {
       'enter_new_password': '输入新密码',
       'confirm_again': '再次确认',
       'agree_terms_and_privacy': '我已同意《用户协议》和《隐私策略》',
+      'terms_of_service': '用户协议',
+      'privacy_policy': '隐私策略',
       'need_following_permissions': '需要获取以下权限',
       'bluetooth': '蓝牙',
       'bluetooth_desc': '连接您的智能头盔',

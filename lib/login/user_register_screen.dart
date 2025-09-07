@@ -43,8 +43,8 @@ class _UserRegisterScreenState extends VerificationScreenState {
   // Build the clickable text spans for Terms of Service and Privacy Policy
   Widget _buildTermsAndPrivacyText(BuildContext context) {
     final String fullText = AppLocalizations.of(context)!.agreeTermsAndPrivacy;
-    final String termsText = Localizations.localeOf(context).languageCode == 'zh' ? '《用户协议》' : 'Terms of Service';
-    final String privacyText = Localizations.localeOf(context).languageCode == 'zh' ? '《隐私策略》' : 'Privacy Policy';
+    final String termsText = AppLocalizations.of(context)!.termsOfService;
+    final String privacyText = AppLocalizations.of(context)!.privacyPolicy;
     
     // Find the positions of the terms and privacy text in the full text
     final int termsIndex = fullText.indexOf(termsText);
@@ -76,7 +76,7 @@ class _UserRegisterScreenState extends VerificationScreenState {
               _showTermsOrPrivacy(
                 context, 
                 Localizations.localeOf(context).languageCode == 'zh' ? 'TermsofService-zh.md' : 'TermsofService.md',
-                Localizations.localeOf(context).languageCode == 'zh' ? '用户协议' : 'Terms of Service'
+                AppLocalizations.of(context)!.termsOfService
               );
             },
         ),
@@ -91,7 +91,7 @@ class _UserRegisterScreenState extends VerificationScreenState {
               _showTermsOrPrivacy(
                 context, 
                 Localizations.localeOf(context).languageCode == 'zh' ? 'PrivacyPolicy-zh.md' : 'PrivacyPolicy.md',
-                Localizations.localeOf(context).languageCode == 'zh' ? '隐私策略' : 'Privacy Policy'
+                AppLocalizations.of(context)!.privacyPolicy
               );
             },
         ),
