@@ -20,6 +20,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
+import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 
 import 'verification_screen.dart';
 import 'password_setting_screen.dart';
@@ -263,6 +264,20 @@ class _UserRegisterScreenState extends VerificationScreenState {
          }
        }
      }
+  }
+  
+  @override
+  void mainButtonClicked() {
+    if (_isAgreed) {
+      super.mainButtonClicked();
+    } else {
+      // Show a message if user hasn't agreed to terms
+      R2Flash.showBasicFlash(
+        context: context,
+        message: AppLocalizations.of(context)!.agreeTermsAndPrivacy,
+        duration: const Duration(seconds: 3),
+      );
+    }
   }
 }
 
