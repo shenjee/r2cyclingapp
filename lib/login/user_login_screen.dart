@@ -19,6 +19,8 @@ import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 import 'package:r2cyclingapp/login/password_recover_screen.dart';
 
@@ -252,12 +254,107 @@ class _UserLoginScreenState extends LoginBaseScreenState {
     );
   }
 
+  /*
+   * Build the clickable text spans for Terms of Service and Privacy Policy
+   */
+  Widget _buildTermsAndPrivacyText(BuildContext context) {
+    final String fullText = AppLocalizations.of(context)!.agreeTermsAndPrivacy;
+    final String termsText = AppLocalizations.of(context)!.termsOfService;
+    final String privacyText = AppLocalizations.of(context)!.privacyPolicy;
+    
+    // Find the positions of the terms and privacy text in the full text
+    final int termsIndex = fullText.indexOf(termsText);
+    final int privacyIndex = fullText.indexOf(privacyText);
+    
+    if (termsIndex == -1 || privacyIndex == -1) {
+      // If we can't find the exact text, just return the full text
+      return AutoSizeText(
+        fullText,
+        minFontSize: 10.0,
+        maxFontSize: 16.0,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+    
+    // Create the rich text with clickable links
+    final richText = TextSpan(
+      style: const TextStyle(color: Colors.black),
+      children: [
+        TextSpan(text: fullText.substring(0, termsIndex)),
+        TextSpan(
+          text: termsText,
+          style: const TextStyle(
+            decoration: TextDecoration.underline,
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              _showTermsOrPrivacy(
+                context, 
+                Localizations.localeOf(context).languageCode == 'zh' ? 'TermsofService-zh.md' : 'TermsofService.md',
+                AppLocalizations.of(context)!.termsOfService
+              );
+            },
+        ),
+        TextSpan(text: fullText.substring(termsIndex + termsText.length, privacyIndex)),
+        TextSpan(
+          text: privacyText,
+          style: const TextStyle(
+            decoration: TextDecoration.underline,
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              _showTermsOrPrivacy(
+                context, 
+                Localizations.localeOf(context).languageCode == 'zh' ? 'PrivacyPolicy-zh.md' : 'PrivacyPolicy.md',
+                AppLocalizations.of(context)!.privacyPolicy
+              );
+            },
+        ),
+        TextSpan(text: fullText.substring(privacyIndex + privacyText.length)),
+      ],
+    );
+
+    return AutoSizeText.rich(
+      richText,
+      minFontSize: 10.0,
+      maxFontSize: 16.0,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  // Show the Terms of Service or Privacy Policy in a full screen dialog
+  void _showTermsOrPrivacy(BuildContext context, String fileName, String title) async {
+    try {
+      // Load the file from assets
+      final String content = await DefaultAssetBundle.of(context).loadString(fileName);
+      
+      if (mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => _TermsPrivacyScreen(content: content, title: title),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error loading $fileName: $e');
+    }
+  }
+
   @override
   void mainButtonClicked() {
-    // TODO: implement main_button_clicked
-    super.mainButtonClicked();
-    debugPrint('$runtimeType : main button clicked');
-    _requestLogin();
+    if (_isAgreed) {
+      debugPrint('$runtimeType : main button clicked');
+      _requestLogin();
+    } else {
+      // Show a message if user hasn't agreed to terms
+      R2Flash.showBasicFlash(
+        context: context,
+        message: AppLocalizations.of(context)!.agreeTermsAndPrivacy,
+        duration: const Duration(seconds: 3),
+      );
+    }
   }
 
   @override
@@ -311,13 +408,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: AutoSizeText(
-                        AppLocalizations.of(context)!.agreeTermsAndPrivacy,
-                        style: const TextStyle(color: Colors.black),
-                        maxLines: 1,
-                        minFontSize: 10.0,
-                        maxFontSize: 16.0,
-                      ),
+                      child: _buildTermsAndPrivacyText(context),
                     ),
                   ],
                 ),
@@ -326,6 +417,52 @@ class _UserLoginScreenState extends LoginBaseScreenState {
           ),
         ),
       ],
+    );
+  }
+}
+
+// Screen to display Terms of Service or Privacy Policy
+class _TermsPrivacyScreen extends StatelessWidget {
+  final String content;
+  final String title;
+
+  const _TermsPrivacyScreen({required this.content, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Markdown(
+              data: content,
+              padding: const EdgeInsets.all(16.0),
+            ),
+          ),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppConstants.primaryColor,
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
+              ),
+              child: Text(
+                AppLocalizations.of(context)!.confirm,
+                style: const TextStyle(fontSize: 16.0, color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
