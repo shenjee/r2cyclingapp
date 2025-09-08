@@ -106,4 +106,4 @@ We take the protection of minors’ personal information very seriously. If you 
 We regularly review and may update this Privacy Policy to reflect changes in our personal information processing practices. If we make significant changes to this Privacy Policy, we will notify you through the App so that you are aware of the latest version of this Privacy Policy. Such changes will take effect from the date of notification or as specified in the Privacy Policy. We recommend that you regularly review this page to stay informed about our privacy practices.  
 ## VII. Contact Us  
 If you have any comments or questions regarding this Privacy Policy, or if you have any concerns about how RockRoad handles your personal information, please contact us using the following details and indicate that your inquiry or comment is related to the “Privacy Policy”:  
-<p align="right">Email Address: privacy@r2cycling.com</p>
+Email Address: privacy@r2cycling.com
