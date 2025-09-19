@@ -50,8 +50,10 @@ class PermissionDialog extends StatelessWidget {
                     text: AppLocalizations.of(context)!.confirm,
                     onPressed: () async {
                         await _permisson.requestPermissions();
-                        Navigator.of(context).pop(0);
-                        },
+                        if (context.mounted) {
+                          Navigator.of(context).pop(0);
+                        }
+                      },
                   ),
                   const SizedBox(height: 50),
                 ],
@@ -118,7 +120,9 @@ class PermissionDialog extends StatelessWidget {
                   text: AppLocalizations.of(context)!.confirm,
                   onPressed: () async {
                     await _permisson.requestPermissions();
-                    Navigator.of(context).pop(0);
+                    if (context.mounted) {
+                      Navigator.of(context).pop(0);
+                    }
                   },
                 ),
                 const SizedBox(height: 50),

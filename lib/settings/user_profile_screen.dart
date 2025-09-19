@@ -61,7 +61,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     await _requestPermissions();  // Request permissions
 
     showModalBottomSheet(
-      context: context,
+      context: context, // BuildContext is used synchronously here in showModalBottomSheet
       builder: (BuildContext context) {
         return SafeArea(
           child: Wrap(
