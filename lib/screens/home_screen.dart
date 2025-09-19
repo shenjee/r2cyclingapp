@@ -374,7 +374,7 @@ class _HomeScreenState extends State<HomeScreen> {
         w = _infoWidget();
       }
     }
-    return Container(
+    return SizedBox(
       width: 360.0,
       height:320.0,
       child: w,
