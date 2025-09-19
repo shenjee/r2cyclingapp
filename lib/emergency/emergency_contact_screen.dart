@@ -221,7 +221,7 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
 
     if (arrayContacts.length < 3) {
       contactListItems.add(
-        Container(
+        SizedBox(
           height: 100.0,
           child:ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
