@@ -185,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
   /*
    * callback for Bluetooth Paring Screen
    * when BLE's connected, it will be executed.
-   */
+   
   Future<void> _helmetConnected(R2Device device) async {
     // later, it should analyze the brand name from id and name
     try {
@@ -197,6 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
       debugPrint('$runtimeType : $error');
     }
   }
+  */
 
   void _unbindDevice() async {
     if (_connectedDevice != null) {
@@ -455,16 +456,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: () async {
                           final manager = R2UserManager();
                           final group = await manager.localGroup();
-                          if (mounted) {
-                            if (null == group || 0 == group.groupId) {
-                              // If user is not in a group, navigate to GroupListScreen
-                              await Navigator.pushNamed(context, '/groupList');
-                            } else {
-                              // If user is in a group, navigate to GroupIntercomScreen
-                              await Navigator.pushNamed(context, '/intercom');
-                            }
-                            _loadGroupStatus();
+
+                          // Guard context after the first await
+                          if (!context.mounted) return;
+
+                          if (null == group || 0 == group.groupId) {
+                            // If user is not in a group, navigate to GroupListScreen
+                            await Navigator.pushNamed(context, '/groupList');
+                          } else {
+                            // If user is in a group, navigate to GroupIntercomScreen
+                            await Navigator.pushNamed(context, '/intercom');
                           }
+
+                          // Guard context again after navigation returns (another async gap)
+                          if (!context.mounted) return;
+                          await _loadGroupStatus();
                         }
                     ),
                     const Divider(color: AppConstants.primaryColor200),
