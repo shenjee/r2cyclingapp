@@ -149,7 +149,9 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
           await _addContact(name, phone);
           _loadEmergencyContactStatus();
           _checkContactsAfterClose();
-          Navigator.of(context).pop();
+          if (context.mounted) {
+            Navigator.of(context).pop();
+          }
         },
         onClose: () {
           _checkContactsAfterClose();
@@ -166,15 +168,20 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
         onSave: (name, phone) async {
           await _updateContact(contact['contactId'], name, phone);
           _loadEmergencyContactStatus();
-          Navigator.of(context).pop();
+          if (context.mounted) {
+            Navigator.of(context).pop();
+          }
         },
         onDelete: () async {
           await _deleteContact(contact['contactId']);
           _loadEmergencyContactStatus();
           _checkContactsAfterClose();
-          Navigator.of(context).pop();
+          if (context.mounted) {
+            Navigator.of(context).pop();
+          }
         },
         onClose: () {
+          _checkContactsAfterClose();
         },
       ),
     );

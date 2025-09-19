@@ -111,7 +111,7 @@ class _UserRegisterScreenState extends VerificationScreenState {
       // Load the file from assets
       final String content = await DefaultAssetBundle.of(context).loadString(fileName);
       
-      if (mounted) {
+      if (context.mounted) {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => _TermsPrivacyScreen(content: content, title: title),

@@ -24,7 +24,8 @@ class ContactWidget extends StatefulWidget {
   final Function? onDelete;
   final Function? onClose;
 
-  ContactWidget({
+  const ContactWidget({
+    super.key,
     this.contact,
     required this.onSave,
     this.onDelete,
