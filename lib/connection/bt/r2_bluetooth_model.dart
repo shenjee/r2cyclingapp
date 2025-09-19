@@ -52,7 +52,6 @@ class R2BluetoothModel {
   Stream<ConnectionStateUpdate?> get connectedDevice => _connectedDevice.stream;
   Stream<List<int>> get receivedData => _receivedData.stream;
 
-  late QualifiedCharacteristic _characteristic;
   // write service and characteristic
   final String _writeServiceID = "0000ffe5-0000-1000-8000-00805f9b34fb";
   final String _writeCharacteristicID = "0000ffe9-0000-1000-8000-00805f9b34fb";
@@ -174,7 +173,7 @@ class R2BluetoothModel {
 
   /*
    * enable A2dp and Headset profiles
-   */
+   
   static Future<void> _enableAudioProfiles(String deviceAddress) async {
     try {
       await platform.invokeMethod('enableAudioProfiles', {"deviceAddress": deviceAddress});
@@ -182,6 +181,7 @@ class R2BluetoothModel {
       debugPrint("Failed to enable audio profiles: ${e.message}");
     }
   }
+  */
 
   Future<void> pairClassicBt(String name) async {
     // Get the last 6 characters (e.g. Helmet-39C5B8 in EH201-5BA3BB39C5B8)
@@ -192,8 +192,7 @@ class R2BluetoothModel {
         // classic bluetooth scanned
         debugPrint('$runtimeType : bond state: ${device.bondState
             .name}, device type: ${device.type.name}');
-        BluetoothConnection? connection;
-
+        
         if (device.name!.startsWith('Helmet-$lastPart')) {
           // stop scanning classic bt
           _classicBt.stopScan();

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 
 class R2Sms {
   static const MethodChannel _platform = MethodChannel('r2_sms_channel');
@@ -25,7 +26,7 @@ class R2Sms {
       };
       await _platform.invokeMethod('sendSMS', params);
     } on PlatformException catch (e) {
-      print("Failed to send SMS: '${e.message}'.");
+      debugPrint("Failed to send SMS: '${e.message}'.");
     }
   }
 }

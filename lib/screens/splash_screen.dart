@@ -17,8 +17,9 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';// For loading animation
 import 'dart:async';
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> {

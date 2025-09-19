@@ -46,22 +46,22 @@ class LoginBaseScreenState extends State<LoginBaseScreen> {
   }
 
   Widget topWidget(BuildContext context) {
-    // TODO: override
+    // Override this method in subclass to provide custom top widget content
     return Container();
   }
 
   Widget centerWidget(BuildContext context) {
-    // TODO: override
+    // Override this method in subclass to provide custom center widget content
     return Container();
   }
 
   Widget bottomWidget(BuildContext context) {
-    // TODO: override
+    // Override this method in subclass to provide custom bottom widget content
     return Container();
   }
 
   void mainButtonClicked() {
-    // TODO: override
+    // This method should be overridden in subclasses to handle main button tap events
   }
 
   // private method

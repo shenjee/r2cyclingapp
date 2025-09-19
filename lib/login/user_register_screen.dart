@@ -36,10 +36,6 @@ class _UserRegisterScreenState extends VerificationScreenState {
   bool _isAgreed = false;
 
   @override
-  void initState() {
-    super.initState();
-    // mainButtonTitle will be set in didChangeDependencies
-  }
   
   /*
    * Build the clickable text spans for Terms of Service and Privacy Policy

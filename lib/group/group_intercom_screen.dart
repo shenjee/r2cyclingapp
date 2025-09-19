@@ -133,6 +133,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
         // remove local cached invalid group
         final group = await _manager.localGroup();
         final ret = await _manager.leaveGroup(group!.groupId);
+        debugPrint('$runtimeType : leave group ${group.groupId} : $ret');
 
         // do not pop till flash finishes
         Future.delayed(const Duration(seconds: 3), () async {
@@ -284,53 +285,53 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   Widget _groupMemberWidget(BuildContext context) {
     return Center(
       child: Container(
-      width: MediaQuery.of(context).size.width * 0.9, // Constrain to 90% of screen width
-      child: GridView.builder (
-        shrinkWrap: true, // When used in Column, ensure GridView doesn't expand to occupy entire space
-        physics: const NeverScrollableScrollPhysics(), // Disable GridView scrolling to avoid conflicts with external scrolling
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4, // 4 members per row
-          crossAxisSpacing: 0.0,
-          mainAxisSpacing: 0.0,
-          childAspectRatio: 0.7, // Make items taller to provide more space for avatar and text
+        width: MediaQuery.of(context).size.width * 0.9, // Constrain to 90% of screen width
+        child: GridView.builder (
+          shrinkWrap: true, // When used in Column, ensure GridView doesn't expand to occupy entire space
+          physics: const NeverScrollableScrollPhysics(), // Disable GridView scrolling to avoid conflicts with external scrolling
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4, // 4 members per row
+            crossAxisSpacing: 0.0,
+            mainAxisSpacing: 0.0,
+            childAspectRatio: 0.7, // Make items taller to provide more space for avatar and text
+          ),
+          itemCount: _members.length,
+          itemBuilder: (context, index) {
+            final member  = _members[index];
+            return Column(
+              children: [
+                FutureBuilder<Image>(
+                  future: member.getAvatar(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircleAvatar(
+                        radius: 35.0,
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (snapshot.hasError || !snapshot.hasData) {
+                      return const CircleAvatar(
+                        radius: 35.0,
+                        child: Icon(Icons.error),
+                      );
+                    } else {
+                      return CircleAvatar(
+                        radius: 35.0,
+                        backgroundImage: snapshot.data?.image,
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  member.nickname,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12.0,),
+                ),
+              ],
+            );
+          },
         ),
-        itemCount: _members.length,
-        itemBuilder: (context, index) {
-          final member  = _members[index];
-          return Column(
-            children: [
-              FutureBuilder<Image>(
-                future: member.getAvatar(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircleAvatar(
-                      radius: 35.0,
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (snapshot.hasError || !snapshot.hasData) {
-                    return const CircleAvatar(
-                      radius: 35.0,
-                      child: Icon(Icons.error),
-                    );
-                  } else {
-                    return CircleAvatar(
-                      radius: 35.0,
-                      backgroundImage: snapshot.data?.image,
-                    );
-                  }
-                },
-              ),
-              const SizedBox(height: 2),
-              Text(
-                member.nickname,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12.0,),
-              ),
-            ],
-          );
-        },
-      ),
       ),
     );
   }
@@ -414,7 +415,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           boxShadow: _isPressed
-              ? [const BoxShadow(color: AppConstants.primaryColor300, blurRadius: 15, offset: const Offset(0, 0), spreadRadius: 5)]
+              ? [const BoxShadow(color: AppConstants.primaryColor300, blurRadius: 15, offset: Offset(0, 0), spreadRadius: 5)]
               : [],
         ),
         child: Stack(
