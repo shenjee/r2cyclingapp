@@ -27,10 +27,6 @@ class PasswordRecoverScreen extends VerificationScreen {
 }
 
 class PasswordRecoverScreenState extends VerificationScreenState {
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void didChangeDependencies() {

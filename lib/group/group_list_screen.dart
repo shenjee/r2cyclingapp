@@ -56,7 +56,7 @@ class GroupListScreen extends StatelessWidget {
               trailing: const Icon(Icons.chevron_right, color: AppConstants.textColor200,),
               onTap: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => CreateGroupScreen()),
+                  MaterialPageRoute(builder: (context) => const CreateGroupScreen()),
                   );
                   },
             ),

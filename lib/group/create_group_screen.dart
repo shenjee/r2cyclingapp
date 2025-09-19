@@ -199,7 +199,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
   Widget _groupMemberWidget(BuildContext context) {
     return Center(
-      child: Container(
+      child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.9, // Constrain to 90% of screen width
         child: GridView.builder (
           shrinkWrap: true, // When used in Column, ensure GridView doesn't expand to occupy entire space

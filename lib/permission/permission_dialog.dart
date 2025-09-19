@@ -37,7 +37,10 @@ class PermissionDialog extends StatelessWidget {
                 children:<Widget> [
                   Padding(
                       padding: const EdgeInsets.fromLTRB(0, 50, 0, 0),
-                      child: Text(AppLocalizations.of(context)!.needFollowingPermissions, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))
+                      child: Text(
+                        AppLocalizations.of(context)!.needFollowingPermissions, 
+                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)
+                        )
                   ),
                   _permissionitem(context, 'assets/icons/bluetooth.png', AppLocalizations.of(context)!.bluetooth, AppLocalizations.of(context)!.bluetoothDesc),
                   _permissionitem(context, 'assets/icons/mic.png', AppLocalizations.of(context)!.microphone, AppLocalizations.of(context)!.microphoneDesc),
@@ -102,7 +105,10 @@ class PermissionDialog extends StatelessWidget {
               children:<Widget> [
                 Padding(
                     padding: const EdgeInsets.fromLTRB(0, 50, 0, 0),
-                    child: Text(AppLocalizations.of(context)!.needFollowingPermissions, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))
+                    child: Text(
+                      AppLocalizations.of(context)!.needFollowingPermissions, 
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)
+                      )
                 ),
                 _permissionitem(context, 'assets/icons/bluetooth.png', AppLocalizations.of(context)!.bluetooth, AppLocalizations.of(context)!.bluetoothDesc),
                  _permissionitem(context, 'assets/icons/mic.png', AppLocalizations.of(context)!.microphone, AppLocalizations.of(context)!.microphoneDesc),

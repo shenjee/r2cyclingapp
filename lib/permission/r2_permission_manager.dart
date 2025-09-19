@@ -228,7 +228,7 @@ class R2PermissionManager {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Permission Required'),
+          title: const Text('Permission Required'),
           content: Text(_getPermissionRationale(permissionType)),
           actions: [
             TextButton(
@@ -236,14 +236,14 @@ class R2PermissionManager {
                 Navigator.of(context).pop();
                 completer.complete(false);
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 completer.complete(true);
               },
-              child: Text('Grant Permission'),
+              child: const Text('Grant Permission'),
             ),
           ],
         );
