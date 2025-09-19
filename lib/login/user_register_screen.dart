@@ -34,8 +34,6 @@ class UserRegisterScreen extends VerificationScreen {
 
 class _UserRegisterScreenState extends VerificationScreenState {
   bool _isAgreed = false;
-
-  @override
   
   /*
    * Build the clickable text spans for Terms of Service and Privacy Policy

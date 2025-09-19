@@ -15,7 +15,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class R2Storage {
-  static final _storage = FlutterSecureStorage();
+  static const _storage = FlutterSecureStorage();
 
   static Future<void> save(String key, String value) async {
     await _storage.write(key:key, value:value);

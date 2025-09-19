@@ -32,7 +32,7 @@ class ContactWidget extends StatefulWidget {
   });
 
   @override
-  _ContactWidgetState createState() => _ContactWidgetState();
+  State<ContactWidget> createState() => _ContactWidgetState();
 }
 
 class _ContactWidgetState extends State<ContactWidget> {
