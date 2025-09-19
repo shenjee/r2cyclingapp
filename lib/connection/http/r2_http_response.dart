@@ -55,14 +55,14 @@ class R2HttpResponse {
   }
 
   factory R2HttpResponse.fromJson(String responseBody) {
-    final Map<String, dynamic> json_map = json.decode(responseBody);
+    final Map<String, dynamic> jsonMap = json.decode(responseBody);
 
     return R2HttpResponse(
-      success: json_map['success']??false,
-      message: json_map['message']??'',
-      code: json_map['code']??0,
-      stackTracke: json_map['stackTracke'],
-      result: _parseResult(json_map['result']),
+      success: jsonMap['success']??false,
+      message: jsonMap['message']??'',
+      code: jsonMap['code']??0,
+      stackTracke: jsonMap['stackTracke'],
+      result: _parseResult(jsonMap['result']),
     );
   }
 }
