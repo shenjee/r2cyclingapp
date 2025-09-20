@@ -244,6 +244,7 @@ r2cyclingapp/                    # 项目根目录
 │   ├── constants.dart           # 应用常量
 │   └── main.dart                # 应用入口点
 ├── assets/                      # 静态资源
+│   ├── configs/                 # 配置文件
 │   ├── icons/                   # 应用图标
 │   └── images/                  # 应用图片
 ├── test/                        # 单元测试

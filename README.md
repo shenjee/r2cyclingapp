@@ -247,6 +247,7 @@ r2cyclingapp/                    # Project root
 │   ├── constants.dart           # App constants
 │   └── main.dart                # App entry point
 ├── assets/                      # Static assets
+│   ├── configs/                 # Configuration files
 │   ├── icons/                   # App icons
 │   └── images/                  # App images
 ├── test/                        # Unit tests
