@@ -34,9 +34,9 @@ class R2DeviceManager {
 
   final _btModel = R2BluetoothModel();
 
-  Stream<List<R2Device>> scanDevices({String? brand}) {
+  Stream<List<R2Device>> scanDevices() {
     // Start scanning BLE devices using the existing method in _btModel
-    _btModel.scanDevices(brand: brand);
+    _btModel.scanDevices();
 
     // Convert the stream of List<DiscoveredDevice> to List<R2Device>
     return _btModel.scannedDevices.map((discoveredDevices) {
@@ -45,7 +45,7 @@ class R2DeviceManager {
         return R2Device(
           deviceId: discoveredDevice.id.replaceAll(RegExp(r'[^a-zA-Z0-9]'), ''),
           model: '',
-          brand: brand ?? '',
+          brand: '', // DiscoveredDevice does not provide brand, use empty string
           name: discoveredDevice.name.isNotEmpty ? discoveredDevice.name : "Unknown",
           bleAddress: discoveredDevice.id,
           classicAddress: null,

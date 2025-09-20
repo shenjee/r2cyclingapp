@@ -100,7 +100,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> with TickerPr
       _title = AppLocalizations.of(context)!.selectYourHelmet;
     });
 
-    _scannedDevices = _btManager.scanDevices(brand: 'EH201');
+    _scannedDevices = _btManager.scanDevices();
   }
 
   /*

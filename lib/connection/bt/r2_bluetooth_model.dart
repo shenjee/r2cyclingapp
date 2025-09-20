@@ -52,6 +52,8 @@ class R2BluetoothModel {
   Stream<ConnectionStateUpdate?> get connectedDevice => _connectedDevice.stream;
   Stream<List<int>> get receivedData => _receivedData.stream;
 
+  // ble name
+  final String _bleName = "EH201";
   // write service and characteristic
   final String _writeServiceID = "0000ffe5-0000-1000-8000-00805f9b34fb";
   final String _writeCharacteristicID = "0000ffe9-0000-1000-8000-00805f9b34fb";
@@ -66,7 +68,8 @@ class R2BluetoothModel {
   Stream<Map<String, String>> get pairingStream => _pairingController.stream;
 
   // ble operations
-  void scanDevices({String? brand}) {
+  void scanDevices() {
+    String brand = _bleName;
     _scannedDevices.add([]);
     _scanHandler = _reactiveBle.scanForDevices(withServices: []).listen(
             (device) {
