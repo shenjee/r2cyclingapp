@@ -300,31 +300,68 @@ r2cyclingapp/                    # 项目根目录
 6. 将设备信息保存到本地数据库
 ```
 
-### 4. 代码示例：更改产品型号
+### 4. 添加或修改蓝牙设备配置
 
-**将产品型号从 'EH201' 更改为其他型号：**
+**使用 JSON 配置系统添加或修改设备信息：**
 
-在 `lib/screens/device_pairing_screen.dart` 第 89 行：
-```dart
-// 当前代码：
-_scannedDevices = _btManager.scanDevices(brand: 'EH201');
+从版本 1.1.0 开始，应用使用基于 JSON 的配置系统来管理蓝牙设备信息，无需修改代码即可支持新设备。
 
-// 更改为新型号（例如 'EH202'）：
-_scannedDevices = _btManager.scanDevices(brand: 'EH202');
+#### 4.1 JSON 配置文件
+
+编辑 `assets/configs/bluetooth_devices.json` 文件添加或修改设备配置：
+
+```json
+{
+  "devices": [
+    {
+      "manufacturer": "EH201",
+      "name": "EH201",
+      "write_service": "0000ffe5-0000-1000-8000-00805f9b34fb",
+      "write_characteristic": "0000ffe9-0000-1000-8000-00805f9b34fb",
+      "read_service": "0000ffe0-0000-1000-8000-00805f9b34fb",
+      "read_characteristic": "0000ffe4-0000-1000-8000-00805f9b34fb",
+      "classic_bt_prefix": "Helmet"
+    },
+    {
+      "manufacturer": "EH202",
+      "name": "EH202",
+      "write_service": "0000ffe5-0000-1000-8000-00805f9b34fb",
+      "write_characteristic": "0000ffe9-0000-1000-8000-00805f9b34fb",
+      "read_service": "0000ffe0-0000-1000-8000-00805f9b34fb",
+      "read_characteristic": "0000ffe4-0000-1000-8000-00805f9b34fb",
+      "classic_bt_prefix": "NewHelmet"
+    }
+  ]
+}
 ```
 
-在 `lib/connection/bt/r2_bluetooth_model.dart` 第 169 行（经典蓝牙配对逻辑）：
+#### 4.2 配置参数说明
+
+- `manufacturer`: 制造商标识
+- `name`: 设备名称前缀，用于扫描匹配
+- `write_service`: 写入服务 UUID
+- `write_characteristic`: 写入特征 UUID
+- `read_service`: 读取服务 UUID
+- `read_characteristic`: 读取特征 UUID
+- `classic_bt_prefix`: 经典蓝牙设备名称前缀
+
+#### 4.3 配置系统工作原理
+
+应用使用 `BluetoothConfigManager` 类（位于 `lib/connection/bt/r2_bluetooth_config.dart`）在启动时加载配置：
+
 ```dart
-// 当前代码查找：
-if (device.name!.startsWith('Helmet-$lastPart')) {
+// 获取配置管理器实例
+final configManager = BluetoothConfigManager();
 
-// 如果头盔命名约定发生变化，修改模式：
-if (device.name!.startsWith('NewHelmet-$lastPart')) {
+// 加载配置
+await configManager.loadConfigurations();
+
+// 获取所有设备配置
+List<BluetoothDeviceConfig> allConfigs = configManager.deviceConfigs;
+
+// 根据设备名称获取特定配置
+BluetoothDeviceConfig? config = configManager.getConfigByName('EH202');
 ```
-
-**关键要点：**
-- EH201 是智能头盔的开发板型号
-- 设备名称可由客户自定义（无严格格式要求）
 
 ## R2 骑行应用中的实时语音对讲技术是如何工作的？
 

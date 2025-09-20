@@ -1,0 +1,13 @@
+{
+  "devices": [
+    {
+      "manufacturer": "EH201",
+      "name": "EH201",
+      "write_service": "0000ffe5-0000-1000-8000-00805f9b34fb",
+      "write_characteristic": "0000ffe9-0000-1000-8000-00805f9b34fb",
+      "read_service": "0000ffe0-0000-1000-8000-00805f9b34fb",
+      "read_characteristic": "0000ffe4-0000-1000-8000-00805f9b34fb",
+      "classic_bt_prefix": "Helmet"
+    }
+  ]
+}

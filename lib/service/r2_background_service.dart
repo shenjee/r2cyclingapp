@@ -125,7 +125,7 @@ class R2BackgroundService {
       
       // Connect to the bonded device
       try {
-        await _btModel.connectDevice(device.deviceId);
+        await _btModel.connectDevice(device.deviceId, deviceName: device.name);
         debugPrint('$runtimeType : Connected to device');
       } catch (e) {
         debugPrint('$runtimeType : Failed to connect to device: $e');

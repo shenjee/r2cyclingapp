@@ -303,31 +303,68 @@ The Bluetooth pairing follows a two-stage process: BLE discovery first, then Cla
 6. Save device information to local database
 ```
 
-### 4. Code Sample: Changing Product Model
+### 4. Adding or Modifying Bluetooth Device Configurations
 
-**To change the product model from 'EH201' to another model:**
+**Using the JSON Configuration System to Add or Modify Device Information:**
 
-In `lib/screens/device_pairing_screen.dart`, line 89:
-```dart
-// Current code:
-_scannedDevices = _btManager.scanDevices(brand: 'EH201');
+Starting from version 1.1.0, the app uses a JSON-based configuration system to manage Bluetooth device information, allowing support for new devices without code modifications.
 
-// Change to new model (e.g., 'EH202'):
-_scannedDevices = _btManager.scanDevices(brand: 'EH202');
+#### 4.1 JSON Configuration File
+
+Edit the `assets/configs/bluetooth_devices.json` file to add or modify device configurations:
+
+```json
+{
+  "devices": [
+    {
+      "manufacturer": "EH201",
+      "name": "EH201",
+      "write_service": "0000ffe5-0000-1000-8000-00805f9b34fb",
+      "write_characteristic": "0000ffe9-0000-1000-8000-00805f9b34fb",
+      "read_service": "0000ffe0-0000-1000-8000-00805f9b34fb",
+      "read_characteristic": "0000ffe4-0000-1000-8000-00805f9b34fb",
+      "classic_bt_prefix": "Helmet"
+    },
+    {
+      "manufacturer": "EH202",
+      "name": "EH202",
+      "write_service": "0000ffe5-0000-1000-8000-00805f9b34fb",
+      "write_characteristic": "0000ffe9-0000-1000-8000-00805f9b34fb",
+      "read_service": "0000ffe0-0000-1000-8000-00805f9b34fb",
+      "read_characteristic": "0000ffe4-0000-1000-8000-00805f9b34fb",
+      "classic_bt_prefix": "NewHelmet"
+    }
+  ]
+}
 ```
 
-In `lib/connection/bt/r2_bluetooth_model.dart`, line 169 (Classic BT pairing logic):
+#### 4.2 Configuration Parameters
+
+- `manufacturer`: Manufacturer identifier
+- `name`: Device name prefix used for scanning and matching
+- `write_service`: Write service UUID
+- `write_characteristic`: Write characteristic UUID
+- `read_service`: Read service UUID
+- `read_characteristic`: Read characteristic UUID
+- `classic_bt_prefix`: Classic Bluetooth device name prefix
+
+#### 4.3 How the Configuration System Works
+
+The app uses the `BluetoothConfigManager` class (located in `lib/connection/bt/r2_bluetooth_config.dart`) to load configurations at startup:
+
 ```dart
-// Current code looks for:
-if (device.name!.startsWith('Helmet-$lastPart')) {
+// Get the configuration manager instance
+final configManager = BluetoothConfigManager();
 
-// If helmet naming convention changes, modify the pattern:
-if (device.name!.startsWith('NewHelmet-$lastPart')) {
+// Load configurations
+await configManager.loadConfigurations();
+
+// Get all device configurations
+List<BluetoothDeviceConfig> allConfigs = configManager.deviceConfigs;
+
+// Get a specific configuration by device name
+BluetoothDeviceConfig? config = configManager.getConfigByName('EH202');
 ```
-
-**Key Points:**
-- EH201 is the development board model for smart helmet
-- Device names can be customized by customers (no strict format requirement)
 
 ## How does the realtime voice intercom technology work in the R2 Cycling App?
 

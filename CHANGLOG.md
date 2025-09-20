@@ -7,13 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ---
 
 ## [Unreleased]
-### Added
-- [x] Content of Privacy Policy and Terms of Service
-
 ### Fixed
-- [x] Registration and login are not allowed untill privacy policy and terms of service are agreed to.
 - [ ] Synchronization of avatar between mobile app and helmet
 - [ ] Display member status during voice intercom, avatar and speaking indicator
+
+---
+
+## [1.1.0] - 2025-09-20
+### Added
+- JSON-based Bluetooth device configuration system
+- Support for multiple device manufacturers
+- Content of Privacy Policy and Terms of Service
+
+### Changed
+- Refactored Bluetooth connection handling for better maintainability
+- Improved device scanning to support multiple device types
+
+### Fixed
+- Registration and login are not allowed until privacy policy and terms of service are agreed to
 
 ---
 

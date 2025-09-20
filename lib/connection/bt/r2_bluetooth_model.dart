@@ -20,6 +20,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 // classic bt lib
 import 'package:flutter_blue_classic/flutter_blue_classic.dart';
+// import bluetooth config
+import 'r2_bluetooth_config.dart';
 
 
 class R2BluetoothModel {
@@ -34,7 +36,18 @@ class R2BluetoothModel {
   }
 
   // Private constructor for internal use
-  R2BluetoothModel._internal();
+  R2BluetoothModel._internal() {
+    _initializeConfigs();
+  }
+
+  // Initialize Bluetooth configurations
+  Future<void> _initializeConfigs() async {
+    await BluetoothConfigManager().loadConfigurations();
+    _deviceConfigs = BluetoothConfigManager().deviceConfigs;
+  }
+
+  // List of device configurations
+  List<BluetoothDeviceConfig> _deviceConfigs = [];
 
   // ble
   final FlutterReactiveBle _reactiveBle = FlutterReactiveBle();
@@ -52,14 +65,8 @@ class R2BluetoothModel {
   Stream<ConnectionStateUpdate?> get connectedDevice => _connectedDevice.stream;
   Stream<List<int>> get receivedData => _receivedData.stream;
 
-  // ble name
-  final String _bleName = "EH201";
-  // write service and characteristic
-  final String _writeServiceID = "0000ffe5-0000-1000-8000-00805f9b34fb";
-  final String _writeCharacteristicID = "0000ffe9-0000-1000-8000-00805f9b34fb";
-  // read service and characteristic
-  final String _readServcieID = "0000ffe0-0000-1000-8000-00805f9b34fb";
-  final String _readCharacteristicID = "0000ffe4-0000-1000-8000-00805f9b34fb";
+  // Current device configuration
+  BluetoothDeviceConfig? _currentConfig;
 
   // classic bt
   final _classicBt = FlutterBlueClassic();
@@ -69,23 +76,22 @@ class R2BluetoothModel {
 
   // ble operations
   void scanDevices() {
-    String brand = _bleName;
     _scannedDevices.add([]);
     _scanHandler = _reactiveBle.scanForDevices(withServices: []).listen(
             (device) {
               debugPrint('$runtimeType found ble: ${device.id} ${device.name}');
-              if (brand != null) {
-                if (device.name.startsWith(brand)) {
-                  final devices = List<DiscoveredDevice>.from(
-                      _scannedDevices.value);
-                  if (!devices.any((d) => d.id == device.id)) {
-                    devices.add(device);
-                    _scannedDevices.add(devices);
-                  }
+              
+              // Check if device name matches any of our configured devices
+              bool isMatchingDevice = false;
+              for (var config in _deviceConfigs) {
+                if (device.name.startsWith(config.name)) {
+                  isMatchingDevice = true;
+                  break;
                 }
-              } else {
-                final devices = List<DiscoveredDevice>.from(
-                    _scannedDevices.value);
+              }
+              
+              if (_deviceConfigs.isEmpty || isMatchingDevice) {
+                final devices = List<DiscoveredDevice>.from(_scannedDevices.value);
                 if (!devices.any((d) => d.id == device.id)) {
                   devices.add(device);
                   _scannedDevices.add(devices);
@@ -102,10 +108,31 @@ class R2BluetoothModel {
     _scanHandler = null;
   }
 
-  Future<void> connectDevice(String deviceId) async {
+  Future<void> connectDevice(String deviceId, {String? deviceName}) async {
     debugPrint('$runtimeType : connect device id: $deviceId');
 
     try {
+      // Find the appropriate configuration for this device
+      if (deviceName != null) {
+        for (var config in _deviceConfigs) {
+          if (deviceName.startsWith(config.name)) {
+            _currentConfig = config;
+            break;
+          }
+        }
+      }
+      
+      // If no configuration found, use the first one as default (if available)
+      if (_currentConfig == null && _deviceConfigs.isNotEmpty) {
+        _currentConfig = _deviceConfigs.first;
+      }
+      
+      // If still no configuration, log error and return
+      if (_currentConfig == null) {
+        debugPrint('$runtimeType : No device configuration found for $deviceName');
+        return;
+      }
+
       _connectionHandler = _reactiveBle.connectToDevice(
           id: deviceId,
           connectionTimeout: const Duration(seconds: 10))
@@ -116,8 +143,8 @@ class R2BluetoothModel {
               debugPrint('$runtimeType : device $deviceId connected');
               _writeSubscription = _reactiveBle.subscribeToCharacteristic(
                   QualifiedCharacteristic(
-                    serviceId: Uuid.parse(_writeServiceID),
-                    characteristicId: Uuid.parse(_writeCharacteristicID),
+                    serviceId: Uuid.parse(_currentConfig!.writeService),
+                    characteristicId: Uuid.parse(_currentConfig!.writeCharacteristic),
                     deviceId: deviceId,
                   )).listen((data) {
                 _receivedData.add(data);
@@ -133,14 +160,19 @@ class R2BluetoothModel {
     }
   }
 
-  // todo: deviceId is the address of BLE
+  // deviceId is the address of BLE
   Future<void> sendData(String deviceId, List<int> data) async {
+    if (_currentConfig == null) {
+      debugPrint('$runtimeType : No device configuration available');
+      return;
+    }
+    
     debugPrint('$runtimeType : sending data to device: $deviceId');
     try {
       await _reactiveBle.writeCharacteristicWithoutResponse(
           QualifiedCharacteristic(
-            characteristicId: Uuid.parse(_writeCharacteristicID),
-            serviceId: Uuid.parse(_writeServiceID),
+            characteristicId: Uuid.parse(_currentConfig!.writeCharacteristic),
+            serviceId: Uuid.parse(_currentConfig!.writeService),
             deviceId: deviceId,
           ),
           value: data);
@@ -150,13 +182,18 @@ class R2BluetoothModel {
   }
 
   /*
-   *
+   * Start listening for data from the device
    */
   void startListening(String deviceId, Function(String) onDataReceived) {
+    if (_currentConfig == null) {
+      debugPrint('$runtimeType : No device configuration available');
+      return;
+    }
+    
     try {
       final c = QualifiedCharacteristic(
-        serviceId: Uuid.parse(_readServcieID),
-        characteristicId: Uuid.parse(_readCharacteristicID),
+        serviceId: Uuid.parse(_currentConfig!.readService),
+        characteristicId: Uuid.parse(_currentConfig!.readCharacteristic),
         deviceId: deviceId,
       );
       _reactiveBle.subscribeToCharacteristic(c).listen((data) {
@@ -189,6 +226,21 @@ class R2BluetoothModel {
   Future<void> pairClassicBt(String name) async {
     // Get the last 6 characters (e.g. Helmet-39C5B8 in EH201-5BA3BB39C5B8)
     String? lastPart = name.substring(name.length - 6);
+    
+    // Find the appropriate configuration for this device
+    for (var config in _deviceConfigs) {
+      if (name.startsWith(config.name)) {
+        _currentConfig = config;
+        break;
+      }
+    }
+    
+    // If no configuration found, use the first one as default (if available)
+    if (_currentConfig == null && _deviceConfigs.isNotEmpty) {
+      _currentConfig = _deviceConfigs.first;
+    }
+    
+    String classicBtPrefix = _currentConfig?.classicBtPrefix ?? 'Helmet';
 
     if (lastPart.isNotEmpty) {
       _classicBt.scanResults.listen((device) async {
@@ -196,7 +248,7 @@ class R2BluetoothModel {
         debugPrint('$runtimeType : bond state: ${device.bondState
             .name}, device type: ${device.type.name}');
         
-        if (device.name!.startsWith('Helmet-$lastPart')) {
+        if (device.name!.startsWith('$classicBtPrefix-$lastPart')) {
           // stop scanning classic bt
           _classicBt.stopScan();
           // bond device
