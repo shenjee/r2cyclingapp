@@ -14,6 +14,7 @@
 
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/foundation.dart' show debugPrint;
 
 class BluetoothDeviceConfig {
   final String manufacturer;
@@ -67,7 +68,7 @@ class BluetoothConfigManager {
           .map((deviceJson) => BluetoothDeviceConfig.fromJson(deviceJson))
           .toList();
     } catch (e) {
-      print('Error loading Bluetooth configurations: $e');
+      debugPrint('Error loading Bluetooth configurations: $e');
       // Initialize with default configuration if loading fails
       _deviceConfigs = [
         BluetoothDeviceConfig(
