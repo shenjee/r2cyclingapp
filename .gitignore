@@ -48,6 +48,16 @@ app.*.map.json
 # iOS build artifacts
 ios/Podfile.lock
 ios/.symlinks/
+ios/build/
+ios/DerivedData/
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral
+**/ios/Flutter/flutter_assets/
+ios/Runner.xcworkspace/xcuserdata/
+ios/Runner.xcodeproj/xcuserdata/
+ios/build/ios/XCBuildData/
 
 # Android build artifacts
 android/app/.cxx/

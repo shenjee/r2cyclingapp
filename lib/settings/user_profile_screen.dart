@@ -129,6 +129,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         child: Column(
           children: [
             const Divider(color: AppConstants.primaryColor200),
+            // user avatar
             ListTile(
               contentPadding: const EdgeInsets.symmetric(
                   vertical: 30.0,
@@ -172,6 +173,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               onTap: () => _showImageSourceActionSheet(context),
             ),
             const Divider(color: AppConstants.primaryColor200),
+            // user nickname
             ListTile(
               contentPadding: const EdgeInsets.symmetric(
                   vertical: 30.0,
@@ -237,6 +239,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               },
             ),
             const Divider(color: AppConstants.primaryColor200),
+            // user management
             ListTile(
               contentPadding: const EdgeInsets.symmetric(
                   vertical: 30.0,
