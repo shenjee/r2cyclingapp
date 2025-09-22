@@ -41,19 +41,19 @@ class R2Account {
   // Getter for id
   int get uid => _uid;
 
-  // Getter for account (cannot be modified)
+  // Getter for account (generally should not be modified except during initialization)
   String get account => _account;
   set account(String value) {
     _account = value;
   }
 
-  // Getter for phone number (cannot be modified)
+  // Getter for phone number (generally should not be modified except during initialization)
   String get phoneNumber => _phoneNumber;
   set phoneNumber(String value) {
     _phoneNumber = value;
   }
 
-  // Getter for email (cannot be modified)
+  // Getter for email (generally should not be modified except during initialization)
   String get email => _email;
   set email(String value) {
     _email = value;
