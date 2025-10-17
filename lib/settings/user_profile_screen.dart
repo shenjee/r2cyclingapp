@@ -22,6 +22,9 @@ import 'package:r2cyclingapp/usermanager/r2_account.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/constants.dart';
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
+import 'package:r2cyclingapp/r2controls/r2_flash.dart';
+import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
+import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 
 import 'image_cut_screen.dart';
 
@@ -108,11 +111,65 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       );
 
       if (croppedImage != null) {
+        // Upload the image to server first
+        await _uploadAvatarImage(croppedImage);
+        
         setState(() {
-          // save the image path and upload to server
+          // save the image path locally
           _account?.avatarPath = croppedImage.path;
           _manager.updateAvatar(value: croppedImage.path);
         });
+      }
+    }
+  }
+
+  // Upload avatar image to server
+  Future<void> _uploadAvatarImage(File imageFile) async {
+    // Show loading indicator
+    R2LoadingIndicator.show(context);
+    
+    try {
+      // Get the auth token
+      final token = await _manager.readToken();
+      
+      // Create HTTP request with necessary headers
+      final request = R2HttpRequest();
+      final response = await request.uploadFile(
+        api: 'tools/upload',
+        token: token,
+        file: imageFile,
+      );
+      
+      if (response.success) {
+        debugPrint('Avatar uploaded successfully');
+        debugPrint('BasePath: ${response.result['basePath']}');
+        debugPrint('Filename: ${response.result['filename']}');
+        
+        // You can store the server path if needed
+        // final serverPath = '${response.result['basePath']}/${response.result['filename']}';
+      } else {
+        debugPrint('Failed to upload avatar: ${response.message}');
+        if (mounted) {
+          R2Flash.showBasicFlash(
+            context: context,
+            message: '${response.message} (${response.code})',
+            duration: const Duration(seconds: 3),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error uploading avatar: $e');
+      if (mounted) {
+        R2Flash.showBasicFlash(
+          context: context,
+          message: 'Error uploading avatar: $e',
+          duration: const Duration(seconds: 3),
+        );
+      }
+    } finally {
+      // Hide loading indicator
+      if (mounted) {
+        R2LoadingIndicator.stop(context);
       }
     }
   }

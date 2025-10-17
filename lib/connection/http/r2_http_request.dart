@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart';
 import 'r2_http_response.dart';
 
 class R2HttpRequest {
@@ -106,6 +108,66 @@ class R2HttpRequest {
       }
     } catch (e) {
       // Handle errors.
+      return R2HttpResponse(
+        success: false,
+        message: e.toString(),
+        code: 500,
+        result: null,
+      );
+    }
+  }
+
+  // Method to upload a file using multipart/form-data
+  Future<R2HttpResponse> uploadFile({String? token, required String api, required File file}) async {
+    final String url = '$_baseUrl$api'; // Construct the full URL.
+    
+    // Create a multipart request
+    final request = http.MultipartRequest('POST', Uri.parse(url));
+    
+    // Add the file to the request
+    final fileStream = http.ByteStream(file.openRead());
+    final fileLength = await file.length();
+    final multipartFile = http.MultipartFile(
+      'file', // parameter name as specified in the API
+      fileStream,
+      fileLength,
+      filename: basename(file.path),
+    );
+    request.files.add(multipartFile);
+
+    // Add thumbnail parameters required by tools/upload
+    if (api == 'tools/upload') {
+      request.fields['thumbHeight'] = '200';
+      request.fields['thumbWidth'] = '200';
+    }
+    
+    // Add required headers
+    request.headers['Content-Type'] = 'multipart/form-data';
+    request.headers['Accept'] = 'application/json';
+    
+    // Add the token to headers if it is provided
+    if (token != null && token.isNotEmpty) {
+      request.headers['apiToken'] = token;
+    }
+    
+    try {
+      // Send the request
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      
+      // Convert the HTTP response to R2HttpResponse
+      if (response.statusCode == 200) {
+        return R2HttpResponse.fromJson(response.body);
+      } else {
+        return R2HttpResponse(
+          success: false,
+          message: 'Request failed with status: ${response.statusCode}',
+          code: response.statusCode,
+          result: null,
+        );
+      }
+    } catch (e) {
+      // Handle errors
       return R2HttpResponse(
         success: false,
         message: e.toString(),
