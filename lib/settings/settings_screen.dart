@@ -32,7 +32,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _manager = R2UserManager();
   bool _isLoggedIn = false;
   R2Account? _account;
-  File? _avatar;
+  late Future<Image> _avatarFuture;
 
   @override
   void initState() {
@@ -47,14 +47,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _loadAvatar() async {
-    final manager = R2UserManager();
-    final account = await manager.localAccount();
-    if (account != null && account.avatarPath.isNotEmpty) {
-      setState(() {
-        _account = account;
-        _avatar = File(account.avatarPath);
-      });
-    }
+    final account = await _manager.localAccount();
+    setState(() {
+      _account = account;
+      _avatarFuture = _manager.getAvatar();
+    });
   }
 
   Future<void> _loadAccount() async {
@@ -77,7 +74,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       contentPadding:
           const EdgeInsets.symmetric(vertical: 30.0, horizontal: 16.0),
       leading: FutureBuilder<Image>(
-        future: _manager.getAvatar(),
+        future: _avatarFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircleAvatar(
