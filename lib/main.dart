@@ -15,6 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'dart:async';
+import 'dart:io';
 
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/constants.dart';
@@ -28,6 +29,8 @@ import 'package:r2cyclingapp/login/user_register_screen.dart';
 import 'package:r2cyclingapp/login/user_login_screen.dart';
 import 'package:r2cyclingapp/settings/settings_screen.dart';
 import 'package:r2cyclingapp/settings/user_profile_screen.dart';
+import 'package:r2cyclingapp/database/r2_storage.dart';
+import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 
 void main() async {
   // Use Zone to capture all exceptions
@@ -57,11 +60,46 @@ void main() async {
   });
 }
 
+Future<void> _appInit() async {
+  try {
+    final int code = Platform.isAndroid ? 2 : 3;
+    final request = R2HttpRequest();
+    final response = await request.getRequest(api: 'common/appInit?clientTypeCode=$code');
+
+    if (response.success == true && response.result is Map) {
+      final Map<String, dynamic> r = Map<String, dynamic>.from(response.result);
+      String sanitize(dynamic v) => (v ?? '').toString().trim();
+      Future<void> saveKV(String k, dynamic v) => R2Storage.save(k, sanitize(v));
+
+      await Future.wait([
+        saveKV('fileDomain', r['fileDomain']),
+        saveKV('amqpPubUrl', r['amqpPubUrl']),
+        saveKV('amqpVhost', r['amqpVhost']),
+        saveKV('currentVerNum', r['currentVerNum']),
+        saveKV('baseVerNum', r['baseVerNum']),
+        saveKV('verDescr', r['verDescr']),
+        saveKV('releaseTime', r['releaseTime']),
+        saveKV('newToken', r['newToken']),
+        saveKV('updUrl', sanitize(r['updUrl']).replaceAll('`', '')),
+        saveKV('loggedIn', (r['loggedIn'] ?? false).toString()),
+      ]);
+
+      debugPrint('appInit: settings saved');
+    } else {
+      debugPrint('appInit failed: code=${response.code} message=${response.message}');
+    }
+  } catch (e) {
+    debugPrint('appInit error: $e');
+  }
+}
+
 /// Initialize services required by the app
 Future<void> _initServices() async {
   try {
     // Add services that need to be initialized when the app starts
     // For example: database, shared preferences, network client, etc.
+
+    await _appInit();
     
     // Simulate initialization process
     await Future.delayed(const Duration(milliseconds: 100));
@@ -120,7 +158,6 @@ class R2CyclingApp extends StatelessWidget {
   }
 }
 
-/// Safe mode application class, provides basic functionality when the main app crashes
 class R2CyclingAppSafeMode extends StatelessWidget {
   const R2CyclingAppSafeMode({super.key});
 
@@ -164,11 +201,9 @@ class R2CyclingAppSafeMode extends StatelessWidget {
               const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () {
-                  // Try to restart the main app
                   try {
                     runApp(const R2CyclingApp());
                   } catch (e) {
-                    // If still failing, stay in safe mode
                     debugPrint('Restart failed: $e');
                   }
                 },

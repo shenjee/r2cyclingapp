@@ -30,7 +30,7 @@ class R2Account {
     String? account,
     String? phoneNumber,
     String? email,
-  }) : _uid = uid,
+  })  : _uid = uid,
         _account = account ?? '',
         _phoneNumber = phoneNumber ?? '',
         _email = email ?? '',
@@ -84,9 +84,6 @@ class R2Account {
 
   // Save a custom icon and update the path
   Future<void> saveAvatar(File avatarFile) async {
-    final directory = await getTemporaryDirectory();
-    _avatarPath = '${directory.path}/avatar_${_account.hashCode}.png';
-
     // Save the avatar to the specified path
     await avatarFile.copy(_avatarPath);
   }
@@ -98,9 +95,7 @@ class R2Account {
       return account.substring(account.length - 4);
     } else if (_isEmailAddress(account)) {
       // The part of the email before "@"
-      return account
-          .split('@')
-          .first;
+      return account.split('@').first;
     } else {
       return 'User';
     }
@@ -108,15 +103,15 @@ class R2Account {
 
   // Private helper method to check if the account is a phone number
   static bool _isPhoneNumber(String account) {
-    final phoneNumberPattern = RegExp(
-        r'^\d{10,}$'); // A simple pattern for phone numbers
+    final phoneNumberPattern =
+        RegExp(r'^\d{10,}$'); // A simple pattern for phone numbers
     return phoneNumberPattern.hasMatch(account);
   }
 
   // Private helper method to check if the account is an email address
   static bool _isEmailAddress(String account) {
-    final emailPattern = RegExp(
-        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailPattern =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     return emailPattern.hasMatch(account);
   }
 

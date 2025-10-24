@@ -22,6 +22,10 @@ import 'package:r2cyclingapp/usermanager/r2_account.dart';
 import 'package:r2cyclingapp/usermanager/r2_group.dart';
 import 'package:r2cyclingapp/devicemanager/r2_device.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_profile.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
+import 'package:http/http.dart' as http;
 
 class R2UserManager {
   final _db = R2DBHelper();
@@ -50,13 +54,13 @@ class R2UserManager {
     return intDate;
   }
 
-  Map<String,dynamic> _decodeToken(String token) {
+  Map<String, dynamic> _decodeToken(String token) {
     // 拆分 JWT 为三部分
     final parts = token.split('.');
 
     if (parts.length != 3) {
       debugPrint('Invalid token');
-      return {'na':'na'};
+      return {'na': 'na'};
     }
 
     // the second part of the token
@@ -74,10 +78,10 @@ class R2UserManager {
   }
 
   Future<void> saveToken(String token) async {
-    await R2Storage.save('authtoken',token);
+    await R2Storage.save('authtoken', token);
   }
 
-  Future<String?> readToken()async {
+  Future<String?> readToken() async {
     return await R2Storage.read('authtoken');
   }
 
@@ -93,8 +97,8 @@ class R2UserManager {
 
       if (expiredDate > 0) {
         // Convert Unix timestamp to DateTime (in milliseconds)
-        DateTime timestampDate = DateTime.fromMillisecondsSinceEpoch(
-            expiredDate * 1000);
+        DateTime timestampDate =
+            DateTime.fromMillisecondsSinceEpoch(expiredDate * 1000);
 
         // Get the current local date and time
         DateTime currentTime = DateTime.now();
@@ -127,7 +131,7 @@ class R2UserManager {
   }
 
   Future<int> saveUser(int uid, String account) async {
-    final r2a = R2Account(uid:uid, account: account);
+    final r2a = R2Account(uid: uid, account: account);
     return await _db.saveAccount(r2a);
   }
 
@@ -169,7 +173,7 @@ class R2UserManager {
     if (true == response.success) {
       debugPrint('$runtimeType : message ${response.message}');
       final Map<String, dynamic> data = response.result;
-      
+
       // Create and save R2Account from API response
       final account = R2Account(
         uid: data['userId'] ?? 0,
@@ -179,26 +183,29 @@ class R2UserManager {
         ..nickname = data['userName'] ?? ''
         ..avatarPath = data['userAvatar'] ?? ''
         ..isPasswdSet = data['defaultPassword'] != true;
-      
+
       await _db.saveAccount(account);
-      
+
       // Create and save R2Group from API response
       if (data['cyclingGroupId'] != null && data['cyclingGroupId'] != 0) {
         final group = R2Group(
           groupId: data['cyclingGroupId'],
-          groupCode: data['groupNum']?.toString() ?? 'Group ${data['cyclingGroupId']}',
+          groupCode:
+              data['groupNum']?.toString() ?? 'Group ${data['cyclingGroupId']}',
         );
         await _db.saveGroup(account.uid, group);
       }
-      
+
       // Create and save R2Device from API response
-      if (data['hwDeviceId'] != null && data['hwDeviceId'].toString().isNotEmpty) {
+      if (data['hwDeviceId'] != null &&
+          data['hwDeviceId'].toString().isNotEmpty) {
         final address = _formatMacAddress(data['hwDeviceId']?.toString() ?? '');
         final device = R2Device(
           deviceId: data['hwDeviceId']?.toString() ?? '',
           model: data['hwDeviceModelId']?.toString() ?? '',
           brand: data['manufacturerId']?.toString() ?? '',
-          name: '${data['manufacturerId']?.toString()} ${data['hwDeviceId']?.toString() ?? ''}',
+          name:
+              '${data['manufacturerId']?.toString()} ${data['hwDeviceId']?.toString() ?? ''}',
           // so now deviceId is ble address, format is '9AD3B79F27A6'
           // it should be converted to '9A:D3:B7:9F:27:A6'
           // todo: Refactor device class on server side to improve data structure and consistency
@@ -206,15 +213,15 @@ class R2UserManager {
         );
         await _db.saveDevice(device);
       }
-      
+
       // Save emergency contact setting
       if (data['ifEmergencyContactEnable'] != null) {
         final isEnabled = data['ifEmergencyContactEnable'].toString() == 'Y';
         await _db.saveEmergencyContactEnabled(isEnabled);
       }
-      
     } else {
-      debugPrint('$runtimeType : request profile info failed: ${response.code}');
+      debugPrint(
+          '$runtimeType : request profile info failed: ${response.code}');
     }
 
     return profile;
@@ -232,29 +239,241 @@ class R2UserManager {
       // update local account's nickname
       final r2a = await localAccount();
       r2a!.nickname = value!;
-      return await _db.saveAccount(r2a);
+      final saved = await _db.saveAccount(r2a);
+      // sync to server
+      await _updateUserProfile(nickName: value);
+      return saved;
     } else {
       // update specified user's nickname
       return 0;
     }
   }
 
+  Future<Image> getAvatar() async {
+    try {
+      final r2a = await localAccount();
+      if (r2a == null) {
+        return Image.asset('assets/icons/default_avatar.png');
+      }
+      final int uid = r2a.uid;
+
+      // 1) Check local cache via helper
+      final Directory appDir = await getApplicationDocumentsDirectory();
+      final Image? cached = await _readAvatarImage(uid);
+      if (cached != null) {
+        return cached;
+      }
+
+      // 3) If avatarPath is empty, return default immediately
+      final String avatarPath = (r2a.avatarPath).trim();
+      if (avatarPath.isEmpty) {
+        return Image.asset('assets/icons/default_avatar.png');
+      }
+
+      // 2) No cache, try download from https: _baseUrl (host) + fileDomain + avatarPath
+      String fileDomain = (await R2Storage.read('fileDomain') ?? '').trim();
+      if (fileDomain.isEmpty) {
+        return Image.asset('assets/icons/default_avatar.png');
+      }
+      // Normalize segments
+      if (!fileDomain.startsWith('/')) fileDomain = '/$fileDomain';
+      // Some fileDomain values may already include trailing slash; avoid double slashes
+      if (!fileDomain.endsWith('/')) fileDomain = '$fileDomain/';
+
+      String fileName = avatarPath;
+      if (fileName.startsWith('/')) fileName = fileName.substring(1);
+
+      // Base host for static files (images)
+      const String baseHost = 'https://rock.r2cycling.com';
+      final String url = '$baseHost$fileDomain$fileName';
+
+      try {
+        final http.Response resp = await http.get(Uri.parse(url));
+        if (resp.statusCode == 200) {
+          final String extension = p.extension(fileName);
+          // Write to a temporary file, then cache via helper
+          final String tempPath =
+              p.join(appDir.path, 'avatar_${uid}_temp$extension');
+          final File tempFile = File(tempPath);
+          try {
+            await tempFile.writeAsBytes(resp.bodyBytes);
+            debugPrint('$runtimeType: start write $tempPath to cache');
+            final String? cachedPath = await _writeAvatarImage(uid, tempPath);
+            // Clean up temp file
+            try {
+              await tempFile.delete();
+            } catch (_) {}
+
+            if (cachedPath != null) {
+              return Image.file(File(cachedPath));
+            } else {
+              debugPrint(
+                  '$runtimeType : cache write failed for downloaded avatar');
+              return Image.asset('assets/icons/default_avatar.png');
+            }
+          } catch (e) {
+            debugPrint('getAvatar: write temp error $e');
+            return Image.asset('assets/icons/default_avatar.png');
+          }
+        } else {
+          debugPrint('getAvatar: download failed ${resp.statusCode} url=$url');
+          return Image.asset('assets/icons/default_avatar.png');
+        }
+      } catch (e) {
+        debugPrint('getAvatar: download error url=$url err=$e');
+        return Image.asset('assets/icons/default_avatar.png');
+      }
+    } catch (e) {
+      debugPrint('getAvatar: unexpected error $e');
+      return Image.asset('assets/icons/default_avatar.png');
+    }
+  }
+
   /*
-   * update the nickname and save it
+   * update the avatar image and save it
    *
    * userId: the id of account.
    *         if it is not provided, default account is the local user.
-   * value: the path of avatar image
+   * imagePath: the path and filename of avatar image
+   * 
+   * return 0 - success
+   * return other - failed
    */
-  Future<int> updateAvatar({int? userId, String? value}) async {
+  Future<int> updateAvatar({int? userId, String? imagePath}) async {
     if (null == userId) {
-      // update local account's nickname
+      // use local account
       final r2a = await localAccount();
-      r2a!.avatarPath = value!;
-      return await _db.saveAccount(r2a);
+      if (r2a == null) {
+        return -1;
+      }
+      final uid = r2a.uid;
+      if (imagePath == null || imagePath.isEmpty) {
+        return -1;
+      }
+
+      try {
+        final srcFile = File(imagePath);
+        if (await srcFile.exists()) {
+          debugPrint('$runtimeType: start write $imagePath to cache');
+          final String? cachedPath = await _writeAvatarImage(uid, imagePath);
+          if (cachedPath == null) {
+            debugPrint('updateAvatar: copy cache error');
+            return -1;
+          }
+
+          // Upload cached file to server and sync profile
+          String? serverFilename;
+          try {
+            final cachedFile = File(cachedPath);
+            if (await cachedFile.exists()) {
+              serverFilename = await _uploadAvatarImage(cachedFile);
+            }
+          } catch (e) {
+            debugPrint('$runtimeType : updateAvatar sync error: $e');
+          }
+
+          // Save avatarPath as value returned by tools/upload
+          if (serverFilename != null && serverFilename.isNotEmpty) {
+            // Perform profile sync separately; only save locally when server confirms
+            bool synced = false;
+            try {
+              synced = await _updateUserProfile(avatarFile: serverFilename);
+            } catch (e) {
+              debugPrint('$runtimeType : updateAvatar profile sync error: $e');
+            }
+
+            if (synced) {
+              return 0;
+            } else {
+              debugPrint('$runtimeType : profile sync failed after upload');
+              return -1;
+            }
+          } else {
+            debugPrint('$runtimeType : upload avatar did not return filename');
+            return -1;
+          }
+        } else {
+          debugPrint(
+              '$runtimeType : source avatar file does not exist: $imagePath');
+          return -1;
+        }
+      } catch (e) {
+        debugPrint('$runtimeType : updateAvatar cache error: $e');
+        return -1;
+      }
     } else {
-      // update specified user's nickname
-      return 0;
+      // TODO: support updating specified user's avatar if needed
+      return -1;
+    }
+  }
+
+  Future<String?> _writeAvatarImage(int uid, String srcPath) async {
+    try {
+      final Directory appDir = await getApplicationDocumentsDirectory();
+      final String ext = p.extension(srcPath);
+      final String sanitizedExt = ext.isNotEmpty ? ext : '';
+
+      // Delete old timestamped avatar files for this uid
+      final RegExp oldPattern =
+          RegExp('^avatar_${uid}_[0-9]+\\.[A-Za-z0-9]+\$');
+      await for (var entity in appDir.list(followLinks: false)) {
+        if (entity is File) {
+          final String name = p.basename(entity.path);
+          if (oldPattern.hasMatch(name)) {
+            try {
+              await entity.delete();
+            } catch (_) {}
+          }
+        }
+      }
+
+      // Write new cached file with timestamp
+      final int ts = DateTime.now().millisecondsSinceEpoch;
+      final String cachedPath =
+          p.join(appDir.path, 'avatar_${uid}_${ts}${sanitizedExt}');
+      final File srcFile = File(srcPath);
+      if (!await srcFile.exists()) {
+        return null;
+      }
+      debugPrint('$runtimeType : _writeAvatarImage $cachedPath');
+      await srcFile.copy(cachedPath);
+      return cachedPath;
+    } catch (e) {
+      debugPrint('$runtimeType : _writeAvatarImage error: ${e.toString()}');
+      return null;
+    }
+  }
+
+  Future<Image?> _readAvatarImage(int uid) async {
+    try {
+      final Directory appDir = await getApplicationDocumentsDirectory();
+      final RegExp pattern = RegExp('^avatar_${uid}_(\\d+)\\.[A-Za-z0-9]+\$');
+      File? latestFile;
+      int latestTs = -1;
+
+      await for (var entity in appDir.list(followLinks: false)) {
+        if (entity is File) {
+          final String name = p.basename(entity.path);
+          final Match? m = pattern.firstMatch(name);
+          if (m != null) {
+            final int ts = int.tryParse(m.group(1) ?? '') ?? -1;
+            if (ts > latestTs) {
+              latestTs = ts;
+              latestFile = entity;
+            }
+          }
+        }
+      }
+
+      if (latestFile != null) {
+        debugPrint(
+            '$runtimeType : _readAvatarImage found cached avatar $latestFile');
+        return Image.file(latestFile);
+      }
+      return null;
+    } catch (e) {
+      debugPrint('$runtimeType : _readAvatarImage error: ${e.toString()}');
+      return null;
     }
   }
 
@@ -263,11 +482,80 @@ class R2UserManager {
     if (deviceId.isEmpty || deviceId.length != 12) {
       return deviceId; // Return original if not valid format
     }
-    
+
     // Insert colons every 2 characters
-    return deviceId.replaceAllMapped(
-      RegExp(r'(.{2})'),
-      (match) => '${match.group(1)}:'
-    ).substring(0, 17); // Remove trailing colon
+    return deviceId
+        .replaceAllMapped(RegExp(r'(.{2})'), (match) => '${match.group(1)}:')
+        .substring(0, 17); // Remove trailing colon
+  }
+
+  // Rename and adjust server sync helpers to be private
+  Future<String?> _uploadAvatarImage(File imageFile) async {
+    try {
+      final token = await readToken();
+      final request = R2HttpRequest();
+      final response = await request.uploadFile(
+        api: 'tools/upload',
+        token: token,
+        file: imageFile,
+      );
+
+      if (response.success == true) {
+        final dynamic result = response.result;
+        String? filename;
+        if (result is Map) {
+          final dynamic f = result['filename'];
+          if (f != null) filename = f.toString();
+        } else if (result is String) {
+          filename = result.trim();
+        }
+        return (filename != null && filename.isNotEmpty) ? filename : null;
+      } else {
+        debugPrint(
+            '$runtimeType : upload avatar failed: ${response.message} (${response.code})');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('$runtimeType : upload avatar error: $e');
+      return null;
+    }
+  }
+
+  Future<bool> _updateUserProfile(
+      {String? avatarFile, String? nickName}) async {
+    // Build request body with only provided parameters
+    final Map<String, String> body = {};
+
+    if (avatarFile != null && avatarFile.isNotEmpty) {
+      body['userAvatar'] = 'temp/$avatarFile';
+    }
+    if (nickName != null && nickName.isNotEmpty) {
+      body['userName'] = nickName;
+    }
+
+    if (body.isEmpty) {
+      return false;
+    }
+
+    try {
+      final token = await readToken();
+      final request = R2HttpRequest();
+      final response = await request.postRequest(
+        api: 'user/modUserInfo',
+        token: token,
+        body: body,
+      );
+
+      if (response.success == true) {
+        return true;
+      } else {
+        debugPrint(
+            '$runtimeType : update profile failed: ${response.message} (${response.code})');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('$runtimeType : update profile error: $e');
+      return false;
+    }
   }
 }

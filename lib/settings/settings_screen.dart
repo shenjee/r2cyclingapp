@@ -43,7 +43,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _loadAvatar();  // Reload the avatar whenever dependencies change (i.e., when returning to this screen)
+    _loadAvatar(); // Reload the avatar whenever dependencies change (i.e., when returning to this screen)
   }
 
   Future<void> _loadAvatar() async {
@@ -74,12 +74,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _userInfoWidget() {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-          vertical: 30.0,
-          horizontal: 16.0
-      ),
+      contentPadding:
+          const EdgeInsets.symmetric(vertical: 30.0, horizontal: 16.0),
       leading: FutureBuilder<Image>(
-        future: _account?.getAvatar(),
+        future: _manager.getAvatar(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircleAvatar(
@@ -100,8 +98,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           }
         },
       ),
-      title: Text(_account?.nickname ?? 'User', style: const TextStyle(fontSize: 24.0),),
-      trailing: Icon(Icons.chevron_right, color: Colors.grey[500],),
+      title: Text(
+        _account?.nickname ?? 'User',
+        style: const TextStyle(fontSize: 24.0),
+      ),
+      trailing: Icon(
+        Icons.chevron_right,
+        color: Colors.grey[500],
+      ),
       onTap: () async {
         await Navigator.pushNamed(context, '/profile');
         _loadAvatar();
@@ -109,25 +113,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-
-
   Widget _aboutWidget(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding (
+        Padding(
           padding: const EdgeInsets.all(10.0),
-          child:Text(
+          child: Text(
             AppLocalizations.of(context)!.aboutR2Cycling,
-            style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, color: AppConstants.textColor),
+            style: const TextStyle(
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold,
+                color: AppConstants.textColor),
           ),
         ),
-        Padding (
-          padding: const EdgeInsets.fromLTRB(20.0,0.0,20.0,10.0),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 10.0),
           child: Text(
             AppLocalizations.of(context)!.appDescription,
             textAlign: TextAlign.start,
-            style: const TextStyle(fontSize: 18.0, color: AppConstants.textColor),
+            style:
+                const TextStyle(fontSize: 18.0, color: AppConstants.textColor),
           ),
         ),
       ],
@@ -144,20 +150,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
               if (snapshot.hasData) {
                 final packageInfo = snapshot.data!;
                 return Text(
-                   '${AppLocalizations.of(context)!.version}: ${packageInfo.version} build ${packageInfo.buildNumber}',
+                  '${AppLocalizations.of(context)!.version}: ${packageInfo.version} build ${packageInfo.buildNumber}',
                   style: const TextStyle(
-                    fontSize: 18.0,
-                    color: AppConstants.primaryColor
-                  ),
+                      fontSize: 18.0, color: AppConstants.primaryColor),
                 );
               } else {
                 return const Text(
                   'Loading version...',
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20.0,
-                    color: AppConstants.primaryColor
-                  ),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20.0,
+                      color: AppConstants.primaryColor),
                 );
               }
             },
@@ -186,14 +189,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(16.0,0.0,16.0,0.0),
+        padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Divider(color: AppConstants.primaryColor200),
             // 1. User Avatar and Nickname
-            if (true == _isLoggedIn)
-              _userInfoWidget(),
+            if (true == _isLoggedIn) _userInfoWidget(),
             const Divider(color: AppConstants.primaryColor200),
             // 2. R2 Cycling Introduction
             _aboutWidget(context),
@@ -202,7 +204,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             //_versionWidget(context),
             // 4. Company Info and Copyright
             const Spacer(),
-            Center(child:_copyrightWidget(context)),
+            Center(child: _copyrightWidget(context)),
             const SizedBox(height: 16.0),
           ],
         ),

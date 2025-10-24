@@ -22,9 +22,6 @@ import 'package:r2cyclingapp/usermanager/r2_account.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/constants.dart';
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
-import 'package:r2cyclingapp/r2controls/r2_flash.dart';
-import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
-import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 
 import 'image_cut_screen.dart';
 
@@ -38,11 +35,13 @@ class UserProfileScreen extends StatefulWidget {
 class _UserProfileScreenState extends State<UserProfileScreen> {
   final _manager = R2UserManager();
   R2Account? _account;
+  late Future<Image> _avatarFuture;
 
   @override
   void initState() {
     super.initState();
     _loadAccount();
+    _avatarFuture = _manager.getAvatar();
   }
 
   Future<void> _loadAccount() async {
@@ -61,10 +60,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Future<void> _showImageSourceActionSheet(BuildContext context) async {
-    await _requestPermissions();  // Request permissions
+    await _requestPermissions(); // Request permissions
 
     showModalBottomSheet(
-      context: context, // BuildContext is used synchronously here in showModalBottomSheet
+      context:
+          context, // BuildContext is used synchronously here in showModalBottomSheet
       builder: (BuildContext context) {
         return SafeArea(
           child: Wrap(
@@ -111,65 +111,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       );
 
       if (croppedImage != null) {
-        // Upload the image to server first
-        await _uploadAvatarImage(croppedImage);
-        
-        setState(() {
-          // save the image path locally
-          _account?.avatarPath = croppedImage.path;
-          _manager.updateAvatar(value: croppedImage.path);
-        });
-      }
-    }
-  }
-
-  // Upload avatar image to server
-  Future<void> _uploadAvatarImage(File imageFile) async {
-    // Show loading indicator
-    R2LoadingIndicator.show(context);
-    
-    try {
-      // Get the auth token
-      final token = await _manager.readToken();
-      
-      // Create HTTP request with necessary headers
-      final request = R2HttpRequest();
-      final response = await request.uploadFile(
-        api: 'tools/upload',
-        token: token,
-        file: imageFile,
-      );
-      
-      if (response.success) {
-        debugPrint('Avatar uploaded successfully');
-        debugPrint('BasePath: ${response.result['basePath']}');
-        debugPrint('Filename: ${response.result['filename']}');
-        
-        // You can store the server path if needed
-        // final serverPath = '${response.result['basePath']}/${response.result['filename']}';
-      } else {
-        debugPrint('Failed to upload avatar: ${response.message}');
-        if (mounted) {
-          R2Flash.showBasicFlash(
-            context: context,
-            message: '${response.message} (${response.code})',
-            duration: const Duration(seconds: 3),
-          );
-        }
-      }
-    } catch (e) {
-      debugPrint('Error uploading avatar: $e');
-      if (mounted) {
-        R2Flash.showBasicFlash(
-          context: context,
-          message: 'Error uploading avatar: $e',
-          duration: const Duration(seconds: 3),
-        );
-      }
-    } finally {
-      // Hide loading indicator
-      if (mounted) {
-        R2LoadingIndicator.stop(context);
+        // Save locally and let manager handle server sync
+        await _manager.updateAvatar(imagePath: croppedImage.path);
+        _avatarFuture = _manager.getAvatar();
+        setState(() {});
       }
     }
   }
@@ -188,19 +133,20 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             const Divider(color: AppConstants.primaryColor200),
             // user avatar
             ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                  vertical: 30.0,
-                  horizontal: 16.0
-              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 30.0, horizontal: 16.0),
               title: Padding(
-                  padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                  child: Text(AppLocalizations.of(context)!.avatar, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor)),
+                padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                child: Text(AppLocalizations.of(context)!.avatar,
+                    style: const TextStyle(
+                        fontSize: 24.0, color: AppConstants.textColor)),
               ),
               trailing: Row(
-                mainAxisSize: MainAxisSize.min, // Ensures the row takes the minimum space needed
+                mainAxisSize: MainAxisSize
+                    .min, // Ensures the row takes the minimum space needed
                 children: [
                   FutureBuilder<Image>(
-                    future: _account?.getAvatar(),
+                    future: _avatarFuture,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const CircleAvatar(
@@ -232,32 +178,42 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             const Divider(color: AppConstants.primaryColor200),
             // user nickname
             ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                  vertical: 30.0,
-                  horizontal: 16.0
-              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 30.0, horizontal: 16.0),
               title: Padding(
                   padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                  child: Text(AppLocalizations.of(context)!.nickname, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),)
-              ),
-              trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('${_account?.nickname}', style: const TextStyle(fontSize: 24.0),),
-                    const SizedBox(width: 20.0,),
-                    Icon(Icons.chevron_right, color: Colors.grey[500],),
-                  ]), // Placeholder for nickname
+                  child: Text(
+                    AppLocalizations.of(context)!.nickname,
+                    style: const TextStyle(
+                        fontSize: 24.0, color: AppConstants.textColor),
+                  )),
+              trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                Text(
+                  '${_account?.nickname}',
+                  style: const TextStyle(fontSize: 24.0),
+                ),
+                const SizedBox(
+                  width: 20.0,
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: Colors.grey[500],
+                ),
+              ]), // Placeholder for nickname
               onTap: () {
                 // Handle nickname modification
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
-                    TextEditingController nicknameController = TextEditingController(); // Placeholder
+                    TextEditingController nicknameController =
+                        TextEditingController(); // Placeholder
                     return AlertDialog(
                       title: Text(AppLocalizations.of(context)!.modifyNickname),
                       content: TextField(
                         controller: nicknameController,
-                        decoration: InputDecoration(hintText: AppLocalizations.of(context)!.enterNewNickname),
+                        decoration: InputDecoration(
+                            hintText:
+                                AppLocalizations.of(context)!.enterNewNickname),
                         onSubmitted: (value) {
                           Navigator.pop(context, value);
                         },
@@ -266,7 +222,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         TextButton(
                           child: Text(
                             AppLocalizations.of(context)!.cancel,
-                            style: const TextStyle(fontSize: 20.0,color: AppConstants.primaryColor),
+                            style: const TextStyle(
+                                fontSize: 20.0,
+                                color: AppConstants.primaryColor),
                           ),
                           onPressed: () {
                             Navigator.pop(context);
@@ -275,7 +233,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         TextButton(
                           child: Text(
                             AppLocalizations.of(context)!.save,
-                            style: const TextStyle(fontSize: 20.0, color: AppConstants.primaryColor),
+                            style: const TextStyle(
+                                fontSize: 20.0,
+                                color: AppConstants.primaryColor),
                           ),
                           onPressed: () {
                             Navigator.pop(context, nicknameController.text);
@@ -284,13 +244,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       ],
                     );
                   },
-                ).then((newNickname) {
+                ).then((newNickname) async {
                   if (newNickname != null && newNickname.isNotEmpty) {
                     setState(() {
                       // Save the new nickname
                       _account?.nickname = newNickname;
-                      _manager.updateNickname(value: newNickname);
                     });
+                    _manager.updateNickname(value: newNickname);
                   }
                 });
               },
@@ -298,13 +258,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             const Divider(color: AppConstants.primaryColor200),
             // user management
             ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                  vertical: 30.0,
-                  horizontal: 16.0
-              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 30.0, horizontal: 16.0),
               title: Padding(
-                  padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                  child: Text(AppLocalizations.of(context)!.accountManagement, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor)),
+                padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                child: Text(AppLocalizations.of(context)!.accountManagement,
+                    style: const TextStyle(
+                        fontSize: 24.0, color: AppConstants.textColor)),
               ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -338,7 +298,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ),
           ],
         ),
-    ),);
+      ),
+    );
   }
 
   Future<void> _accountLogout() async {
