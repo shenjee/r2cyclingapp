@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import "package:r2cyclingapp/usermanager/r2_user_manager.dart";
@@ -43,7 +42,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _loadAvatar(); // Reload the avatar whenever dependencies change (i.e., when returning to this screen)
+    // Reload the avatar whenever dependencies change (i.e., when returning to this screen)
+    _loadAvatar();
   }
 
   Future<void> _loadAvatar() async {
