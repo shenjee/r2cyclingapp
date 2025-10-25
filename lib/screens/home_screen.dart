@@ -67,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _loadAvatar();  // Reload the avatar whenever dependencies change (i.e., when returning to this screen)
+    _loadAvatar(); // Reload the avatar whenever dependencies change (i.e., when returning to this screen)
   }
 
   @override
@@ -121,7 +121,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final token = await manager.readToken();
     final account = await manager.localAccount();
     final isExpired = manager.expiredToken(token: token);
-    debugPrint('$runtimeType : check login token?${null != token} account?${null != account} expired?$isExpired');
+    debugPrint(
+        '$runtimeType : check login token?${null != token} account?${null != account} expired?$isExpired');
     if (token == null || account == null || true == isExpired) {
       _registerScreen();
     }
@@ -216,17 +217,17 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<Widget> _leftNavigationButton() async {
     final manager = R2UserManager();
     final account = await manager.localAccount();
-    final token  = await manager.readToken();
+    final token = await manager.readToken();
     if (null == token || null == account) {
       return IconButton(
-          icon: const Icon(Icons.person, size:34.0),
+          icon: const Icon(Icons.person, size: 34.0),
           onPressed: () {
             _registerScreen();
           });
     } else {
       return IconButton(
           icon: FutureBuilder<Image>(
-            future: account.getAvatar(),
+            future: manager.getAvatar(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const CircleAvatar(
@@ -254,18 +255,16 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-    /*
+  /*
    * it shows a button for adding a smart helmet
    */
   Widget _addHelmetWidget() {
     return Align(
       alignment: Alignment.center,
-      child:GestureDetector(
+      child: GestureDetector(
         onTap: () async {
-          final isFound = await Navigator.pushNamed(
-              context,
-              '/bluetooth_pairing'
-          );
+          final isFound =
+              await Navigator.pushNamed(context, '/bluetooth_pairing');
           if (true == isFound) {
             await _checkBondedDevice();
           }
@@ -283,7 +282,8 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: AutoSizeText(
                 AppLocalizations.of(context)!.clickAddHelmet,
-                style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),
+                style: const TextStyle(
+                    fontSize: 24.0, color: AppConstants.textColor),
                 maxLines: 1,
                 minFontSize: 16.0,
                 maxFontSize: 24.0,
@@ -303,7 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget> [
+        children: <Widget>[
           GestureDetector(
             onLongPress: () {
               setState(() {
@@ -320,44 +320,42 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               }
             },
-            child:Column(
-              children: <Widget>[
-                Image.asset('assets/images/helmet_sample.png'),
-                Text(_connectedDevice!.name),
-              ]
-            ),
+            child: Column(children: <Widget>[
+              Image.asset('assets/images/helmet_sample.png'),
+              Text(_connectedDevice!.name),
+            ]),
           ),
-        ]
-    );
+        ]);
   }
 
   Widget _removeHelmetWidget() {
     return Column(
         mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment:MainAxisAlignment.center,
-        children: <Widget> [
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
           GestureDetector(
               onTap: () {
                 setState(() {
                   _isUnbindMode = false;
                 });
-                },
-              child:Column(
-                  children: <Widget>[
-                    Image.asset('assets/images/helmet_sample.png', width: 250.0,),
-                    TextButton(
-                      onPressed: _unbindDevice,
-                      style: const ButtonStyle(
-                        backgroundColor: WidgetStatePropertyAll(Colors.red),
-                        foregroundColor: WidgetStatePropertyAll(Colors.white),
-                      ),
-                      child: Text(AppLocalizations.of(context)!.unbind),
+              },
+              child: Column(
+                children: <Widget>[
+                  Image.asset(
+                    'assets/images/helmet_sample.png',
+                    width: 250.0,
+                  ),
+                  TextButton(
+                    onPressed: _unbindDevice,
+                    style: const ButtonStyle(
+                      backgroundColor: WidgetStatePropertyAll(Colors.red),
+                      foregroundColor: WidgetStatePropertyAll(Colors.white),
                     ),
-                  ],
-              )
-          ),
-        ]
-    );
+                    child: Text(AppLocalizations.of(context)!.unbind),
+                  ),
+                ],
+              )),
+        ]);
   }
 
   /*
@@ -377,7 +375,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     return SizedBox(
       width: 360.0,
-      height:320.0,
+      height: 320.0,
       child: w,
     );
   }
@@ -403,9 +401,13 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings, size: 34.0,),
+            icon: const Icon(
+              Icons.settings,
+              size: 34.0,
+            ),
             onPressed: () async {
-              final isLoggedOut = await Navigator.pushNamed(context, '/settings');
+              final isLoggedOut =
+                  await Navigator.pushNamed(context, '/settings');
               if (true == isLoggedOut) {
                 _checkLoginStatus();
               }
@@ -416,103 +418,110 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child:Column(
+        child: Column(
           children: [
             _helmetWidget(),
             Expanded(
                 child: ListView(
-                  shrinkWrap: true,
-                  children: [
-                    const Divider(color: AppConstants.primaryColor200,),
-                    ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                            vertical: 30.0,
-                            horizontal: 16.0
-                        ),
-                        leading: Image.asset(
-                          'assets/icons/icon_intercom.png', 
-                          width: 50.0, height: 50.0, color: AppConstants.primaryColor200,),
-                        title: Padding(
-                            padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                            child: AutoSizeText(
-                              AppLocalizations.of(context)!.cyclingIntercom, 
-                              style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),
-                              maxLines: 1,
-                              minFontSize: 12.0,
-                              maxFontSize: 24.0,
-                              )
-                        ),
-                        trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                groupStatus,
-                                style: TextStyle(fontSize: 16.0, color: groupStatusColor),
-                              ),
-                              const SizedBox(width: 10.0,),
-                              const Icon(Icons.chevron_right, color: AppConstants.textColor200,),
-                            ]
-                        ),
-                        onTap: () async {
-                          final manager = R2UserManager();
-                          final group = await manager.localGroup();
-
-                          // Guard context after the first await
-                          if (!context.mounted) return;
-
-                          if (null == group || 0 == group.groupId) {
-                            // If user is not in a group, navigate to GroupListScreen
-                            await Navigator.pushNamed(context, '/groupList');
-                          } else {
-                            // If user is in a group, navigate to GroupIntercomScreen
-                            await Navigator.pushNamed(context, '/intercom');
-                          }
-
-                          // Guard context again after navigation returns (another async gap)
-                          if (!context.mounted) return;
-                          await _loadGroupStatus();
-                        }
+              shrinkWrap: true,
+              children: [
+                const Divider(
+                  color: AppConstants.primaryColor200,
+                ),
+                ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 30.0, horizontal: 16.0),
+                    leading: Image.asset(
+                      'assets/icons/icon_intercom.png',
+                      width: 50.0,
+                      height: 50.0,
+                      color: AppConstants.primaryColor200,
                     ),
-                    const Divider(color: AppConstants.primaryColor200),
-                    ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                            vertical: 30.0,
-                            horizontal: 16.0
-                        ),
-                        leading: Image.asset(
-                          'assets/icons/icon_sos.png', 
-                          width: 50.0, height: 50.0, color: AppConstants.primaryColor200,),
-                        title: Padding(
-                            padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                            child: AutoSizeText(
-                              AppLocalizations.of(context)!.emergencyContactHome, 
-                              style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),
-                              maxLines: 1,
-                              minFontSize: 12.0,
-                              maxFontSize: 24.0,
-                              )
-                        ),
-                        trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                emergencyContactStatus,
-                                style: TextStyle(fontSize: 16.0, color: emergencyContactColor),
-                              ),
-                              const SizedBox(width: 10.0,),
-                              const Icon(Icons.chevron_right, color: AppConstants.textColor200,),
-                            ]
-                        ),
-                        onTap: () async {
-                          await Navigator.pushNamed(context, '/emergencyContact');
-                          _loadEmergencyContactStatus();
-                          await Permission.sms.request();
-                        }
+                    title: Padding(
+                        padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                        child: AutoSizeText(
+                          AppLocalizations.of(context)!.cyclingIntercom,
+                          style: const TextStyle(
+                              fontSize: 24.0, color: AppConstants.textColor),
+                          maxLines: 1,
+                          minFontSize: 12.0,
+                          maxFontSize: 24.0,
+                        )),
+                    trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                      Text(
+                        groupStatus,
+                        style:
+                            TextStyle(fontSize: 16.0, color: groupStatusColor),
+                      ),
+                      const SizedBox(
+                        width: 10.0,
+                      ),
+                      const Icon(
+                        Icons.chevron_right,
+                        color: AppConstants.textColor200,
+                      ),
+                    ]),
+                    onTap: () async {
+                      final manager = R2UserManager();
+                      final group = await manager.localGroup();
+
+                      // Guard context after the first await
+                      if (!context.mounted) return;
+
+                      if (null == group || 0 == group.groupId) {
+                        // If user is not in a group, navigate to GroupListScreen
+                        await Navigator.pushNamed(context, '/groupList');
+                      } else {
+                        // If user is in a group, navigate to GroupIntercomScreen
+                        await Navigator.pushNamed(context, '/intercom');
+                      }
+
+                      // Guard context again after navigation returns (another async gap)
+                      if (!context.mounted) return;
+                      await _loadGroupStatus();
+                    }),
+                const Divider(color: AppConstants.primaryColor200),
+                ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 30.0, horizontal: 16.0),
+                    leading: Image.asset(
+                      'assets/icons/icon_sos.png',
+                      width: 50.0,
+                      height: 50.0,
+                      color: AppConstants.primaryColor200,
                     ),
-                    const Divider(color: AppConstants.primaryColor200),
-                  ],
-                )
-            ),
+                    title: Padding(
+                        padding: const EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                        child: AutoSizeText(
+                          AppLocalizations.of(context)!.emergencyContactHome,
+                          style: const TextStyle(
+                              fontSize: 24.0, color: AppConstants.textColor),
+                          maxLines: 1,
+                          minFontSize: 12.0,
+                          maxFontSize: 24.0,
+                        )),
+                    trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                      Text(
+                        emergencyContactStatus,
+                        style: TextStyle(
+                            fontSize: 16.0, color: emergencyContactColor),
+                      ),
+                      const SizedBox(
+                        width: 10.0,
+                      ),
+                      const Icon(
+                        Icons.chevron_right,
+                        color: AppConstants.textColor200,
+                      ),
+                    ]),
+                    onTap: () async {
+                      await Navigator.pushNamed(context, '/emergencyContact');
+                      _loadEmergencyContactStatus();
+                      await Permission.sms.request();
+                    }),
+                const Divider(color: AppConstants.primaryColor200),
+              ],
+            )),
           ],
         ),
       ),
