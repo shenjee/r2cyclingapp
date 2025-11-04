@@ -16,7 +16,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'dart:io';
 
 import 'package:r2cyclingapp/service/r2_background_service.dart';
 import 'package:r2cyclingapp/devicemanager/r2_device_manager.dart';
@@ -47,7 +46,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Color emergencyContactColor = Colors.grey;
   String groupStatus = '';
   Color groupStatusColor = Colors.grey;
-  File? _avatar;
 
   @override
   void initState() {
@@ -67,7 +65,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _loadAvatar(); // Reload the avatar whenever dependencies change (i.e., when returning to this screen)
   }
 
   @override
@@ -77,19 +74,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  Future<void> _loadAvatar() async {
-    final manager = R2UserManager();
-    final account = await manager.localAccount();
-    if (account != null && account.avatarPath.isNotEmpty) {
-      setState(() {
-        _avatar = File(account.avatarPath);
-      });
-    } else {
-      setState(() {
-        _avatar = null;
-      });
-    }
-  }
+  // Removed obsolete avatar loader and backing field; avatar is resolved
+  // via R2UserManager.getAvatar() directly in UI builders.
 
   /*
    * When launch the app at the first time ,
@@ -250,7 +236,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           onPressed: () async {
             await Navigator.pushNamed(context, '/profile');
-            _loadAvatar();
+            // Force rebuild to refresh avatar shown via R2UserManager.getAvatar()
+            if (mounted) setState(() {});
           });
     }
   }
@@ -411,7 +398,8 @@ class _HomeScreenState extends State<HomeScreen> {
               if (true == isLoggedOut) {
                 _checkLoginStatus();
               }
-              _loadAvatar();
+              // Force rebuild to refresh avatar shown via R2UserManager.getAvatar()
+              if (mounted) setState(() {});
             },
           ),
         ],

@@ -23,11 +23,10 @@ class PasswordRecoverScreen extends VerificationScreen {
   const PasswordRecoverScreen({super.key});
 
   @override
-  PasswordRecoverScreenState createState()=> PasswordRecoverScreenState();
+  PasswordRecoverScreenState createState() => PasswordRecoverScreenState();
 }
 
 class PasswordRecoverScreenState extends VerificationScreenState {
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -38,11 +37,14 @@ class PasswordRecoverScreenState extends VerificationScreenState {
   void onTokenRetrieved(String token) async {
     final userManager = R2UserManager();
     final currentAccount = await userManager.localAccount();
-    
+
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => PasswordSettingScreen(
-          phoneNumber: currentAccount?.phoneNumber, title: AppLocalizations.of(context)!.resetPassword,)),
+      MaterialPageRoute(
+          builder: (context) => PasswordSettingScreen(
+                phoneNumber: currentAccount?.phoneNumber,
+                title: AppLocalizations.of(context)!.resetPassword,
+              )),
     );
   }
 }
