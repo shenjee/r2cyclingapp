@@ -54,7 +54,7 @@ class ApiClient {
     return <String, dynamic>{};
   }
 
-  Future<String> postFormString(
+  Future<Map<String, dynamic>> postFormString(
     String path, {
     Map<String, String>? form,
     String? apiToken,
@@ -69,18 +69,33 @@ class ApiClient {
     final resp = await http.post(uri,
         headers: headers, body: form ?? const <String, String>{});
     if (resp.statusCode != 200) {
-      throw Exception('Request failed: ${resp.statusCode}');
+      return {
+        'success': false,
+        'message': 'Request failed: ${resp.statusCode}',
+        'code': resp.statusCode,
+        'result': null,
+      };
     }
-    final bodyText = resp.body;
     try {
-      final dynamic decoded = json.decode(bodyText);
+      final dynamic decoded = json.decode(resp.body);
       if (decoded is Map<String, dynamic>) {
+        final bool success = (decoded['success'] ?? false) == true;
+        final dynamic message = decoded['message'];
+        final dynamic code = decoded['code'];
         final dynamic result = decoded['result'];
-        if (result != null) {
-          return result.toString();
-        }
+        return {
+          'success': success,
+          'message': message?.toString(),
+          'code': code is int ? code : int.tryParse('${code ?? 0}') ?? 0,
+          'result': result,
+        };
       }
     } catch (_) {}
-    return bodyText;
+    return {
+      'success': false,
+      'message': 'Invalid response',
+      'code': 500,
+      'result': null,
+    };
   }
 }

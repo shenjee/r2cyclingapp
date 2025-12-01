@@ -29,7 +29,7 @@ class CommonApi {
     );
   }
 
-  Future<String> passwordLogin({
+  Future<Map<String, dynamic>> passwordLogin({
     required String loginId,
     required String sid,
     required String userPsw,
@@ -49,7 +49,7 @@ class CommonApi {
     );
   }
 
-  Future<String> sendAuthCode({
+  Future<Map<String, dynamic>> sendAuthCode({
     required String sid,
     required String userMobile,
     String? apiToken,
@@ -65,7 +65,7 @@ class CommonApi {
     );
   }
 
-  Future<String> mobileLogin({
+  Future<Map<String, dynamic>> mobileLogin({
     required String sid,
     required String userMobile,
     required String validateCode,
@@ -78,6 +78,22 @@ class CommonApi {
     };
     return _client.postFormString(
       'common/mobileLogin',
+      form: form,
+      apiToken: apiToken,
+    );
+  }
+
+  Future<Map<String, dynamic>> modUserPass({
+    required String sid,
+    required String modPassword,
+    String? apiToken,
+  }) {
+    final form = <String, String>{
+      'sid': sid,
+      'modPassword': modPassword,
+    };
+    return _client.postFormString(
+      'user/modUserPass',
       form: form,
       apiToken: apiToken,
     );

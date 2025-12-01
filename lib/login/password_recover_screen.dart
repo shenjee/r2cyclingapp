@@ -42,7 +42,7 @@ class PasswordRecoverScreenState extends VerificationScreenState {
       context,
       MaterialPageRoute(
           builder: (context) => PasswordSettingScreen(
-                phoneNumber: currentAccount?.phoneNumber,
+                phoneNumber: phoneController.text,
                 title: AppLocalizations.of(context)!.resetPassword,
               )),
     );

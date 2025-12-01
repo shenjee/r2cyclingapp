@@ -35,8 +35,8 @@ class VerificationScreen extends LoginBaseScreen {
 }
 
 class VerificationScreenState extends LoginBaseScreenState {
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _vcodeController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController vcodeController = TextEditingController();
   bool _isVcodeRequested = false;
   int _secondsRemaining = 0;
   Timer? _timer;
@@ -63,7 +63,7 @@ class VerificationScreenState extends LoginBaseScreenState {
    * request v-code (verification code) from R2Cloud with correct phone number fed.
    */
   Future<void> _requestVcode() async {
-    final isValidNumber = _isValidPhoneNumber(_phoneController.text);
+    final isValidNumber = _isValidPhoneNumber(phoneController.text);
 
     if (true == isValidNumber) {
       // loading indicator for v-code request
@@ -78,11 +78,11 @@ class VerificationScreenState extends LoginBaseScreenState {
         await prefs.setString('sessionId', sid);
       }
 
-      final String userMobile = _phoneController.text;
+      final String userMobile = phoneController.text;
       final commonApi = CommonApi.defaultClient();
-      String sendResult = '';
+      Map<String, dynamic> resp = {};
       try {
-        sendResult = await commonApi.sendAuthCode(
+        resp = await commonApi.sendAuthCode(
           sid: sid,
           userMobile: userMobile,
         );
@@ -99,13 +99,13 @@ class VerificationScreenState extends LoginBaseScreenState {
         R2LoadingIndicator.stop(context);
       }
 
-      if (sendResult.isNotEmpty) {
+      if ((resp['success'] ?? false) == true) {
         debugPrint('$runtimeType : Verification code sent successfully');
       } else {
         if (mounted) {
           R2Flash.showBasicFlash(
             context: context,
-            message: 'Request failed',
+            message: (resp['message'] ?? 'Request failed').toString(),
           );
         }
       }
@@ -123,8 +123,8 @@ class VerificationScreenState extends LoginBaseScreenState {
    * request authorization token with phone number and v-code fed.
    */
   Future<void> _requestToken() async {
-    final isValidNumber = _isValidPhoneNumber(_phoneController.text);
-    final isValidCode = _isValidVerificationCode(_vcodeController.text);
+    final isValidNumber = _isValidPhoneNumber(phoneController.text);
+    final isValidCode = _isValidVerificationCode(vcodeController.text);
 
     if (true == isValidNumber && true == isValidCode) {
       // start loading indicator for token request
@@ -139,12 +139,12 @@ class VerificationScreenState extends LoginBaseScreenState {
         await prefs.setString('sessionId', sid);
       }
       // get phone number and v-code
-      final String phonenumber = _phoneController.text;
-      final String vcode = _vcodeController.text;
+      final String phonenumber = phoneController.text;
+      final String vcode = vcodeController.text;
       final commonApi = CommonApi.defaultClient();
-      String token = '';
+      Map<String, dynamic> resp = {};
       try {
-        token = await commonApi.mobileLogin(
+        resp = await commonApi.mobileLogin(
           sid: sid,
           userMobile: phonenumber,
           validateCode: vcode,
@@ -158,7 +158,9 @@ class VerificationScreenState extends LoginBaseScreenState {
         R2LoadingIndicator.stop(context);
       }
 
-      if (token.isNotEmpty) {
+      if ((resp['success'] ?? false) == true &&
+          (resp['result'] ?? '').toString().isNotEmpty) {
+        final String token = (resp['result'] ?? '').toString();
         debugPrint('$runtimeType : Token received');
         final manager = R2UserManager();
         // Save the token
@@ -169,15 +171,13 @@ class VerificationScreenState extends LoginBaseScreenState {
         if (mounted) {
           R2Flash.showBasicFlash(
               context: context,
-              message: 'Request failed',
-              duration: const Duration(seconds: 3)
-          );
+              message: (resp['message'] ?? 'Request failed').toString(),
+              duration: const Duration(seconds: 3));
         }
       }
     } else {
       // v-code is in a wrong format
-      if (_phoneController.text.isNotEmpty &&
-          _vcodeController.text.isNotEmpty) {
+      if (phoneController.text.isNotEmpty && vcodeController.text.isNotEmpty) {
         String warning;
         if (false == isValidCode && false == isValidNumber) {
           warning = AppLocalizations.of(context)!.phoneOrCodeFormatError;
@@ -296,7 +296,7 @@ class VerificationScreenState extends LoginBaseScreenState {
               ),
             ),
             hintText: AppLocalizations.of(context)!.enterPhoneNumber,
-            controller: _phoneController,
+            controller: phoneController,
             keyboardType: TextInputType.phone,
           ),
           const SizedBox(height: 40.0),
@@ -306,7 +306,7 @@ class VerificationScreenState extends LoginBaseScreenState {
                 width: 24, height: 24),
             hintText: AppLocalizations.of(context)!.enterVerificationCode,
             suffixWidget: _vcodeButton(),
-            controller: _vcodeController,
+            controller: vcodeController,
             keyboardType: TextInputType.number,
           ),
         ]);

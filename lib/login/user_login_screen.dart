@@ -122,9 +122,9 @@ class _UserLoginScreenState extends LoginBaseScreenState {
       debugPrint('  hashed_combined: $hashedCombined');
 
       final commonApi = CommonApi.defaultClient();
-      String token = '';
+      Map<String, dynamic> resp = {};
       try {
-        token = await commonApi.passwordLogin(
+        resp = await commonApi.passwordLogin(
           loginId: phonenumber,
           sid: sid,
           userPsw: hashedCombined,
@@ -139,7 +139,9 @@ class _UserLoginScreenState extends LoginBaseScreenState {
         R2LoadingIndicator.stop(context);
       }
 
-      if (token.isNotEmpty) {
+      if ((resp['success'] ?? false) == true &&
+          (resp['result'] ?? '').toString().isNotEmpty) {
+        final String token = (resp['result'] ?? '').toString();
         debugPrint('Login by phone number + password');
         debugPrint('  Token: $token');
 
@@ -156,7 +158,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
           );
         }
       } else {
-        String warning = 'Login failed';
+        String warning = (resp['message'] ?? 'Login failed').toString();
         if (mounted) {
           R2Flash.showBasicFlash(
               context: context,

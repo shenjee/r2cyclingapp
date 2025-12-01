@@ -23,7 +23,7 @@ import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
-import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
+import 'package:r2cyclingapp/openapi/common_api.dart';
 import 'package:r2cyclingapp/screens/home_screen.dart';
 import 'package:r2cyclingapp/constants.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
@@ -33,11 +33,8 @@ class PasswordSettingScreen extends LoginBaseScreen {
   final String? phoneNumber;
   final String? title;
 
-  const PasswordSettingScreen({
-    super.key,
-    @required this.phoneNumber,
-    @required this.title
-  });
+  const PasswordSettingScreen(
+      {super.key, @required this.phoneNumber, @required this.title});
 
   @override
   LoginBaseScreenState createState() => _PasswordSettingScreenState();
@@ -87,7 +84,8 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
   }
 
   Future<void> _setPassword() async {
-    debugPrint('1st:${_passwordController.text} 2nd:${_confirmController.text}');
+    debugPrint(
+        '1st:${_passwordController.text} 2nd:${_confirmController.text}');
     final isSame = _passwordController.text.compareTo(_confirmController.text);
     final isValidPasswd = _isValidPassword(_passwordController.text);
     if (0 == isSame && true == isValidPasswd) {
@@ -116,41 +114,39 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
         debugPrint('combined: $combined');
         debugPrint('hashedCombined: $hashedCombined');
 
-        final request = R2HttpRequest();
-        final response = await request.postRequest(
-          api: 'user/modUserPass',
-          token: token,
-          body: {
-            'sid': sid,
-            'modPassword': hashedCombined,
-          },
-        );
+        final commonApi = CommonApi.defaultClient();
+        Map<String, dynamic> resp = {};
+        try {
+          resp = await commonApi.modUserPass(
+            sid: sid,
+            modPassword: hashedCombined,
+            apiToken: token,
+          );
+        } catch (e) {
+          debugPrint('Failed to set password: $e');
+        }
 
         // stop the indicator
         if (mounted) {
           R2LoadingIndicator.stop(context);
         }
 
-        if (true == response.success) {
+        if ((resp['success'] ?? false) == true) {
           debugPrint('$runtimeType : Password sent successfully');
-          debugPrint('$runtimeType : Message: ${response.message}');
-          debugPrint('$runtimeType : Code: ${response.code}');
-          debugPrint('$runtimeType : Result: ${response.result}');
 
           if (mounted) {
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => const HomeScreen()),
-                  (Route<dynamic> route) => false,
+              (Route<dynamic> route) => false,
             );
           }
         } else {
-          debugPrint('Failed to set password: ${response.code}');
           if (mounted) {
             R2Flash.showBasicFlash(
-                context: context,
-                message: '${response.message}（${response.code}）',
-                duration: const Duration(seconds: 3),
+              context: context,
+              message: (resp['message'] ?? 'Request failed').toString(),
+              duration: const Duration(seconds: 3),
             );
           }
         }
@@ -165,23 +161,22 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
       R2Flash.showBasicFlash(
           context: context,
           message: warning,
-          duration: const Duration(seconds: 3)
-      );
+          duration: const Duration(seconds: 3));
     }
   }
 
   @override
   Widget topWidget(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.fromLTRB(40.0, 40.0, 40.0, 20.0),
-        child: AutoSizeText(
-            _title ?? AppLocalizations.of(context)!.setPassword,
-            style: const TextStyle(fontSize: 46, fontWeight: FontWeight.bold),
-            maxLines: 1,
-            minFontSize: 20.0,
-            maxFontSize: 46.0,
-            overflow: TextOverflow.ellipsis,
-        ),
+      padding: const EdgeInsets.fromLTRB(40.0, 40.0, 40.0, 20.0),
+      child: AutoSizeText(
+        _title ?? AppLocalizations.of(context)!.setPassword,
+        style: const TextStyle(fontSize: 46, fontWeight: FontWeight.bold),
+        maxLines: 1,
+        minFontSize: 20.0,
+        maxFontSize: 46.0,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 
@@ -189,22 +184,24 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
   Widget centerWidget(BuildContext context) {
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children:<Widget> [
-          Container (
+        children: <Widget>[
+          Container(
             width: 340,
             alignment: Alignment.centerLeft,
-            child: Text('${AppLocalizations.of(context)!.passwordRequirement}\n'),
+            child:
+                Text('${AppLocalizations.of(context)!.passwordRequirement}\n'),
           ),
           // text field for entering phone number
           R2UserTextField(
-            prefixWidget: Image.asset('assets/icons/icon_password.png', width: 24, height: 24),
+            prefixWidget: Image.asset('assets/icons/icon_password.png',
+                width: 24, height: 24),
             hintText: AppLocalizations.of(context)!.enterNewPassword,
             controller: _passwordController,
             keyboardType: TextInputType.text,
             textVisible: _isPasswordHidden,
             suffixWidget: IconButton(
               icon: Icon(
-                _isPasswordHidden ? Icons.visibility_off : Icons.visibility ,
+                _isPasswordHidden ? Icons.visibility_off : Icons.visibility,
                 color: AppConstants.primaryColor200,
               ),
               onPressed: () {
@@ -214,17 +211,18 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
               },
             ),
           ),
-          const SizedBox(height:40.0),
+          const SizedBox(height: 40.0),
           // text field for entering password
           R2UserTextField(
-            prefixWidget: Image.asset('assets/icons/icon_password.png', width: 24, height: 24),
+            prefixWidget: Image.asset('assets/icons/icon_password.png',
+                width: 24, height: 24),
             hintText: AppLocalizations.of(context)!.confirmAgain,
             controller: _confirmController,
             keyboardType: TextInputType.text,
             textVisible: _isConfirmHidden,
             suffixWidget: IconButton(
               icon: Icon(
-                _isConfirmHidden ? Icons.visibility_off : Icons.visibility ,
+                _isConfirmHidden ? Icons.visibility_off : Icons.visibility,
                 color: AppConstants.primaryColor200,
               ),
               onPressed: () {
@@ -234,8 +232,7 @@ class _PasswordSettingScreenState extends LoginBaseScreenState {
               },
             ),
           ),
-        ]
-    );
+        ]);
   }
 
   @override
