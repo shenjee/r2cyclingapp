@@ -126,4 +126,15 @@ class CommonApi {
       apiToken: apiToken,
     );
   }
+
+  Future<Map<String, dynamic>> joinGroup({
+    required String joinCode,
+    String? apiToken,
+  }) {
+    return _client.postFormString(
+      'cyclingGroup/joinGroup',
+      form: <String, String>{'joinCode': joinCode},
+      apiToken: apiToken,
+    );
+  }
 }

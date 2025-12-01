@@ -19,7 +19,7 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/usermanager/r2_group.dart';
-import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
+import 'package:r2cyclingapp/openapi/common_api.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/constants.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
@@ -52,13 +52,10 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
 
     final manager = R2UserManager();
     final token = await manager.readToken();
-    final request = R2HttpRequest();
-    final response = await request.postRequest(
-      token: token,
-      api: 'cyclingGroup/joinGroup',
-      body: {
-        'joinCode':'$group',
-      }
+    final api = CommonApi.defaultClient();
+    final response = await api.joinGroup(
+      joinCode: group ?? '',
+      apiToken: token,
     );
 
     // stop the indicator
@@ -66,14 +63,16 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
       R2LoadingIndicator.stop(context);
     }
 
-    if (true == response.success && group != null) {
-      debugPrint('$runtimeType : Request succeeded: ${response.message}');
-      debugPrint('$runtimeType :   Response code: ${response.code}');
-      debugPrint('$runtimeType :   Result: ${response.result}');
+    if ((response['success'] ?? false) == true && group != null) {
+      debugPrint('$runtimeType : Request succeeded: ${response['message']}');
+      debugPrint('$runtimeType :   Response code: ${response['code']}');
+      debugPrint('$runtimeType :   Result: ${response['result']}');
 
       final account = await manager.localAccount();
-      final groupId = response.result['cyclingGroupId'];
-      final gCode = response.result['groupName'];
+      final Map<String, dynamic> data =
+          (response['result'] ?? {}) as Map<String, dynamic>;
+      final groupId = data['cyclingGroupId'];
+      final gCode = data['groupName'];
       final group = R2Group(groupId: groupId, groupCode: gCode);
       final ret = await manager.saveGroup(account!.uid, group);
       debugPrint('$runtimeType : save group $groupId : $ret');
@@ -84,9 +83,9 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
         );
       }
     } else {
-      debugPrint('Failed to join group: ${response.code}');
+      debugPrint('Failed to join group: ${response['code']}');
       // should show error info
-      String warning = '${response.message}（${response.code}）';
+      String warning = '${response['message']}（${response['code']}）';
       if (mounted) {
         R2Flash.showBasicFlash(
           context: context,
