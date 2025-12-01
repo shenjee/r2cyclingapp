@@ -54,6 +54,51 @@ class ApiClient {
     return <String, dynamic>{};
   }
 
+  Future<Map<String, dynamic>> getJsonFull(
+    String path, {
+    Map<String, String>? query,
+    String? apiToken,
+  }) async {
+    final uri =
+        Uri.parse('$_baseHost$_basePath$path').replace(queryParameters: query);
+    final headers = <String, String>{
+      'Content-Type': 'application/x-www-form-urlencoded',
+    };
+    if (apiToken != null && apiToken.isNotEmpty) {
+      headers['apiToken'] = apiToken;
+    }
+    final resp = await http.get(uri, headers: headers);
+    if (resp.statusCode != 200) {
+      return {
+        'success': false,
+        'message': 'Request failed: ${resp.statusCode}',
+        'code': resp.statusCode,
+        'result': null,
+      };
+    }
+    try {
+      final dynamic decoded = json.decode(resp.body);
+      if (decoded is Map<String, dynamic>) {
+        final bool success = (decoded['success'] ?? false) == true;
+        final dynamic message = decoded['message'];
+        final dynamic code = decoded['code'];
+        final dynamic result = decoded['result'];
+        return {
+          'success': success,
+          'message': message?.toString(),
+          'code': code is int ? code : int.tryParse('${code ?? 0}') ?? 0,
+          'result': result,
+        };
+      }
+    } catch (_) {}
+    return {
+      'success': false,
+      'message': 'Invalid response',
+      'code': 500,
+      'result': null,
+    };
+  }
+
   Future<Map<String, dynamic>> postFormString(
     String path, {
     Map<String, String>? form,

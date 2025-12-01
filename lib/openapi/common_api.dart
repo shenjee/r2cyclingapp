@@ -98,4 +98,13 @@ class CommonApi {
       apiToken: apiToken,
     );
   }
+
+  Future<Map<String, dynamic>> getMember({
+    String? apiToken,
+  }) {
+    return _client.getJsonFull(
+      'member/getMember',
+      apiToken: apiToken,
+    );
+  }
 }

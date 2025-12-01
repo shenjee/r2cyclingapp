@@ -17,6 +17,7 @@ import 'dart:convert';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
 import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
+import 'package:r2cyclingapp/openapi/common_api.dart';
 
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
 import 'package:r2cyclingapp/usermanager/r2_group.dart';
@@ -164,15 +165,13 @@ class R2UserManager {
   Future<R2UserProfile?> requestUserProfile() async {
     R2UserProfile? profile;
     final token = await readToken();
-    final request = R2HttpRequest();
-    final response = await request.getRequest(
-      api: 'member/getMember',
-      token: token,
-    );
+    final commonApi = CommonApi.defaultClient();
+    final resp = await commonApi.getMember(apiToken: token);
 
-    if (true == response.success) {
-      debugPrint('$runtimeType : message ${response.message}');
-      final Map<String, dynamic> data = response.result;
+    if ((resp['success'] ?? false) == true) {
+      debugPrint('$runtimeType : message ${resp['message']}');
+      final Map<String, dynamic> data =
+          (resp['result'] ?? {}) as Map<String, dynamic>;
 
       // Create and save R2Account from API response
       final account = R2Account(
@@ -220,8 +219,7 @@ class R2UserManager {
         await _db.saveEmergencyContactEnabled(isEnabled);
       }
     } else {
-      debugPrint(
-          '$runtimeType : request profile info failed: ${response.code}');
+      debugPrint('$runtimeType : request profile info failed: ${resp['code']}');
     }
 
     return profile;
