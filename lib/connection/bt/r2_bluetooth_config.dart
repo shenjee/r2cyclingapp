@@ -61,7 +61,7 @@ class BluetoothConfigManager {
   
   Future<void> loadConfigurations() async {
     try {
-      final String jsonString = await rootBundle.loadString('assets/configs/bluetooth_devices.json');
+      final String jsonString = await rootBundle.loadString('assets/config/bluetooth_devices.json');
       final Map<String, dynamic> jsonData = json.decode(jsonString);
       
       _deviceConfigs = (jsonData['devices'] as List)

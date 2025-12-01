@@ -87,7 +87,7 @@ flutter:
   assets:
     - assets/icons/
     - assets/images/
-    - assets/configs/
+    - assets/config/
     - TermsofService.md
     - TermsofService-zh.md
     - PrivacyPolicy.md

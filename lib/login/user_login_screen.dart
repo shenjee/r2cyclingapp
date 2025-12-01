@@ -27,7 +27,7 @@ import 'package:r2cyclingapp/login/password_recover_screen.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
-import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
+import 'package:r2cyclingapp/openapi/common_api.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/constants.dart';
@@ -121,31 +121,29 @@ class _UserLoginScreenState extends LoginBaseScreenState {
       debugPrint('  combined: $combined');
       debugPrint('  hashed_combined: $hashedCombined');
 
-      final request = R2HttpRequest();
-      final response = await request.postRequest(
-        api: 'common/passwordLogin',
-        body: {
-          'sid': sid,
-          'loginId': phonenumber,
-          'userPsw': hashedCombined,
-          'validateCode': ''
-        },
-      );
+      final commonApi = CommonApi.defaultClient();
+      String token = '';
+      try {
+        token = await commonApi.passwordLogin(
+          loginId: phonenumber,
+          sid: sid,
+          userPsw: hashedCombined,
+          validateCode: '',
+        );
+      } catch (e) {
+        debugPrint('Failed to request login: $e');
+      }
 
       // stop loading indicator
       if (mounted) {
         R2LoadingIndicator.stop(context);
       }
 
-      if (true == response.success) {
+      if (token.isNotEmpty) {
         debugPrint('Login by phone number + password');
-        debugPrint('  Message: ${response.message}');
-        debugPrint('  Code: ${response.code}');
-        debugPrint('  Result: ${response.result}');
+        debugPrint('  Token: $token');
 
         // retrieve the token and password-setting indicator
-        final token = response.result;
-
         final manager = R2UserManager();
         await manager.saveToken(token);
         await manager.requestUserProfile();
@@ -154,24 +152,22 @@ class _UserLoginScreenState extends LoginBaseScreenState {
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => const HomeScreen()),
-                (Route<dynamic> route) => false,
+            (Route<dynamic> route) => false,
           );
         }
       } else {
-        debugPrint('Failed to request login: ${response.code}');
-        // should show error info
-        String warning = '${response.message}（${response.code}）';
+        String warning = 'Login failed';
         if (mounted) {
           R2Flash.showBasicFlash(
               context: context,
               message: warning,
-              duration: const Duration(seconds: 3)
-          );
+              duration: const Duration(seconds: 3));
         }
       }
     } else {
       // phone number or password are in wrong format
-      if (_phoneController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
+      if (_phoneController.text.isNotEmpty &&
+          _passwordController.text.isNotEmpty) {
         String warning;
         if (false == isValidPasswd && false == isValidNumber) {
           warning = AppLocalizations.of(context)!.phonePasswordFormatError;
@@ -192,66 +188,65 @@ class _UserLoginScreenState extends LoginBaseScreenState {
   @override
   Widget topWidget(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(25.0,0.0,25.0,0.0),
-      child:Image.asset('assets/images/r2cycling_logo.png')
-    );
+        padding: const EdgeInsets.fromLTRB(25.0, 0.0, 25.0, 0.0),
+        child: Image.asset('assets/images/r2cycling_logo.png'));
   }
 
   @override
   Widget centerWidget(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children:<Widget> [
-        // text field for entering phone number
-        R2UserTextField(
-          prefixWidget: const Text(
-            '+86',
-            style: TextStyle(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          // text field for entering phone number
+          R2UserTextField(
+            prefixWidget: const Text(
+              '+86',
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
                 color: AppConstants.primaryColor200,
-            ),
-          ),
-          hintText: AppLocalizations.of(context)!.enterPhoneNumber,
-          controller: _phoneController,
-          keyboardType: TextInputType.phone,
-        ),
-        const SizedBox(height:40.0),
-        // text field for entering password
-        R2UserTextField(
-          prefixWidget: Image.asset('assets/icons/icon_password.png', width: 24, height: 24),
-          hintText: AppLocalizations.of(context)!.enterPassword,
-          controller: _passwordController,
-          keyboardType: TextInputType.text,
-          textVisible: _isPasswordHidden,
-          suffixWidget: IconButton(
-            icon: Icon(
-              _isPasswordHidden ? Icons.visibility_off : Icons.visibility ,
-              color: AppConstants.primaryColor200,
-            ),
-            onPressed: () {
-              setState(() {
-                _isPasswordHidden = !_isPasswordHidden;
-              });
-            },
-          ),
-        ),
-        const SizedBox(height:30),
-        Container (
-          width: 340,
-          alignment: Alignment.centerRight,
-          child: TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              },
-            child: Text(
-              AppLocalizations.of(context)!.verificationCodeLogin, 
-              style: const TextStyle(color: AppConstants.textColor),
               ),
+            ),
+            hintText: AppLocalizations.of(context)!.enterPhoneNumber,
+            controller: _phoneController,
+            keyboardType: TextInputType.phone,
           ),
-        )
-      ]
-    );
+          const SizedBox(height: 40.0),
+          // text field for entering password
+          R2UserTextField(
+            prefixWidget: Image.asset('assets/icons/icon_password.png',
+                width: 24, height: 24),
+            hintText: AppLocalizations.of(context)!.enterPassword,
+            controller: _passwordController,
+            keyboardType: TextInputType.text,
+            textVisible: _isPasswordHidden,
+            suffixWidget: IconButton(
+              icon: Icon(
+                _isPasswordHidden ? Icons.visibility_off : Icons.visibility,
+                color: AppConstants.primaryColor200,
+              ),
+              onPressed: () {
+                setState(() {
+                  _isPasswordHidden = !_isPasswordHidden;
+                });
+              },
+            ),
+          ),
+          const SizedBox(height: 30),
+          Container(
+            width: 340,
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text(
+                AppLocalizations.of(context)!.verificationCodeLogin,
+                style: const TextStyle(color: AppConstants.textColor),
+              ),
+            ),
+          )
+        ]);
   }
 
   /*
@@ -261,11 +256,11 @@ class _UserLoginScreenState extends LoginBaseScreenState {
     final String fullText = AppLocalizations.of(context)!.agreeTermsAndPrivacy;
     final String termsText = AppLocalizations.of(context)!.termsOfService;
     final String privacyText = AppLocalizations.of(context)!.privacyPolicy;
-    
+
     // Find the positions of the terms and privacy text in the full text
     final int termsIndex = fullText.indexOf(termsText);
     final int privacyIndex = fullText.indexOf(privacyText);
-    
+
     if (termsIndex == -1 || privacyIndex == -1) {
       // If we can't find the exact text, just return the full text
       return AutoSizeText(
@@ -276,7 +271,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
         overflow: TextOverflow.ellipsis,
       );
     }
-    
+
     // Create the rich text with clickable links
     final richText = TextSpan(
       style: const TextStyle(color: Colors.black),
@@ -290,13 +285,16 @@ class _UserLoginScreenState extends LoginBaseScreenState {
           recognizer: TapGestureRecognizer()
             ..onTap = () {
               _showTermsOrPrivacy(
-                context, 
-                Localizations.localeOf(context).languageCode == 'zh' ? 'TermsofService-zh.md' : 'TermsofService.md',
-                AppLocalizations.of(context)!.termsOfService
-              );
+                  context,
+                  Localizations.localeOf(context).languageCode == 'zh'
+                      ? 'TermsofService-zh.md'
+                      : 'TermsofService.md',
+                  AppLocalizations.of(context)!.termsOfService);
             },
         ),
-        TextSpan(text: fullText.substring(termsIndex + termsText.length, privacyIndex)),
+        TextSpan(
+            text: fullText.substring(
+                termsIndex + termsText.length, privacyIndex)),
         TextSpan(
           text: privacyText,
           style: const TextStyle(
@@ -305,10 +303,11 @@ class _UserLoginScreenState extends LoginBaseScreenState {
           recognizer: TapGestureRecognizer()
             ..onTap = () {
               _showTermsOrPrivacy(
-                context, 
-                Localizations.localeOf(context).languageCode == 'zh' ? 'PrivacyPolicy-zh.md' : 'PrivacyPolicy.md',
-                AppLocalizations.of(context)!.privacyPolicy
-              );
+                  context,
+                  Localizations.localeOf(context).languageCode == 'zh'
+                      ? 'PrivacyPolicy-zh.md'
+                      : 'PrivacyPolicy.md',
+                  AppLocalizations.of(context)!.privacyPolicy);
             },
         ),
         TextSpan(text: fullText.substring(privacyIndex + privacyText.length)),
@@ -325,15 +324,18 @@ class _UserLoginScreenState extends LoginBaseScreenState {
   }
 
   // Show the Terms of Service or Privacy Policy in a full screen dialog
-  void _showTermsOrPrivacy(BuildContext context, String fileName, String title) async {
+  void _showTermsOrPrivacy(
+      BuildContext context, String fileName, String title) async {
     try {
       // Load the file from assets
-      final String content = await DefaultAssetBundle.of(context).loadString(fileName);
-      
+      final String content =
+          await DefaultAssetBundle.of(context).loadString(fileName);
+
       if (context.mounted) {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => _TermsPrivacyScreen(content: content, title: title),
+            builder: (context) =>
+                _TermsPrivacyScreen(content: content, title: title),
           ),
         );
       }
@@ -361,28 +363,29 @@ class _UserLoginScreenState extends LoginBaseScreenState {
   Widget bottomWidget(BuildContext context) {
     return Column(
       children: [
-        Container (
+        Container(
             width: 340,
             padding: const EdgeInsets.fromLTRB(0, 30, 0, 0),
             alignment: Alignment.topRight,
             child: TextButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const PasswordRecoverScreen()),
-              );
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const PasswordRecoverScreen()),
+                );
               },
               child: Text(
-                AppLocalizations.of(context)!.forgotPassword, 
+                AppLocalizations.of(context)!.forgotPassword,
                 style: const TextStyle(color: AppConstants.textColor),
-                ),
-            )
-        ),
+              ),
+            )),
         Expanded(
           child: Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
+              padding:
+                  const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
               child: GestureDetector(
                 onTap: () {
                   setState(() {

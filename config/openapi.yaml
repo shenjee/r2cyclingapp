@@ -1,0 +1,7 @@
+sources:
+  - name: MemberAPI
+    url: https://rock.r2cycling.com/v2/api-docs?group=MemberAPI
+defaults:
+  baseHost: https://rock.r2cycling.com
+  basePath: /api/
+

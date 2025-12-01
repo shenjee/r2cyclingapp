@@ -53,4 +53,34 @@ class ApiClient {
     }
     return <String, dynamic>{};
   }
+
+  Future<String> postFormString(
+    String path, {
+    Map<String, String>? form,
+    String? apiToken,
+  }) async {
+    final uri = Uri.parse('$_baseHost$_basePath$path');
+    final headers = <String, String>{
+      'Content-Type': 'application/x-www-form-urlencoded',
+    };
+    if (apiToken != null && apiToken.isNotEmpty) {
+      headers['apiToken'] = apiToken;
+    }
+    final resp = await http.post(uri,
+        headers: headers, body: form ?? const <String, String>{});
+    if (resp.statusCode != 200) {
+      throw Exception('Request failed: ${resp.statusCode}');
+    }
+    final bodyText = resp.body;
+    try {
+      final dynamic decoded = json.decode(bodyText);
+      if (decoded is Map<String, dynamic>) {
+        final dynamic result = decoded['result'];
+        if (result != null) {
+          return result.toString();
+        }
+      }
+    } catch (_) {}
+    return bodyText;
+  }
 }

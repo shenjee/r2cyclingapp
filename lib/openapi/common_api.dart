@@ -28,4 +28,24 @@ class CommonApi {
       apiToken: apiToken,
     );
   }
+
+  Future<String> passwordLogin({
+    required String loginId,
+    required String sid,
+    required String userPsw,
+    String? validateCode,
+    String? apiToken,
+  }) {
+    final form = <String, String>{
+      'loginId': loginId,
+      'sid': sid,
+      'userPsw': userPsw,
+      'validateCode': validateCode ?? '',
+    };
+    return _client.postFormString(
+      'common/passwordLogin',
+      form: form,
+      apiToken: apiToken,
+    );
+  }
 }
