@@ -107,4 +107,23 @@ class CommonApi {
       apiToken: apiToken,
     );
   }
+
+  Future<Map<String, dynamic>> getMyGroup({
+    String? apiToken,
+  }) {
+    return _client.getJsonFull(
+      'cyclingGroup/getMyGroup',
+      apiToken: apiToken,
+    );
+  }
+
+  Future<Map<String, dynamic>> leaveGroup({
+    String? apiToken,
+  }) {
+    return _client.postFormString(
+      'cyclingGroup/leaveGroup',
+      form: const <String, String>{},
+      apiToken: apiToken,
+    );
+  }
 }

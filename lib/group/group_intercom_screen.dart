@@ -18,7 +18,7 @@ import 'package:r2cyclingapp/constants.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
-import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
+import 'package:r2cyclingapp/openapi/common_api.dart';
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
 import 'package:r2cyclingapp/usermanager/r2_group.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
@@ -50,7 +50,8 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
 
   _initR2Intercom(int groupId) {
     final account = _members.first;
-    _r2intercom = R2IntercomEngine.getInstance(groupID: groupId, userID:account.uid);
+    _r2intercom =
+        R2IntercomEngine.getInstance(groupID: groupId, userID: account.uid);
     _r2intercom!.initAgora();
   }
 
@@ -103,30 +104,29 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
     R2LoadingIndicator.show(context);
 
     final token = await _manager.readToken();
-    final request = R2HttpRequest();
-    final response = await request.getRequest(
-      token: token,
-      api: 'cyclingGroup/getMyGroup',
-    );
+    final api = CommonApi.defaultClient();
+    final response = await api.getMyGroup(apiToken: token);
 
     // stop the indicator
     if (mounted) {
       R2LoadingIndicator.stop(context);
     }
 
-    if (true == response.success) {
-      debugPrint('Request succeeded: ${response.message}');
-      debugPrint('Response code: ${response.code}');
-      debugPrint('Result: ${response.result}');
+    if ((response['success'] ?? false) == true) {
+      debugPrint('Request succeeded: ${response['message']}');
+      debugPrint('Response code: ${response['code']}');
+      debugPrint('Result: ${response['result']}');
 
-      Map<String, dynamic> resultData = response.result;
+      final Map<String, dynamic> resultData =
+          (response['result'] ?? {}) as Map<String, dynamic>;
 
       if (resultData.values.every((value) => value == null)) {
         // empty group object indicates that user has left the group
         if (mounted) {
           R2Flash.showBasicFlash(
             context: context,
-            message: '${AppLocalizations.of(context)!.exitGroupMessage} (${response.code})',
+            message:
+                '${AppLocalizations.of(context)!.exitGroupMessage} (${response['code']})',
             duration: const Duration(seconds: 3),
           );
         }
@@ -152,8 +152,8 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
         final ret = await _manager.saveGroup(account!.uid, group);
         debugPrint('$runtimeType : save group $groupId : $ret');
 
-        String formattedString = groupNum.toString().padLeft(
-            4, '0'); // Convert to 4-digit string
+        String formattedString =
+            groupNum.toString().padLeft(4, '0'); // Convert to 4-digit string
         debugPrint('Formatted Result: $formattedString');
         setState(() {
           _groupCode = formattedString;
@@ -162,11 +162,11 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
         _initR2Intercom(groupId);
       }
     } else {
-      debugPrint('Failed to request my group: ${response.code}');
+      debugPrint('Failed to request my group: ${response['code']}');
       if (mounted) {
         R2Flash.showBasicFlash(
           context: context,
-          message: '${response.message} (${response.code})',
+          message: '${response['message']} (${response['code']})',
           duration: const Duration(seconds: 3),
         );
       }
@@ -178,32 +178,29 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
     R2LoadingIndicator.show(context);
 
     final token = await _manager.readToken();
-    final request = R2HttpRequest();
-    final response = await request.postRequest(
-      token: token,
-      api: 'cyclingGroup/leaveGroup',
-    );
+    final api = CommonApi.defaultClient();
+    final response = await api.leaveGroup(apiToken: token);
 
     // stop the indicator
     if (mounted) {
       R2LoadingIndicator.stop(context);
     }
 
-    if (true == response.success) {
-      debugPrint('Request succeeded: ${response.message}');
-      debugPrint('Response code: ${response.code}');
-      debugPrint('Result: ${response.result}');
+    if ((response['success'] ?? false) == true) {
+      debugPrint('Request succeeded: ${response['message']}');
+      debugPrint('Response code: ${response['code']}');
+      debugPrint('Result: ${response['result']}');
 
       // delete local group data
       final group = await _manager.localGroup();
       final ret = await _manager.leaveGroup(group!.groupId);
       debugPrint('$runtimeType : remove local cached group data : $ret');
     } else {
-      debugPrint('Failed to leave group code: ${response.code}');
+      debugPrint('Failed to leave group code: ${response['code']}');
       if (mounted) {
         R2Flash.showBasicFlash(
           context: context,
-          message: '${response.message} (${response.code})',
+          message: '${response['message']} (${response['code']})',
           duration: const Duration(seconds: 3),
         );
       }
@@ -285,19 +282,23 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   Widget _groupMemberWidget(BuildContext context) {
     return Center(
       child: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.9, // Constrain to 90% of screen width
-        child: GridView.builder (
-          shrinkWrap: true, // When used in Column, ensure GridView doesn't expand to occupy entire space
-          physics: const NeverScrollableScrollPhysics(), // Disable GridView scrolling to avoid conflicts with external scrolling
+        width: MediaQuery.of(context).size.width *
+            0.9, // Constrain to 90% of screen width
+        child: GridView.builder(
+          shrinkWrap:
+              true, // When used in Column, ensure GridView doesn't expand to occupy entire space
+          physics:
+              const NeverScrollableScrollPhysics(), // Disable GridView scrolling to avoid conflicts with external scrolling
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 4, // 4 members per row
             crossAxisSpacing: 0.0,
             mainAxisSpacing: 0.0,
-            childAspectRatio: 0.7, // Make items taller to provide more space for avatar and text
+            childAspectRatio:
+                0.7, // Make items taller to provide more space for avatar and text
           ),
           itemCount: _members.length,
           itemBuilder: (context, index) {
-            final member  = _members[index];
+            final member = _members[index];
             return Column(
               children: [
                 FutureBuilder<Image>(
@@ -341,64 +342,64 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
    */
   void _showLeaveGroupDialog(BuildContext context) {
     showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-             contentPadding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 0.0),
-             content: Container(
-               constraints: const BoxConstraints(
-                 maxHeight: 80.0,
-                 minHeight: 60.0,
-                 maxWidth: 320.0,
-                 minWidth: 280.0,
-               ),
-               child: Center(
-                 child: Text(
-                   AppLocalizations.of(context)!.confirmExitGroup,
-                   style: const TextStyle(
-                     fontSize: 20.0,
-                     color: AppConstants.textColor,
-                   ),
-                   textAlign: TextAlign.center,
-                 ),
-               ),
-             ),
-             actionsPadding: const EdgeInsets.fromLTRB(24.0, 0.0, 24.0, 16.0),
-             actionsAlignment: MainAxisAlignment.center,
-             actions: [
-               TextButton(
-                 onPressed: () {
-                   Navigator.of(context).pop();
-                 },
-                 child: Text(
-                   AppLocalizations.of(context)!.cancel,
-                   style: const TextStyle(
-                     fontSize: 16.0,
-                     color: AppConstants.textColor,
-                   ),
-                 ),
-               ),
-               const SizedBox(width: 20),
-               TextButton(
-                 onPressed: () {
-                   Navigator.of(context).pop();
-                   _leaveMyGroup();
-                   if (_r2intercom != null) {
-                     _r2intercom!.stopIntercom();
-                   }
-                 },
-                 child: Text(
-                   AppLocalizations.of(context)!.exit,
-                   style: const TextStyle(
-                     fontSize: 16.0,
-                     color: AppConstants.textColor,
-                   ),
-                 ),
-               ),
-             ],
-           );
-        },
-      );
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          contentPadding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 0.0),
+          content: Container(
+            constraints: const BoxConstraints(
+              maxHeight: 80.0,
+              minHeight: 60.0,
+              maxWidth: 320.0,
+              minWidth: 280.0,
+            ),
+            child: Center(
+              child: Text(
+                AppLocalizations.of(context)!.confirmExitGroup,
+                style: const TextStyle(
+                  fontSize: 20.0,
+                  color: AppConstants.textColor,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          actionsPadding: const EdgeInsets.fromLTRB(24.0, 0.0, 24.0, 16.0),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                AppLocalizations.of(context)!.cancel,
+                style: const TextStyle(
+                  fontSize: 16.0,
+                  color: AppConstants.textColor,
+                ),
+              ),
+            ),
+            const SizedBox(width: 20),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _leaveMyGroup();
+                if (_r2intercom != null) {
+                  _r2intercom!.stopIntercom();
+                }
+              },
+              child: Text(
+                AppLocalizations.of(context)!.exit,
+                style: const TextStyle(
+                  fontSize: 16.0,
+                  color: AppConstants.textColor,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   /*
@@ -415,7 +416,13 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           boxShadow: _isPressed
-              ? [const BoxShadow(color: AppConstants.primaryColor300, blurRadius: 15, offset: Offset(0, 0), spreadRadius: 5)]
+              ? [
+                  const BoxShadow(
+                      color: AppConstants.primaryColor300,
+                      blurRadius: 15,
+                      offset: Offset(0, 0),
+                      spreadRadius: 5)
+                ]
               : [],
         ),
         child: Stack(
@@ -435,7 +442,9 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
             ),
             // Text overlay
             Text(
-              _isPressed ? AppLocalizations.of(context)!.talking : AppLocalizations.of(context)!.holdToTalk,
+              _isPressed
+                  ? AppLocalizations.of(context)!.talking
+                  : AppLocalizations.of(context)!.holdToTalk,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20.0,
@@ -448,19 +457,19 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_groupCode ?? AppLocalizations.of(context)!.cyclingIntercom),
+        title:
+            Text(_groupCode ?? AppLocalizations.of(context)!.cyclingIntercom),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.of(context).pushNamedAndRemoveUntil(
               '/home',
-                  (Route<dynamic> route) => false,
+              (Route<dynamic> route) => false,
             );
             _r2intercom!.stopIntercom();
           },
@@ -478,7 +487,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
           ),
         ],
       ),
-      body: Column (
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           const SizedBox(height: 30.0),
