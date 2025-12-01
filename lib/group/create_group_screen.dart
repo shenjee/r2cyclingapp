@@ -18,12 +18,11 @@ import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
 import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
-import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
+import 'package:r2cyclingapp/openapi/common_api.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/constants.dart';
-
 
 import 'group_intercom_screen.dart';
 
@@ -65,35 +64,34 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     // loading indicator for requesting a group pin code
     R2LoadingIndicator.show(context);
     final token = await R2Storage.getToken();
-    final request = R2HttpRequest();
-    final response = await request.postRequest(
-        token: token,
-        api: 'cyclingGroup/newGroup',
-    );
+    final api = CommonApi.defaultClient();
+    final response = await api.newGroup(apiToken: token);
 
     // stop the indicator
     if (mounted) {
       R2LoadingIndicator.stop(context);
     }
 
-    if (true == response.success) {
-      debugPrint('Request succeeded: ${response.message}');
-      debugPrint('Response code: ${response.code}');
-      debugPrint('Result: ${response.result}');
+    if ((response['success'] ?? false) == true) {
+      debugPrint('Request succeeded: ${response['message']}');
+      debugPrint('Response code: ${response['code']}');
+      debugPrint('Result: ${response['result']}');
 
-      Map<String, dynamic> resultData = response.result;
+      final Map<String, dynamic> resultData =
+          (response['result'] ?? {}) as Map<String, dynamic>;
       int groupNum = resultData['groupNum'];
-      String formattedString = groupNum.toString().padLeft(4, '0'); // Convert to 4-digit string
+      String formattedString =
+          groupNum.toString().padLeft(4, '0'); // Convert to 4-digit string
       debugPrint('Formatted Result: $formattedString');
       setState(() {
         _groupCode = formattedString;
       });
     } else {
-      debugPrint('Failed to request group code: $response');
+      debugPrint('Failed to request group code: ${response['code']}');
       if (mounted) {
         R2Flash.showBasicFlash(
           context: context,
-          message: '${response.message} (${response.code})',
+          message: '${response['message']} (${response['code']})',
           duration: const Duration(seconds: 3),
         );
       }
@@ -107,23 +105,20 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     // start the indicator of requesting leaving group
     R2LoadingIndicator.show(context);
     final token = await R2Storage.getToken();
-    final r2request = R2HttpRequest();
-    final r2response = await r2request.postRequest(
-      token: token,
-      api: 'cyclingGroup/leaveGroup',
-    );
+    final api = CommonApi.defaultClient();
+    final r2response = await api.leaveGroup(apiToken: token);
 
     // stop the indicator
     if (mounted) {
       R2LoadingIndicator.stop(context);
     }
 
-    if (true == r2response.success) {
-      debugPrint('Request succeeded: ${r2response.message}');
-      debugPrint('Response code: ${r2response.code}');
-      debugPrint('Result: ${r2response.result}');
+    if ((r2response['success'] ?? false) == true) {
+      debugPrint('Request succeeded: ${r2response['message']}');
+      debugPrint('Response code: ${r2response['code']}');
+      debugPrint('Result: ${r2response['result']}');
     } else {
-      debugPrint('Failed to leave group: $r2response');
+      debugPrint('Failed to leave group: ${r2response['code']}');
     }
   }
 
@@ -134,7 +129,9 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        const SizedBox(height: 20.0,),
+        const SizedBox(
+          height: 20.0,
+        ),
         Align(
           alignment: Alignment.centerLeft,
           child: Padding(
@@ -145,48 +142,52 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 70.0,),
+        const SizedBox(
+          height: 70.0,
+        ),
         Stack(
           alignment: Alignment.center,
           children: <Widget>[
             LayoutBuilder(
               builder: (context, constraints) {
                 // Calculate approximate dimensions
-                 double screenWidth = constraints.maxWidth;
-                 double groupNumberWidth = 200; // Approximate width for 4-digit number at 68px
-                 double labelWidth = 60; // Approximate width for "组编号：" at 16px
-                 double groupNumberHeight = 68; // Height of group number text
-                 double labelHeight = 16; // Height of label text
-                 
-                 // Calculate positions using the formulas
-                  double leftPosition = (screenWidth - groupNumberWidth) / 2 - labelWidth;
-                  double topPosition = groupNumberHeight - labelHeight;
-                
+                double screenWidth = constraints.maxWidth;
+                double groupNumberWidth =
+                    200; // Approximate width for 4-digit number at 68px
+                double labelWidth = 60; // Approximate width for "组编号：" at 16px
+                double groupNumberHeight = 68; // Height of group number text
+                double labelHeight = 16; // Height of label text
+
+                // Calculate positions using the formulas
+                double leftPosition =
+                    (screenWidth - groupNumberWidth) / 2 - labelWidth;
+                double topPosition = groupNumberHeight - labelHeight;
+
                 return Stack(
                   children: [
                     // Centered group number
                     Center(
                       child: Text(
-                        _groupCode??'- - - -',
+                        _groupCode ?? '- - - -',
                         style: const TextStyle(
-                            fontSize: 68.0,
-                            fontWeight: FontWeight.bold,
-                            color: AppConstants.primaryColor,
+                          fontSize: 68.0,
+                          fontWeight: FontWeight.bold,
+                          color: AppConstants.primaryColor,
                         ),
                       ),
                     ),
                     // Label positioned using the formulas
-                      Positioned(
-                        left: leftPosition,
-                        top: topPosition,
-                        child: Text(
-                          AppLocalizations.of(context)!.groupNumber,
-                          style: const TextStyle(
-                            fontSize: 16.0,
-                            color: AppConstants.textColor,
-                            ),
+                    Positioned(
+                      left: leftPosition,
+                      top: topPosition,
+                      child: Text(
+                        AppLocalizations.of(context)!.groupNumber,
+                        style: const TextStyle(
+                          fontSize: 16.0,
+                          color: AppConstants.textColor,
                         ),
                       ),
+                    ),
                   ],
                 );
               },
@@ -200,19 +201,22 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   Widget _groupMemberWidget(BuildContext context) {
     return Center(
       child: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.9, // Constrain to 90% of screen width
-        child: GridView.builder (
-          shrinkWrap: true, // When used in Column, ensure GridView doesn't expand to occupy entire space
-          physics: const NeverScrollableScrollPhysics(), // Disable GridView scrolling to avoid conflicts with external scrolling
+        width: MediaQuery.of(context).size.width *
+            0.9, // Constrain to 90% of screen width
+        child: GridView.builder(
+          shrinkWrap:
+              true, // When used in Column, ensure GridView doesn't expand to occupy entire space
+          physics:
+              const NeverScrollableScrollPhysics(), // Disable GridView scrolling to avoid conflicts with external scrolling
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 4, // 4 members per row
             crossAxisSpacing: 0.0,
             mainAxisSpacing: 0.0,
-            childAspectRatio: 0.7, 
+            childAspectRatio: 0.7,
           ),
           itemCount: _members.length,
           itemBuilder: (context, index) {
-            final member  = _members[index];
+            final member = _members[index];
             return Column(
               children: [
                 FutureBuilder<Image>(
@@ -241,7 +245,9 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   member.nickname,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12.0,),
+                  style: const TextStyle(
+                    fontSize: 12.0,
+                  ),
                 ),
               ],
             );
@@ -265,7 +271,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
           },
         ),
       ),
-      body: Column (
+      body: Column(
         children: <Widget>[
           Center(child: _groupNumberWidget(context)),
           const SizedBox(height: 20.0),
@@ -278,7 +284,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   onPressed: () {
                     // Save the group to the database and navigate to GroupIntercomScreen
                     Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => const GroupIntercomScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => const GroupIntercomScreen()),
                     );
                   }),
             ),

@@ -137,4 +137,14 @@ class CommonApi {
       apiToken: apiToken,
     );
   }
+
+  Future<Map<String, dynamic>> newGroup({
+    String? apiToken,
+  }) {
+    return _client.postFormString(
+      'cyclingGroup/newGroup',
+      form: const <String, String>{},
+      apiToken: apiToken,
+    );
+  }
 }
