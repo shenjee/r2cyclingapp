@@ -30,7 +30,7 @@ import 'package:r2cyclingapp/login/user_login_screen.dart';
 import 'package:r2cyclingapp/settings/settings_screen.dart';
 import 'package:r2cyclingapp/settings/user_profile_screen.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
-import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
+import 'package:r2cyclingapp/openapi/common_api.dart';
 
 void main() async {
   // Use Zone to capture all exceptions
@@ -41,20 +41,20 @@ void main() async {
       debugPrint('Flutter error: ${details.exception}');
       // You can add logging or crash reporting here
     };
-    
+
     // Initialize Flutter binding
     WidgetsFlutterBinding.ensureInitialized();
-    
+
     // Initialize services required by the app
     await _initServices();
-    
+
     // Launch the app
     runApp(const R2CyclingApp());
   }, (error, stackTrace) {
     // Handle all uncaught async errors
     debugPrint('Uncaught exception: $error');
     debugPrint('Stack trace: $stackTrace');
-    
+
     // Try to launch the app in safe mode
     runApp(const R2CyclingAppSafeMode());
   });
@@ -63,13 +63,13 @@ void main() async {
 Future<void> _appInit() async {
   try {
     final int code = Platform.isAndroid ? 2 : 3;
-    final request = R2HttpRequest();
-    final response = await request.getRequest(api: 'common/appInit?clientTypeCode=$code');
-
-    if (response.success == true && response.result is Map) {
-      final Map<String, dynamic> r = Map<String, dynamic>.from(response.result);
+    final commonApi = CommonApi.defaultClient();
+    final Map<String, dynamic> r =
+        await commonApi.appInit(clientTypeCode: code.toString());
+    if (r.isNotEmpty) {
       String sanitize(dynamic v) => (v ?? '').toString().trim();
-      Future<void> saveKV(String k, dynamic v) => R2Storage.save(k, sanitize(v));
+      Future<void> saveKV(String k, dynamic v) =>
+          R2Storage.save(k, sanitize(v));
 
       await Future.wait([
         saveKV('fileDomain', r['fileDomain']),
@@ -86,7 +86,7 @@ Future<void> _appInit() async {
 
       debugPrint('appInit: settings saved');
     } else {
-      debugPrint('appInit failed: code=${response.code} message=${response.message}');
+      debugPrint('appInit failed');
     }
   } catch (e) {
     debugPrint('appInit error: $e');
@@ -100,10 +100,10 @@ Future<void> _initServices() async {
     // For example: database, shared preferences, network client, etc.
 
     await _appInit();
-    
+
     // Simulate initialization process
     await Future.delayed(const Duration(milliseconds: 100));
-    
+
     debugPrint('App services initialized successfully');
   } catch (e) {
     debugPrint('Service initialization error: $e');
@@ -120,7 +120,7 @@ class R2CyclingApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'R2 Cycling',
-      
+
       // Internationalization support
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -129,7 +129,7 @@ class R2CyclingApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      
+
       // Theme configuration
       theme: ThemeData(
         scaffoldBackgroundColor: AppConstants.backgroundColor,
@@ -137,21 +137,21 @@ class R2CyclingApp extends StatelessWidget {
           backgroundColor: AppConstants.backgroundColor,
         ),
       ),
-      
+
       // Route configuration
       initialRoute: '/home',
       routes: {
-        '/home':(context) => const HomeScreen(),
-        '/register':(context) => const UserRegisterScreen(),
-        '/login':(context) => const UserLoginScreen(),
-        '/bluetooth_pairing':(context) => const DevicePairingScreen(),
-        '/groupList':(context) => const GroupListScreen(),
-        '/intercom':(context) => const GroupIntercomScreen(),
-        '/emergencyContact':(context) => const EmergencyContactScreen(),
-        '/settings':(context) => const SettingsScreen(),
-        '/profile':(context) => const UserProfileScreen(),
+        '/home': (context) => const HomeScreen(),
+        '/register': (context) => const UserRegisterScreen(),
+        '/login': (context) => const UserLoginScreen(),
+        '/bluetooth_pairing': (context) => const DevicePairingScreen(),
+        '/groupList': (context) => const GroupListScreen(),
+        '/intercom': (context) => const GroupIntercomScreen(),
+        '/emergencyContact': (context) => const EmergencyContactScreen(),
+        '/settings': (context) => const SettingsScreen(),
+        '/profile': (context) => const UserProfileScreen(),
       },
-      
+
       // Debug configuration
       debugShowCheckedModeBanner: false,
     );
