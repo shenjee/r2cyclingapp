@@ -48,4 +48,38 @@ class CommonApi {
       apiToken: apiToken,
     );
   }
+
+  Future<String> sendAuthCode({
+    required String sid,
+    required String userMobile,
+    String? apiToken,
+  }) {
+    final form = <String, String>{
+      'sid': sid,
+      'userMobile': userMobile,
+    };
+    return _client.postFormString(
+      'common/sendAuthCode',
+      form: form,
+      apiToken: apiToken,
+    );
+  }
+
+  Future<String> mobileLogin({
+    required String sid,
+    required String userMobile,
+    required String validateCode,
+    String? apiToken,
+  }) {
+    final form = <String, String>{
+      'sid': sid,
+      'userMobile': userMobile,
+      'validateCode': validateCode,
+    };
+    return _client.postFormString(
+      'common/mobileLogin',
+      form: form,
+      apiToken: apiToken,
+    );
+  }
 }

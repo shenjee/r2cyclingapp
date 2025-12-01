@@ -20,7 +20,7 @@ import 'package:uuid/uuid.dart';
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
-import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
+import 'package:r2cyclingapp/openapi/common_api.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/constants.dart';
@@ -78,16 +78,17 @@ class VerificationScreenState extends LoginBaseScreenState {
         await prefs.setString('sessionId', sid);
       }
 
-      // request code via http
       final String userMobile = _phoneController.text;
-      final request = R2HttpRequest();
-      final response = await request.postRequest(
-        api: 'common/sendAuthCode',
-        body: {
-          'sid': sid,
-          'userMobile': userMobile,
-        },
-      );
+      final commonApi = CommonApi.defaultClient();
+      String sendResult = '';
+      try {
+        sendResult = await commonApi.sendAuthCode(
+          sid: sid,
+          userMobile: userMobile,
+        );
+      } catch (e) {
+        debugPrint('$runtimeType : Failed to request verification code: $e');
+      }
 
       // start 60s countdown
       _secondsRemaining = 60;
@@ -98,21 +99,16 @@ class VerificationScreenState extends LoginBaseScreenState {
         R2LoadingIndicator.stop(context);
       }
 
-      if (true == response.success) {
+      if (sendResult.isNotEmpty) {
         debugPrint('$runtimeType : Verification code sent successfully');
       } else {
-        debugPrint(
-            '$runtimeType : Failed to request verification code: ${response
-                .code}');
-
         if (mounted) {
           R2Flash.showBasicFlash(
             context: context,
-            message: '${response.message} (${response.code})',
+            message: 'Request failed',
           );
         }
       }
-
     } else {
       // phone number is missing , or in a wrong format
       R2Flash.showBasicFlash(
@@ -145,46 +141,43 @@ class VerificationScreenState extends LoginBaseScreenState {
       // get phone number and v-code
       final String phonenumber = _phoneController.text;
       final String vcode = _vcodeController.text;
-      final request = R2HttpRequest();
-      final response = await request.postRequest(
-        api: 'common/mobileLogin',
-        body: {
-          'sid': sid,
-          'userMobile': phonenumber,
-          'validateCode': vcode
-        },
-      );
+      final commonApi = CommonApi.defaultClient();
+      String token = '';
+      try {
+        token = await commonApi.mobileLogin(
+          sid: sid,
+          userMobile: phonenumber,
+          validateCode: vcode,
+        );
+      } catch (e) {
+        debugPrint('$runtimeType : Failed to request token: $e');
+      }
 
       //stop indicator
       if (mounted) {
         R2LoadingIndicator.stop(context);
       }
 
-      if (true == response.success) {
-        debugPrint(
-            '$runtimeType : Response of token request by phone number + password');
-        debugPrint('$runtimeType :  Code: ${response.code}');
-        debugPrint('$runtimeType :  result: ${response.result}');
-
-        final token = response.result;
+      if (token.isNotEmpty) {
+        debugPrint('$runtimeType : Token received');
         final manager = R2UserManager();
         // Save the token
         manager.saveToken(token);
 
         onTokenRetrieved(token);
       } else {
-        debugPrint('$runtimeType : Failed to request token: ${response.code}');
         if (mounted) {
           R2Flash.showBasicFlash(
               context: context,
-              message: '${response.message} (${response.code})',
+              message: 'Request failed',
               duration: const Duration(seconds: 3)
           );
         }
       }
     } else {
       // v-code is in a wrong format
-      if (_phoneController.text.isNotEmpty && _vcodeController.text.isNotEmpty) {
+      if (_phoneController.text.isNotEmpty &&
+          _vcodeController.text.isNotEmpty) {
         String warning;
         if (false == isValidCode && false == isValidNumber) {
           warning = AppLocalizations.of(context)!.phoneOrCodeFormatError;
@@ -210,12 +203,17 @@ class VerificationScreenState extends LoginBaseScreenState {
     if (true == _isVcodeRequested) {
       return Padding(
           padding: const EdgeInsets.fromLTRB(0.0, 0, 20.0, 0.0),
-          child:Text('${_secondsRemaining}s', style: const TextStyle(color: AppConstants.textColor),)
-      );
+          child: Text(
+            '${_secondsRemaining}s',
+            style: const TextStyle(color: AppConstants.textColor),
+          ));
     } else {
       return TextButton(
         onPressed: _requestVcode,
-        child: Text(AppLocalizations.of(context)!.getVerificationCode, style: const TextStyle(color: AppConstants.textColor),),
+        child: Text(
+          AppLocalizations.of(context)!.getVerificationCode,
+          style: const TextStyle(color: AppConstants.textColor),
+        ),
       );
     }
   }
@@ -242,8 +240,8 @@ class VerificationScreenState extends LoginBaseScreenState {
   @override
   Widget topWidget(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(25.0,0.0,25.0,0.0),
-      child:Image.asset('assets/images/r2cycling_logo.png'),
+      padding: const EdgeInsets.fromLTRB(25.0, 0.0, 25.0, 0.0),
+      child: Image.asset('assets/images/r2cycling_logo.png'),
     );
   }
 
@@ -304,14 +302,14 @@ class VerificationScreenState extends LoginBaseScreenState {
           const SizedBox(height: 40.0),
           // text field for entering password
           R2UserTextField(
-            prefixWidget: Image.asset('assets/icons/icon_vcode.png', width: 24, height: 24),
+            prefixWidget: Image.asset('assets/icons/icon_vcode.png',
+                width: 24, height: 24),
             hintText: AppLocalizations.of(context)!.enterVerificationCode,
             suffixWidget: _vcodeButton(),
             controller: _vcodeController,
             keyboardType: TextInputType.number,
           ),
-        ]
-    );
+        ]);
   }
 
   /*
