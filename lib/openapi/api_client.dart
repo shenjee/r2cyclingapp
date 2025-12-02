@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class ApiClient {
@@ -136,6 +137,77 @@ class ApiClient {
         };
       }
     } catch (_) {}
+    return {
+      'success': false,
+      'message': 'Invalid response',
+      'code': 500,
+      'result': null,
+    };
+  }
+
+  Future<Map<String, dynamic>> postMultipart(
+    String path, {
+    required File file,
+    String fileField = 'file',
+    Map<String, String>? fields,
+    String? apiToken,
+  }) async {
+    final uri = Uri.parse('$_baseHost$_basePath$path');
+    final request = http.MultipartRequest('POST', uri);
+
+    // Add fields
+    if (fields != null) {
+      request.fields.addAll(fields);
+    }
+
+    // Add headers
+    request.headers['Accept'] = 'application/json';
+    if (apiToken != null && apiToken.isNotEmpty) {
+      request.headers['apiToken'] = apiToken;
+    }
+
+    // Add file
+    final multipartFile = await http.MultipartFile.fromPath(
+      fileField,
+      file.path,
+    );
+    request.files.add(multipartFile);
+
+    try {
+      final streamedResponse = await request.send();
+      final resp = await http.Response.fromStream(streamedResponse);
+
+      if (resp.statusCode != 200) {
+        return {
+          'success': false,
+          'message': 'Request failed: ${resp.statusCode}',
+          'code': resp.statusCode,
+          'result': null,
+        };
+      }
+
+      final dynamic decoded = json.decode(resp.body);
+      if (decoded is Map<String, dynamic>) {
+        final bool success = (decoded['success'] ?? false) == true;
+        final dynamic message = decoded['message'];
+        final dynamic code = decoded['code'];
+        final dynamic result = decoded['result'];
+        return {
+          'success': success,
+          'message': message?.toString(),
+          'code': code is int ? code : int.tryParse('${code ?? 0}') ?? 0,
+          'result': result,
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Request error: $e',
+        'code': 500,
+        'result': null,
+      };
+    }
+
     return {
       'success': false,
       'message': 'Invalid response',

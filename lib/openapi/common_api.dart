@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:r2cyclingapp/openapi/api_client.dart';
+import 'dart:io';
 
 class CommonApi {
   final ApiClient _client;
@@ -247,6 +248,32 @@ class CommonApi {
     return _client.postFormString(
       'member/unBindDevice',
       form: const <String, String>{},
+      apiToken: apiToken,
+    );
+  }
+
+  Future<Map<String, dynamic>> modUserInfo({
+    Map<String, String>? body,
+    String? apiToken,
+  }) {
+    return _client.postFormString(
+      'user/modUserInfo',
+      form: body,
+      apiToken: apiToken,
+    );
+  }
+
+  Future<Map<String, dynamic>> uploadFile({
+    required File file,
+    String? apiToken,
+  }) {
+    return _client.postMultipart(
+      'tools/upload',
+      file: file,
+      fields: {
+        'thumbHeight': '200',
+        'thumbWidth': '200',
+      },
       apiToken: apiToken,
     );
   }

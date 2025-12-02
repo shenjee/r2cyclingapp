@@ -16,7 +16,6 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
-import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
 import 'package:r2cyclingapp/openapi/common_api.dart';
 
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
@@ -491,15 +490,14 @@ class R2UserManager {
   Future<String?> _uploadAvatarImage(File imageFile) async {
     try {
       final token = await readToken();
-      final request = R2HttpRequest();
-      final response = await request.uploadFile(
-        api: 'tools/upload',
-        token: token,
+      final api = CommonApi.defaultClient();
+      final resp = await api.uploadFile(
         file: imageFile,
+        apiToken: token,
       );
 
-      if (response.success == true) {
-        final dynamic result = response.result;
+      if ((resp['success'] ?? false) == true) {
+        final dynamic result = resp['result'];
         String? filename;
         if (result is Map) {
           final dynamic f = result['filename'];
@@ -510,7 +508,7 @@ class R2UserManager {
         return (filename != null && filename.isNotEmpty) ? filename : null;
       } else {
         debugPrint(
-            '$runtimeType : upload avatar failed: ${response.message} (${response.code})');
+            '$runtimeType : upload avatar failed: ${resp['message']} (${resp['code']})');
         return null;
       }
     } catch (e) {
@@ -537,18 +535,17 @@ class R2UserManager {
 
     try {
       final token = await readToken();
-      final request = R2HttpRequest();
-      final response = await request.postRequest(
-        api: 'user/modUserInfo',
-        token: token,
+      final api = CommonApi.defaultClient();
+      final resp = await api.modUserInfo(
         body: body,
+        apiToken: token,
       );
 
-      if (response.success == true) {
+      if ((resp['success'] ?? false) == true) {
         return true;
       } else {
         debugPrint(
-            '$runtimeType : update profile failed: ${response.message} (${response.code})');
+            '$runtimeType : update profile failed: ${resp['message']} (${resp['code']})');
         return false;
       }
     } catch (e) {
