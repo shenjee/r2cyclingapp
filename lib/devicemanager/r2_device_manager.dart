@@ -17,7 +17,7 @@ import 'package:flutter/services.dart';
 
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
-import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
+import 'package:r2cyclingapp/openapi/common_api.dart';
 import 'package:r2cyclingapp/devicemanager/r2_device.dart';
 import 'package:r2cyclingapp/connection/bt/r2_bluetooth_model.dart';
 
@@ -45,8 +45,11 @@ class R2DeviceManager {
         return R2Device(
           deviceId: discoveredDevice.id.replaceAll(RegExp(r'[^a-zA-Z0-9]'), ''),
           model: '',
-          brand: '', // DiscoveredDevice does not provide brand, use empty string
-          name: discoveredDevice.name.isNotEmpty ? discoveredDevice.name : "Unknown",
+          brand:
+              '', // DiscoveredDevice does not provide brand, use empty string
+          name: discoveredDevice.name.isNotEmpty
+              ? discoveredDevice.name
+              : "Unknown",
           bleAddress: discoveredDevice.id,
           classicAddress: null,
           imageUrl: '',
@@ -59,11 +62,12 @@ class R2DeviceManager {
     _btModel.stopScan();
   }
 
-  Future<void> bindDevice(R2Device device, {required Function(R2Device) onBond}) async {
+  Future<void> bindDevice(R2Device device,
+      {required Function(R2Device) onBond}) async {
     // Listen to pairing events
     // BLE is ready, now pair with classic bt
     _btModel.pairingStream.listen((pairingInfo) async {
-      String deviceName = pairingInfo['name']!;  // classic bt name
+      String deviceName = pairingInfo['name']!; // classic bt name
       String deviceAddress = pairingInfo['address']!; // classic bt address
       debugPrint("Paired with classic bt : $deviceName $deviceAddress");
 
@@ -79,7 +83,7 @@ class R2DeviceManager {
     onBond(device);
   }
 
-  Future<void> unbindDevice(R2Device device) async {    
+  Future<void> unbindDevice(R2Device device) async {
     if (device.classicAddress.isNotEmpty) {
       bool unpaired = await _btModel.unpairClassicBt(device.classicAddress);
       if (unpaired) {
@@ -118,10 +122,11 @@ class R2DeviceManager {
   }
 
   /// Update device name
-  /// 
+  ///
   /// deviceId: the id of device to update
   /// value:   new device name
-  Future<int> updateDeviceName({required String deviceId, String? value}) async {
+  Future<int> updateDeviceName(
+      {required String deviceId, String? value}) async {
     final device = await R2DBHelper().getDevice(deviceId);
     if (device != null) {
       final updatedDevice = R2Device(
@@ -140,10 +145,11 @@ class R2DeviceManager {
   }
 
   /// Update device BLE address
-  /// 
+  ///
   /// deviceId: the id of device to update
   /// value:   new BLE address
-  Future<int> updateBleAddress({required String deviceId, String? value}) async {
+  Future<int> updateBleAddress(
+      {required String deviceId, String? value}) async {
     final device = await R2DBHelper().getDevice(deviceId);
     if (device != null) {
       final updatedDevice = R2Device(
@@ -162,10 +168,11 @@ class R2DeviceManager {
   }
 
   /// Update device Classic address
-  /// 
+  ///
   /// deviceId: the id of device to update
   /// value:   new Classic address
-  Future<int> updateClassicAddress({required String deviceId, String? value}) async {
+  Future<int> updateClassicAddress(
+      {required String deviceId, String? value}) async {
     final device = await R2DBHelper().getDevice(deviceId);
     if (device != null) {
       final updatedDevice = R2Device(
@@ -186,21 +193,19 @@ class R2DeviceManager {
   // Upload bond device information to server
   Future<int> requestBindDevice(R2Device device) async {
     final token = await R2Storage.read('authtoken');
-    final request = R2HttpRequest();
-    final response = await request.postRequest(
-      api: 'member/bindDevice',
-      token: token,
-      body: {
-        'hwDeviceId': device.deviceId,
-        'hwDeviceVer': '',
-      },
+    final api = CommonApi.defaultClient();
+    final resp = await api.bindDevice(
+      hwDeviceId: device.deviceId,
+      hwDeviceVer: '',
+      apiToken: token,
     );
 
-    if (true == response.success) {
-      debugPrint('$runtimeType : Cloud bind device: ${response.code}');
-      final Map<String, dynamic> data = response.result;
+    if ((resp['success'] ?? false) == true) {
+      debugPrint('$runtimeType : Cloud bind device: ${resp['code']}');
+      final Map<String, dynamic> data =
+          (resp['result'] ?? {}) as Map<String, dynamic>;
       final imageUrl = data['modelPict'] ?? '';
-      
+
       // Update device with imageUrl and save to database
       final updatedDevice = R2Device(
         deviceId: device.deviceId,
@@ -213,7 +218,7 @@ class R2DeviceManager {
       );
       await R2DBHelper().saveDevice(updatedDevice);
     } else {
-      debugPrint('$runtimeType : Request bind device failed: ${response.code}');
+      debugPrint('$runtimeType : Request bind device failed: ${resp['code']}');
     }
 
     return 0;
@@ -222,30 +227,32 @@ class R2DeviceManager {
   // Remove bond device information from server
   Future<int> requestUnbindDevice(R2Device device) async {
     final token = await R2Storage.read('authtoken');
-    final request = R2HttpRequest();
-    final response = await request.postRequest(
-      api: 'member/unBindDevice',
-      token: token,
-    );
-    
-    debugPrint('$runtimeType : Cloud unbind device: ${response.code}');
-    
+    final api = CommonApi.defaultClient();
+    final resp = await api.unBindDevice(apiToken: token);
+
+    debugPrint('$runtimeType : Cloud unbind device: ${resp['code']}');
+
     return 0;
   }
 
   Future<void> remote(HelmetRemoteOperation operation) async {
     final device = await R2DBHelper().getFirstDevice();
-    switch(operation) {
+    switch (operation) {
       case HelmetRemoteOperation.appConnect:
-        _btModel.sendData(device!.bleAddress, [0x55, 0xB1, 0x03, 0x09, 0x00, 0x01, 0x10]);
+        _btModel.sendData(
+            device!.bleAddress, [0x55, 0xB1, 0x03, 0x09, 0x00, 0x01, 0x10]);
       case HelmetRemoteOperation.rightLight:
-        _btModel.sendData(device!.bleAddress, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x02, 0x1b]);
+        _btModel.sendData(
+            device!.bleAddress, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x02, 0x1b]);
       case HelmetRemoteOperation.leftLight:
-        _btModel.sendData(device!.bleAddress, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x01, 0x18]);
+        _btModel.sendData(
+            device!.bleAddress, [0x55, 0xB1, 0x03, 0x01, 0x00, 0x01, 0x18]);
       case HelmetRemoteOperation.volumeUp:
-        _btModel.sendData(device!.bleAddress, [0x55, 0xB1, 0x03, 0x08, 0x00, 0x08, 0x18]);
+        _btModel.sendData(
+            device!.bleAddress, [0x55, 0xB1, 0x03, 0x08, 0x00, 0x08, 0x18]);
       case HelmetRemoteOperation.volumeDown:
-        _btModel.sendData(device!.bleAddress, [0x55, 0xB1, 0x03, 0x08, 0x00, 0x09, 0x19]);
+        _btModel.sendData(
+            device!.bleAddress, [0x55, 0xB1, 0x03, 0x08, 0x00, 0x09, 0x19]);
     }
   }
 }

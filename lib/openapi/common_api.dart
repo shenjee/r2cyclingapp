@@ -225,4 +225,29 @@ class CommonApi {
       apiToken: apiToken,
     );
   }
+
+  Future<Map<String, dynamic>> bindDevice({
+    required String hwDeviceId,
+    String hwDeviceVer = '',
+    String? apiToken,
+  }) {
+    return _client.postFormString(
+      'member/bindDevice',
+      form: <String, String>{
+        'hwDeviceId': hwDeviceId,
+        'hwDeviceVer': hwDeviceVer,
+      },
+      apiToken: apiToken,
+    );
+  }
+
+  Future<Map<String, dynamic>> unBindDevice({
+    String? apiToken,
+  }) {
+    return _client.postFormString(
+      'member/unBindDevice',
+      form: const <String, String>{},
+      apiToken: apiToken,
+    );
+  }
 }
