@@ -147,4 +147,71 @@ class CommonApi {
       apiToken: apiToken,
     );
   }
+
+  Future<Map<String, dynamic>> fallDownReport({
+    required String eventLat,
+    required String eventLon,
+    String? apiToken,
+  }) {
+    return _client.postFormString(
+      'locationEvent/fallDownReport',
+      form: <String, String>{
+        'eventLat': eventLat,
+        'eventLon': eventLon,
+      },
+      apiToken: apiToken,
+    );
+  }
+
+  Future<Map<String, dynamic>> switchContactEnabled({
+    required String emergencyContactEnabled,
+    String? apiToken,
+  }) {
+    return _client.postFormString(
+      'member/switchContactEnabled',
+      form: <String, String>{
+        'emergencyContactEnabled': emergencyContactEnabled,
+      },
+      apiToken: apiToken,
+    );
+  }
+
+  Future<Map<String, dynamic>> saveEmergencyContact({
+    required String emergencyContactId,
+    required String contactMan,
+    required String contactManMobile,
+    String? apiToken,
+  }) {
+    return _client.postFormString(
+      'emergencyContact/saveEmergencyContact',
+      form: <String, String>{
+        'emergencyContactId': emergencyContactId,
+        'contactMan': contactMan,
+        'contactManMobile': contactManMobile,
+      },
+      apiToken: apiToken,
+    );
+  }
+
+  Future<Map<String, dynamic>> deleteEmergencyContact({
+    required String emergencyContactId,
+    String? apiToken,
+  }) {
+    return _client.postFormString(
+      'emergencyContact/deleteEmergencyContact',
+      form: <String, String>{
+        'emergencyContactId': emergencyContactId,
+      },
+      apiToken: apiToken,
+    );
+  }
+
+  Future<Map<String, dynamic>> listEmergencyContact({
+    String? apiToken,
+  }) {
+    return _client.getJsonFull(
+      'emergencyContact/listEmergencyContact',
+      apiToken: apiToken,
+    );
+  }
 }

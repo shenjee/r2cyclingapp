@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
-import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
+import 'package:r2cyclingapp/openapi/common_api.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 
 import 'r2_sms.dart';
@@ -28,21 +28,21 @@ class R2SosSender {
   Future<String?> _requestShortAddress(double longitude, double latitude) async {
     String? address;
     final token = await _manager.readToken();
-    final r2request = R2HttpRequest();
-    final r2response = await r2request.postRequest(
-      token: token,
-      api: 'locationEvent/fallDownReport',
-      body: {
-        'eventLat': '$latitude',
-        'eventLon': '$longitude',
-      },
+    final api = CommonApi.defaultClient();
+    final resp = await api.fallDownReport(
+      eventLat: '$latitude',
+      eventLon: '$longitude',
+      apiToken: token,
     );
 
-    if (true == r2response.success) {
-      String shortUrl = r2response.result['shortLinkId'];
-      address = 'http://r2cycling.imai.site/t/$shortUrl';
+    if ((resp['success'] ?? false) == true) {
+      final dynamic result = resp['result'];
+      if (result is Map<String, dynamic>) {
+        final shortUrl = result['shortLinkId'];
+        address = 'http://r2cycling.imai.site/t/$shortUrl';
+      }
     } else {
-      debugPrint('Failed to request group code: $r2response');
+      debugPrint('Failed to request group code: ${resp['message']}');
     }
 
     return address;

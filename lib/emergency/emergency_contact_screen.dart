@@ -15,7 +15,7 @@
 import 'package:flutter/material.dart';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
-import 'package:r2cyclingapp/connection/http/r2_http_request.dart';
+import 'package:r2cyclingapp/openapi/common_api.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/constants.dart';
 
@@ -45,10 +45,11 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
 
     setState(() {
       arrayContacts = contactList;
-      isEmergencyContactEnabled = setting != null && setting['emergencyContactEnabled'] == 1;
+      isEmergencyContactEnabled =
+          setting != null && setting['emergencyContactEnabled'] == 1;
     });
 
-    // if the emergency contact is enabled and the contact list is empty, 
+    // if the emergency contact is enabled and the contact list is empty,
     // request the emergency contacts from the server
     if (isEmergencyContactEnabled == true && contactList.isEmpty) {
       await _requestAllEmergencyContacts();
@@ -81,64 +82,62 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
   }
 
   Widget _switchWidget() {
-    return Column(
-      children: [
-        Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Expanded (
-                child: Padding(
-                  padding:const EdgeInsets.fromLTRB(20.0, 20.0, 0.0, 10.0),
-                  child:Text(
-                    AppLocalizations.of(context)!.sosEmergency, 
-                    style: const TextStyle(fontSize: 24.0),
-                    ),
+    return Column(children: [
+      Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20.0, 20.0, 0.0, 10.0),
+                child: Text(
+                  AppLocalizations.of(context)!.sosEmergency,
+                  style: const TextStyle(fontSize: 24.0),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(00.0, 20.0, 20.0, 10.0),
-                child:Switch(
-                  value: isEmergencyContactEnabled,
-                  activeTrackColor: AppConstants.primaryColor200,
-                  onChanged: (value) {
-                    setState(() {
-                      isEmergencyContactEnabled = value;
-                    });
-                    _updateEmergencyContactStatus(value);
-                  },
-                ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(00.0, 20.0, 20.0, 10.0),
+              child: Switch(
+                value: isEmergencyContactEnabled,
+                activeTrackColor: AppConstants.primaryColor200,
+                onChanged: (value) {
+                  setState(() {
+                    isEmergencyContactEnabled = value;
+                  });
+                  _updateEmergencyContactStatus(value);
+                },
               ),
-            ]
+            ),
+          ]),
+      if (!isEmergencyContactEnabled)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(30.0, 10.0, 30.0, 0.0),
+          child: Text(
+            AppLocalizations.of(context)!.sosDescription,
+            style: const TextStyle(
+              fontSize: 16.0,
+              color: AppConstants.textColor,
+            ),
+          ),
         ),
-        if (!isEmergencyContactEnabled)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(30.0, 10.0, 30.0, 0.0),
-            child:Text(
-              AppLocalizations.of(context)!.sosDescription,
+      if (isEmergencyContactEnabled) ...[
+        Padding(
+          padding: const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 10.0),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              AppLocalizations.of(context)!.sosEmergencyContact,
               style: const TextStyle(
-                fontSize: 16.0,
-                color: AppConstants.textColor,
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
-        if (isEmergencyContactEnabled) ...[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 10.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                AppLocalizations.of(context)!.sosEmergencyContact,
-                style: const TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          _buildContactList(),
-        ],
-      ]);
+        ),
+        _buildContactList(),
+      ],
+    ]);
   }
 
   void _showAddContactDialog() {
@@ -193,36 +192,40 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
     for (int i = 0; i < arrayContacts.length; i++) {
       final contact = arrayContacts[i];
       contactListItems.add(
-          SizedBox(
-            height: 100.0,
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
-              leading: Container(
-                width: 60.0,
-                height: 60.0,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppConstants.primaryColor200,
-                    width: 2.5,
-                  ),
-                  color: Colors.transparent,
+        SizedBox(
+          height: 100.0,
+          child: ListTile(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+            leading: Container(
+              width: 60.0,
+              height: 60.0,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppConstants.primaryColor200,
+                  width: 2.5,
                 ),
-                child: Center(
-                  child: Text(
-                    '${i + 1}',
-                    style: const TextStyle(
-                      color: AppConstants.primaryColor200,
-                      fontSize: 22.0,
-                    ),
+                color: Colors.transparent,
+              ),
+              child: Center(
+                child: Text(
+                  '${i + 1}',
+                  style: const TextStyle(
+                    color: AppConstants.primaryColor200,
+                    fontSize: 22.0,
                   ),
                 ),
               ),
-              title: Text(contact['name'], style: const TextStyle(fontSize: 22.0),),
-              trailing: const Icon(Icons.keyboard_arrow_right),
-              onTap: () => _showEditContactDialog(contact),
             ),
+            title: Text(
+              contact['name'],
+              style: const TextStyle(fontSize: 22.0),
+            ),
+            trailing: const Icon(Icons.keyboard_arrow_right),
+            onTap: () => _showEditContactDialog(contact),
           ),
+        ),
       );
     }
 
@@ -230,8 +233,9 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
       contactListItems.add(
         SizedBox(
           height: 100.0,
-          child:ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+          child: ListTile(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
             leading: Container(
               width: 60.0,
               height: 60.0,
@@ -244,13 +248,16 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
                 color: Colors.transparent,
               ),
               child: const Center(
-                child: Icon(Icons.add, color: AppConstants.primaryColor200,),
+                child: Icon(
+                  Icons.add,
+                  color: AppConstants.primaryColor200,
+                ),
               ),
             ),
             title: Text(
               AppLocalizations.of(context)!.addEmergencyContact,
               style: const TextStyle(fontSize: 22.0),
-              ),
+            ),
             onTap: _showAddContactDialog,
           ),
         ),
@@ -296,7 +303,7 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
     }
   }
 
-    /*
+  /*
    * @description: save contact both to server and local database
    * @paramters: name: the name of the contact
    * @paramters: phone: the phone number of the contact
@@ -327,23 +334,19 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
     return errorRet;
   }
 
-    // the following methods handle the data of contacts
+  // the following methods handle the data of contacts
   // fixme: the following methods are should be in a separate class
-  
+
   Future<int> _requestEnableEmergency(bool enabled) async {
     int errorRet = 0;
     final token = await R2Storage.read('authtoken');
-    final request = R2HttpRequest();
-    final response = await request.postRequest(
-      api: 'member/switchContactEnabled',
-      token: token,
-      body: {
-        'emergencyContactEnabled': enabled? 'true':'false',
-      }
+    final api = CommonApi.defaultClient();
+    final resp = await api.switchContactEnabled(
+      emergencyContactEnabled: enabled ? 'true' : 'false',
+      apiToken: token,
     );
-
-    if (false == response.success) {
-      errorRet = response.code;
+    if ((resp['success'] ?? false) != true) {
+      errorRet = (resp['code'] ?? 500) as int;
     }
     return errorRet;
   }
@@ -359,19 +362,18 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
   Future<int> _requestAddContact(String name, String phone) async {
     int contactId = 0;
     final token = await R2Storage.read('authtoken');
-    final request = R2HttpRequest();
-    final response = await request.postRequest(
-      api: 'emergencyContact/saveEmergencyContact',
-      token: token,
-      body: {
-        'emergencyContactId': '',
-        'contactMan': name,
-        'contactManMobile': phone,
-      }
+    final api = CommonApi.defaultClient();
+    final resp = await api.saveEmergencyContact(
+      emergencyContactId: '',
+      contactMan: name,
+      contactManMobile: phone,
+      apiToken: token,
     );
-
-    if (response.success == true) {
-      contactId = response.result['emergencyContactId'] ?? 0;
+    if ((resp['success'] ?? false) == true) {
+      final dynamic result = resp['result'];
+      if (result is Map<String, dynamic>) {
+        contactId = result['emergencyContactId'] ?? 0;
+      }
     }
 
     return contactId;
@@ -386,22 +388,19 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
    * success: 0
    * fail: the value of error code of http reqeust 
    */
-  Future<int> _requestUpdateContact(int contactId, String name, String phone) async {
+  Future<int> _requestUpdateContact(
+      int contactId, String name, String phone) async {
     int errorRet = 0;
     final token = await R2Storage.read('authtoken');
-    final request = R2HttpRequest();
-    final response = await request.postRequest(
-      api: 'emergencyContact/saveEmergencyContact',
-      token: token,
-      body: {
-        'emergencyContactId': contactId.toString(),
-        'contactMan': name,
-        'contactManMobile': phone,
-      }
+    final api = CommonApi.defaultClient();
+    final resp = await api.saveEmergencyContact(
+      emergencyContactId: contactId.toString(),
+      contactMan: name,
+      contactManMobile: phone,
+      apiToken: token,
     );
-
-    if (response.success != true) {
-      errorRet = response.code;
+    if ((resp['success'] ?? false) != true) {
+      errorRet = (resp['code'] ?? 500) as int;
     }
 
     return errorRet;
@@ -410,17 +409,13 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
   Future<int> _requestDeleteContact(int contactId) async {
     int errorRet = 0;
     final token = await R2Storage.read('authtoken');
-    final request = R2HttpRequest();
-    final response = await request.postRequest(
-      api: 'emergencyContact/deleteEmergencyContact',
-      token: token,
-      body: {
-        'emergencyContactId': contactId.toString(),
-      }
+    final api = CommonApi.defaultClient();
+    final resp = await api.deleteEmergencyContact(
+      emergencyContactId: contactId.toString(),
+      apiToken: token,
     );
-
-    if (response.success == false) {
-      errorRet = response.code;
+    if ((resp['success'] ?? false) != true) {
+      errorRet = (resp['code'] ?? 500) as int;
     }
 
     return errorRet;
@@ -434,22 +429,19 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
    */
   Future<void> _requestAllEmergencyContacts() async {
     final token = await R2Storage.read('authtoken');
-    final request = R2HttpRequest();
-    final response = await request.getRequest(
-      api: 'emergencyContact/listEmergencyContact',
-      token: token,
-    );
+    final api = CommonApi.defaultClient();
+    final resp = await api.listEmergencyContact(apiToken: token);
 
-    if (response.success == true) {
-      // response.result is a JSON array containing contact information
-      final List<dynamic> contactList = response.result;
-      
+    if ((resp['success'] ?? false) == true) {
+      final dynamic result = resp['result'];
+      final List<dynamic> contactList = result is List ? result : const [];
+
       // Save each contact to the database
       for (final contactData in contactList) {
         final String name = contactData['contactMan'] ?? '';
         final String phone = contactData['contactManMobile'] ?? '';
         final int contactId = contactData['emergencyContactId'] ?? 0;
-        
+
         if (name.isNotEmpty && phone.isNotEmpty && contactId != 0) {
           await dbHelper.saveContact(contactId, name, phone);
         }
