@@ -214,4 +214,15 @@ class CommonApi {
       apiToken: apiToken,
     );
   }
+
+  Future<Map<String, dynamic>> getVoiceToken({
+    required String cyclingGroupId,
+    String? apiToken,
+  }) {
+    return _client.postFormString(
+      'groupRoom/getVoiceToken',
+      form: <String, String>{'cyclingGroupId': cyclingGroupId},
+      apiToken: apiToken,
+    );
+  }
 }
