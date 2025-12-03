@@ -84,11 +84,11 @@ class R2IntercomEngine {
       apiToken: r2token,
     );
 
-    final bool ok = (resp['success'] ?? false) == true;
+    final bool result = (resp['success'] ?? false) == true;
     final int code = resp['code'] is int
         ? resp['code']
         : int.tryParse('${resp['code'] ?? 0}') ?? 0;
-    if (ok && code == 200) {
+    if (result && code == 200) {
       final Map<String, dynamic> data =
           (resp['result'] ?? {}) as Map<String, dynamic>;
       _rtcAppId = data['appId'];
