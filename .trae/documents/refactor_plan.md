@@ -16,6 +16,14 @@
 
 * Acceptance: Unified API client with tests; improved failures surfaced to UI
 
+### 2a. OpenAPI Alignment
+
+* Outcome: Enforce `config/openapi.yaml` as source of truth; route all HTTP via `lib/openapi/api_client.dart` and `lib/openapi/common_api.dart`
+
+* Impacted files: `lib/openapi/*`, call sites using `R2HttpRequest`
+
+* Acceptance: No ad-hoc `http` outside `lib/openapi`; endpoints mirrored and typed; wrapper smoke tests
+
 ## 3. Auth Module Isolation
 
 * Outcome: Dedicated auth service encapsulating login, token storage, renewal
@@ -39,6 +47,14 @@
 * Impacted files: `lib/main.dart`, `lib/usermanager/r2_user_manager.dart`
 
 * Acceptance: Config schema verified; missing keys handled safely
+
+### 5a. ConfigService Extraction
+
+* Outcome: Centralize `appInit` into a typed `ConfigService` consumed by managers and UI
+
+* Impacted files: `lib/main.dart:63-91`, `lib/usermanager/r2_user_manager.dart`, new `lib/service/config_service.dart`
+
+* Acceptance: Strong types for `fileDomain`, `updUrl`, `loggedIn`, `newToken`; null-safe defaults
 
 ## 6. Storage & Privacy
 
@@ -95,6 +111,70 @@
 * Impacted files: `lib/emergency/emergency_contact_screen.dart`
 
 * Acceptance: Add/edit/delete show progress indicators, success notifications; failed operations revert local state
+
+## 27. Localization Audit
+
+* Outcome: Remove hardcoded strings; route all user-facing text via `AppLocalizations`; ensure EN/zh coverage
+
+* Impacted files: UI in `lib/screens`, `lib/group/*`, `lib/emergency/*`, `lib/login/*`
+
+* Acceptance: L10n keys added; golden tests pass for both locales; semantic labels present
+
+## 28. Accessibility & Safe Areas
+
+* Outcome: 44dp tap targets, semantic labels, text scaling; consistent safe-area handling
+
+* Impacted files: shared controls in `lib/r2controls/*`, major screens
+
+* Acceptance: Accessibility checks pass; no clipped or overlapped UI with large text
+
+## 29. Performance Instrumentation
+
+* Outcome: Add frame timing and startup metrics; optimize rebuilds and lists
+
+* Impacted files: hot paths in `lib/group/group_intercom_screen.dart`, `lib/screens/*`
+
+* Acceptance: p95 frame ≤16ms on interactive screens; cold start ≤2.5s; perf regressions detected in CI
+
+## 30. BLE & Geolocation Battery Optimization
+
+* Outcome: Throttle scanning/updates; stop scans on background; choose appropriate accuracy
+
+* Impacted files: `lib/devicemanager/r2_device_manager.dart`, `lib/service/r2_background_service.dart`, `lib/emergency/r2_sos_sender.dart`
+
+* Acceptance: Reduced battery impact; scans and location updates adhere to cadence; background-safe behavior
+
+## 31. Audio Focus & Background Behavior (Intercom)
+
+* Outcome: Handle audio focus changes; pause/resume properly; background constraints respected
+
+* Impacted files: `lib/intercom/r2_intercom_engine.dart`, Android audio focus wiring
+
+* Acceptance: No audio conflicts with calls/music; clear UX on focus loss
+
+## 32. Assets & Image Optimization
+
+* Outcome: Use resolution-aware assets; `precacheImage` for critical visuals; avoid oversized bitmaps
+
+* Impacted files: `lib/group/group_intercom_screen.dart`, `lib/settings/user_profile_screen.dart`, assets pipeline
+
+* Acceptance: Fewer jank on avatar renders; memory stable; images sized appropriately
+
+## 33. CI Quality Gates
+
+* Outcome: Enforce `flutter analyze`, tests, and format checks; block on failures
+
+* Impacted files: CI config; project scripts
+
+* Acceptance: PRs cannot merge with lint/test failures; coverage thresholds enforced for critical modules
+
+## 34. Spec Conformance Tests
+
+* Outcome: Add integration tests that validate acceptance criteria from spec (login, pairing, intercom, SOS)
+
+* Impacted files: `test/` integration suites
+
+* Acceptance: Green runs assert flows per `.trae/documents/speckit.specification.md`; failures highlight gaps
 
 ## 13. Config Management Service
 
@@ -207,4 +287,3 @@
 * Impacted files: `lib/connection/http/*`, `lib/usermanager/*`, `lib/emergency/*`, `lib/intercom/*`, `lib/devicemanager/*`
 
 * Acceptance: CI runs tests; critical flows covered
-
