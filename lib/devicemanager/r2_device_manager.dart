@@ -17,7 +17,7 @@ import 'package:flutter/services.dart';
 
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
-import 'package:r2cyclingapp/openapi/common_api.dart';
+import 'package:r2cyclingapp/connection/http/openapi/common_api.dart';
 import 'package:r2cyclingapp/devicemanager/r2_device.dart';
 import 'package:r2cyclingapp/connection/bt/r2_bluetooth_model.dart';
 

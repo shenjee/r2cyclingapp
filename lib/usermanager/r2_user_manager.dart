@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:r2cyclingapp/database/r2_db_helper.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
-import 'package:r2cyclingapp/openapi/common_api.dart';
+import 'package:r2cyclingapp/connection/http/openapi/common_api.dart';
 
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
 import 'package:r2cyclingapp/usermanager/r2_group.dart';

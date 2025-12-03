@@ -19,7 +19,7 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/usermanager/r2_group.dart';
-import 'package:r2cyclingapp/openapi/common_api.dart';
+import 'package:r2cyclingapp/connection/http/openapi/common_api.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/constants.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
@@ -34,7 +34,8 @@ class JoinGroupScreen extends StatefulWidget {
 }
 
 class _JoinGroupScreenState extends State<JoinGroupScreen> {
-  final List<TextEditingController> _controllers = List.generate(4, (index) => TextEditingController());
+  final List<TextEditingController> _controllers =
+      List.generate(4, (index) => TextEditingController());
   final _textEditingController = TextEditingController();
   final _errorController = StreamController<ErrorAnimationType>();
 
@@ -100,7 +101,10 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.joinCyclingGroup, style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),),
+        title: Text(
+          AppLocalizations.of(context)!.joinCyclingGroup,
+          style: const TextStyle(fontSize: 24.0, color: AppConstants.textColor),
+        ),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -114,9 +118,12 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(40.0, 40.0, 40.0, 10.0),
-            child: Text(AppLocalizations.of(context)!.enterFourDigitCode, style: const TextStyle(fontSize: 20.0),),
+            child: Text(
+              AppLocalizations.of(context)!.enterFourDigitCode,
+              style: const TextStyle(fontSize: 20.0),
+            ),
           ),
-          Padding (
+          Padding(
             padding: const EdgeInsets.fromLTRB(40.0, 10.0, 40.0, 10.0),
             child: PinCodeTextField(
               appContext: context,
@@ -126,14 +133,14 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
               keyboardType: TextInputType.number,
               textStyle: const TextStyle(fontSize: 24.0),
               cursorColor: Colors.grey,
-              autoFocus:true,
+              autoFocus: true,
               pinTheme: PinTheme(
                 shape: PinCodeFieldShape.box,
                 fieldHeight: 80,
                 fieldWidth: 60,
                 inactiveBorderWidth: 1.0,
                 inactiveColor: Colors.grey,
-                inactiveFillColor:Colors.white,
+                inactiveFillColor: Colors.white,
                 activeBorderWidth: 1.0,
                 activeColor: const Color(0xFF539765),
                 activeFillColor: Colors.white,
@@ -148,10 +155,10 @@ class _JoinGroupScreenState extends State<JoinGroupScreen> {
               onCompleted: (value) {
                 debugPrint('$runtimeType : Completed $value');
                 _requestJoinGroup(value);
-                },
+              },
               onChanged: (value) {
                 debugPrint(value);
-                },
+              },
               beforeTextPaste: (text) {
                 debugPrint("Allowing to paste $text");
                 //if you return true then it will show the paste confirmation dialog. Otherwise if false, then nothing will happen.

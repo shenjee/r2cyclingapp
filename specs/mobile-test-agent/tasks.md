@@ -14,14 +14,14 @@
 
 ## Intercom
 - Fetch current group and members and render list (`lib/group/group_intercom_screen.dart:101-163`).
-- Request RTC credentials and join channel (`lib/openapi/common_api.dart:219-228`, `lib/intercom/r2_intercom_engine.dart:118-167,151-160`).
+- Request RTC credentials and join channel (`lib/connection/http/openapi/common_api.dart:219-228`, `lib/intercom/r2_intercom_engine.dart:118-167,151-160`).
 - Implement push-to-talk: press to unmute, release to mute (`lib/group/group_intercom_screen.dart:247-277`).
 - Implement leave group and cleanup (`lib/group/group_intercom_screen.dart:176-216`).
 - Add integration tests: join, speak, mute, leave.
 
 ## Emergency SOS
 - Implement toggle enable with prompt when contacts empty (`lib/emergency/emergency_contact_screen.dart:59-71`).
-- Implement add/edit/delete contacts with server sync (`lib/openapi/common_api.dart:167-218`).
+- Implement add/edit/delete contacts with server sync (`lib/connection/http/openapi/common_api.dart:167-218`).
 - Implement SOS send: GPS → short link → SMS (`lib/emergency/r2_sos_sender.dart:28-79`, `android/app/src/main/kotlin/com/rockroad/r2cyclingapp/MainActivity.kt:32-77`).
 - Add integration tests: enable flow, CRUD contacts, SOS send with mocked SMS.
 
@@ -47,7 +47,7 @@
 
 ## OpenAPI Alignment
 - Keep `config/openapi.yaml` as source of truth.
-- Ensure `lib/openapi/api_client.dart:19-217` and `lib/openapi/common_api.dart:18-279` cover all endpoints used.
+- Ensure `lib/connection/http/openapi/api_client.dart:19-217` and `lib/connection/http/openapi/common_api.dart:18-279` cover all endpoints used.
 - Add smoke tests for client wrappers: success and error responses.
 
 ## Testing & CI

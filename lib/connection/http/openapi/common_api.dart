@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:r2cyclingapp/openapi/api_client.dart';
+import 'package:r2cyclingapp/connection/http/openapi/api_client.dart';
 import 'dart:io';
 
 class CommonApi {

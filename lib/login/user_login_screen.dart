@@ -27,7 +27,7 @@ import 'package:r2cyclingapp/login/password_recover_screen.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
-import 'package:r2cyclingapp/openapi/common_api.dart';
+import 'package:r2cyclingapp/connection/http/openapi/common_api.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/constants.dart';

@@ -18,7 +18,7 @@ import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/r2controls/r2_flat_button.dart';
 import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
-import 'package:r2cyclingapp/openapi/common_api.dart';
+import 'package:r2cyclingapp/connection/http/openapi/common_api.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
 import 'package:r2cyclingapp/usermanager/r2_account.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';

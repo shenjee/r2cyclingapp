@@ -8,8 +8,8 @@
 ## Technology Rules
 - Flutter as the only UI framework; native code limited to platform channels.
 - Modules organized under `lib/` by responsibility; UI is declarative, business logic in services/managers.
-- Networking follows OpenAPI spec; client layer centralized in `lib/openapi/`.
-- HTTP headers: `Content-Type: application/x-www-form-urlencoded`; authenticated requests include `apiToken` `lib/openapi/api_client.dart:30-36`.
+- Networking follows OpenAPI spec; client layer centralized in `lib/connection/http/openapi/`.
+- HTTP headers: `Content-Type: application/x-www-form-urlencoded`; authenticated requests include `apiToken` `lib/connection/http/openapi/api_client.dart:30-36`.
 - JWT tokens stored in secure storage; managers read expiry and enforce re-auth `lib/database/r2_storage.dart:32-42`, `lib/usermanager/r2_user_manager.dart:92-115`.
 - Errors surfaced via structured responses; avoid throwing raw exceptions in UI; map to user messages.
 

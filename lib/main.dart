@@ -30,7 +30,7 @@ import 'package:r2cyclingapp/login/user_login_screen.dart';
 import 'package:r2cyclingapp/settings/settings_screen.dart';
 import 'package:r2cyclingapp/settings/user_profile_screen.dart';
 import 'package:r2cyclingapp/database/r2_storage.dart';
-import 'package:r2cyclingapp/openapi/common_api.dart';
+import 'package:r2cyclingapp/connection/http/openapi/common_api.dart';
 
 void main() async {
   // Use Zone to capture all exceptions
