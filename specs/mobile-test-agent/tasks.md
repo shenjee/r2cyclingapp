@@ -1,5 +1,39 @@
 # R2 Cycling App — Implementation Tasks
 
+## Refactor Tasks — Prioritized
+- Remove sensitive logging in `lib/login/user_login_screen.dart`; add lint checks.
+- Abstract network layer: typed requests/responses, retry/backoff/timeouts; route all HTTP via `lib/openapi/api_client.dart` and `lib/openapi/common_api.dart`.
+- Align with OpenAPI: eliminate ad-hoc `http` usage; add wrapper smoke tests.
+- Isolate authentication into `AuthService`: login, token storage, renewal; document JWT lifecycle.
+- Decouple Intercom engine behind interface; add error handling and mockable engine; update `lib/group/group_intercom_screen.dart`.
+- Configuration management: introduce typed `ConfigService`; validate `appInit` payload and staged flags.
+- Storage & privacy: evaluate `sid` sensitivity; move to secure storage if needed; clear data on logout.
+- Extract EmergencyContacts service: move CRUD/enable logic out of UI to `lib/emergency/emergency_contact_service.dart`.
+- Typed models/DAO for contacts: introduce `EmergencyContact` and DAO methods; remove raw `Map` usage.
+- Normalize HTTP conventions: true booleans where supported; unify token retrieval; surface errors via `R2Flash`.
+- Secure SOS sender: configurable HTTPS short-link host; add timeouts, error paths; rate-limit SMS bursts.
+- Cross-platform SMS abstraction: implement iOS or graceful fallback (open Messages/copy text).
+- UI/UX resilience: optimistic updates with rollback; consistent prompts and toasts.
+- Localization audit: remove hardcoded strings; route all text via `AppLocalizations`; EN/zh coverage.
+- Accessibility & safe areas: 44dp tap targets, semantic labels, text scaling; consistent safe-area handling.
+- Performance instrumentation: add frame/startup metrics; optimize rebuilds and lists.
+- BLE & geolocation battery optimization: throttle scans/updates; stop scans in background; choose accuracy.
+- Intercom audio focus: handle focus changes; pause/resume; respect background constraints.
+- Assets & image optimization: resolution-aware assets; `precacheImage` critical visuals; avoid oversized bitmaps.
+- CI quality gates: enforce `flutter analyze`, tests, format; block merges on failure; coverage thresholds.
+- Spec conformance tests: integration tests for login, pairing, intercom, SOS per spec.
+- Routing guard based on auth: initial route from token validity and `loggedIn`.
+- HTTP client enhancements: timeouts, retries, typed errors; base URL from config.
+- Response typing & JSON handling: generics in `R2HttpResponse`; fix naming; remove implicit coercion.
+- Central logging & redaction: levelled logger; remove PII; standardize `debugPrint` usage.
+- Split `R2UserManager` responsibilities into smaller services (Auth, Profile, Media).
+- Device pairing state management: decouple BLE scan/bind from UI; use manager streams with lifecycle guards.
+- Database migrations & DAOs: add migration strategy beyond v1; typed DAOs for accounts/groups/devices/contacts/settings.
+- iOS SMS support or fallback: ensure graceful behavior without crashes.
+- Permissions & privacy strings audit: Android/iOS declarations and user messaging.
+- Crash reporting/analytics (optional): integrate with PII safeguards and opt-in.
+- Test coverage: add unit tests for HTTP client, services, intercom engine (mocked), device manager.
+
 ## Authentication
 - Implement password login flow wiring hash + sid and token save (`lib/login/user_login_screen.dart:68-94,104-133`, `lib/usermanager/r2_user_manager.dart:80-86`).
 - Implement verification-code login request, input, exchange, navigate (`lib/login/verification_screen.dart:65-91,149-156,169-175`).
