@@ -117,9 +117,6 @@ class _UserLoginScreenState extends LoginBaseScreenState {
       String? hashedCombined;
       combined = '$phonenumber$password';
       hashedCombined = _hashPassword(combined);
-      debugPrint('Phone number and password combined:');
-      debugPrint('  combined: $combined');
-      debugPrint('  hashed_combined: $hashedCombined');
 
       final commonApi = CommonApi.defaultClient();
       Map<String, dynamic> resp = {};
@@ -142,8 +139,6 @@ class _UserLoginScreenState extends LoginBaseScreenState {
       if ((resp['success'] ?? false) == true &&
           (resp['result'] ?? '').toString().isNotEmpty) {
         final String token = (resp['result'] ?? '').toString();
-        debugPrint('Login by phone number + password');
-        debugPrint('  Token: $token');
 
         // retrieve the token and password-setting indicator
         final manager = R2UserManager();
