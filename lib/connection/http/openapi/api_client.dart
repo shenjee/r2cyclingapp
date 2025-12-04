@@ -15,6 +15,7 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 class ApiClient {
@@ -444,6 +445,33 @@ extension ApiClientTyped on ApiClient {
       );
     } catch (e) {
       return R2HttpResponse<T>(
+        success: false,
+        code: 500,
+        message: 'Request error: $e',
+        errorKind: _classifyError(null, e),
+      );
+    }
+  }
+
+  Future<R2HttpResponse<Uint8List>> getBytesAbsolute(String url) async {
+    final uri = Uri.parse(url);
+    try {
+      final resp = await _withRetry(() => http.get(uri));
+      if (resp.statusCode != 200) {
+        return R2HttpResponse<Uint8List>(
+          success: false,
+          code: resp.statusCode,
+          message: 'Request failed: ${resp.statusCode}',
+          errorKind: _classifyError(resp.statusCode, null),
+        );
+      }
+      return R2HttpResponse<Uint8List>(
+        success: true,
+        code: 200,
+        result: resp.bodyBytes,
+      );
+    } catch (e) {
+      return R2HttpResponse<Uint8List>(
         success: false,
         code: 500,
         message: 'Request error: $e',

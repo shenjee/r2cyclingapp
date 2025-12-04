@@ -25,7 +25,7 @@ import 'package:r2cyclingapp/usermanager/r2_user_profile.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
-import 'package:http/http.dart' as http;
+// import moved: use CommonApi for HTTP
 
 class R2UserManager {
   final _db = R2DBHelper();
@@ -285,15 +285,16 @@ class R2UserManager {
       final String url = '$baseHost$fileDomain$fileName';
 
       try {
-        final http.Response resp = await http.get(Uri.parse(url));
-        if (resp.statusCode == 200) {
+        final api = CommonApi.defaultClient();
+        final bytesResp = await api.getImageBytes(url: url);
+        if (bytesResp.success && bytesResp.result != null) {
           final String extension = p.extension(fileName);
           // Write to a temporary file, then cache via helper
           final String tempPath =
               p.join(appDir.path, 'avatar_${uid}_temp$extension');
           final File tempFile = File(tempPath);
           try {
-            await tempFile.writeAsBytes(resp.bodyBytes);
+            await tempFile.writeAsBytes(bytesResp.result!);
             debugPrint('$runtimeType: start write $tempPath to cache');
             final String? cachedPath = await _writeAvatarImage(uid, tempPath);
             // Clean up temp file
@@ -313,7 +314,7 @@ class R2UserManager {
             return Image.asset('assets/icons/default_avatar.png');
           }
         } else {
-          debugPrint('getAvatar: download failed ${resp.statusCode} url=$url');
+          debugPrint('getAvatar: download failed ${bytesResp.code} url=$url');
           return Image.asset('assets/icons/default_avatar.png');
         }
       } catch (e) {

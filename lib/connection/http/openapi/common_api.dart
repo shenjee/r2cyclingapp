@@ -14,6 +14,8 @@
 
 import 'package:r2cyclingapp/connection/http/openapi/api_client.dart';
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
 
 class CommonApi {
   final ApiClient _client;
@@ -276,5 +278,21 @@ class CommonApi {
       },
       apiToken: apiToken,
     );
+  }
+
+  Future<R2HttpResponse<Uint8List>> getImageBytes({
+    required String url,
+  }) {
+    return _client.getBytesAbsolute(url);
+  }
+
+  Future<Image?> getImage({
+    required String url,
+  }) async {
+    final resp = await _client.getBytesAbsolute(url);
+    if (resp.success && resp.result != null) {
+      return Image.memory(resp.result!);
+    }
+    return null;
   }
 }
