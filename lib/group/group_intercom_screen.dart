@@ -35,7 +35,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   String? _groupCode;
   final List<R2Account> _members = [];
   bool _isPressed = false;
-  R2IntercomEngine? _r2intercom;
+  IntercomEngine? _r2intercom;
   final _manager = R2UserManager();
 
   @override
@@ -50,8 +50,22 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
 
   _initR2Intercom(int groupId) {
     final account = _members.first;
-    _r2intercom =
-        R2IntercomEngine.getInstance(groupID: groupId, userID: account.uid);
+    _r2intercom = R2IntercomEngine.getInstance(
+      groupID: groupId,
+      userID: account.uid,
+      onLocalJoined: _onLocalJoined,
+      onMemberJoined: _onMemberJoined,
+      onMemberLeft: _onMemberLeft,
+      onMemberSpeaking: (uid) {},
+      onError: (message, kind) {
+        if (!mounted) return;
+        R2Flash.showBasicFlash(
+          context: context,
+          message: message,
+          duration: const Duration(seconds: 3),
+        );
+      },
+    );
     _r2intercom!.initAgora();
   }
 

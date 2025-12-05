@@ -25,8 +25,33 @@ const swAppId = "";
 const swToken = "";
 
 typedef IntercomCallback = void Function(int value);
+typedef IntercomErrorHandler = void Function(
+    String message, IntercomErrorKind kind);
 
-class R2IntercomEngine {
+enum IntercomErrorKind {
+  permission,
+  network,
+  unauthorized,
+  engine,
+  token,
+  unknown,
+}
+
+/* an interface and error primitive for intercom engine */
+abstract class IntercomEngine {
+  Future<void> initAgora();
+  Future<void> pauseSpeak(bool mute);
+  Future<void> stopIntercom();
+}
+
+/* 
+ * R2IntercomEngine implements IntercomEngine
+ * it is a singleton class
+ * it is used to manage intercom engine
+ * it is used to init agora engine
+ * it is used to pause and stop intercom
+ */
+class R2IntercomEngine implements IntercomEngine {
   // Private constructor for singleton
   R2IntercomEngine._internal({
     required int groupID,
@@ -35,34 +60,77 @@ class R2IntercomEngine {
     this.onMemberJoined,
     this.onMemberLeft,
     this.onMemberSpeaking,
+    this.onError,
   })  : _groupID = groupID,
         _userID = userID;
 
-  static R2IntercomEngine? _instance;
-
-  // Singleton factory method
-  static R2IntercomEngine? getInstance({
-    int? groupID,
-    int? userID,
+  static IntercomEngine? _instance;
+  static IntercomEngine Function({
+    required int groupID,
+    required int userID,
     IntercomCallback? onLocalJoined,
     IntercomCallback? onMemberJoined,
     IntercomCallback? onMemberLeft,
     IntercomCallback? onMemberSpeaking,
-  }) {
-    if (_instance == null) {
-      if (groupID == null || userID == null) {
-        return null;
-      }
-      _instance = R2IntercomEngine._internal(
+    IntercomErrorHandler? onError,
+  }) _factory = ({
+    required int groupID,
+    required int userID,
+    IntercomCallback? onLocalJoined,
+    IntercomCallback? onMemberJoined,
+    IntercomCallback? onMemberLeft,
+    IntercomCallback? onMemberSpeaking,
+    IntercomErrorHandler? onError,
+  }) =>
+      R2IntercomEngine._internal(
         groupID: groupID,
         userID: userID,
         onLocalJoined: onLocalJoined,
         onMemberJoined: onMemberJoined,
         onMemberLeft: onMemberLeft,
         onMemberSpeaking: onMemberSpeaking,
+        onError: onError,
+      );
+
+  // Singleton factory method
+  static IntercomEngine? getInstance({
+    int? groupID,
+    int? userID,
+    IntercomCallback? onLocalJoined,
+    IntercomCallback? onMemberJoined,
+    IntercomCallback? onMemberLeft,
+    IntercomCallback? onMemberSpeaking,
+    IntercomErrorHandler? onError,
+  }) {
+    if (_instance == null) {
+      if (groupID == null || userID == null) {
+        return null;
+      }
+      _instance = _factory(
+        groupID: groupID,
+        userID: userID,
+        onLocalJoined: onLocalJoined,
+        onMemberJoined: onMemberJoined,
+        onMemberLeft: onMemberLeft,
+        onMemberSpeaking: onMemberSpeaking,
+        onError: onError,
       );
     }
     return _instance!;
+  }
+
+  static void setFactory(
+      IntercomEngine Function({
+        required int groupID,
+        required int userID,
+        IntercomCallback? onLocalJoined,
+        IntercomCallback? onMemberJoined,
+        IntercomCallback? onMemberLeft,
+        IntercomCallback? onMemberSpeaking,
+        IntercomErrorHandler? onError,
+      }) factory) {
+    _factory = factory;
+    _instance = null;
   }
 
   final int? _groupID;
@@ -71,6 +139,7 @@ class R2IntercomEngine {
   final IntercomCallback? onMemberJoined;
   final IntercomCallback? onMemberLeft;
   final IntercomCallback? onMemberSpeaking;
+  final IntercomErrorHandler? onError;
 
   late RtcEngine _engine;
   String? _rtcAppId;
@@ -79,10 +148,16 @@ class R2IntercomEngine {
   Future<void> _requestRTCToken() async {
     final r2token = await R2Storage.getToken();
     final api = CommonApi.defaultClient();
-    final resp = await api.getVoiceToken(
-      cyclingGroupId: '$_groupID',
-      apiToken: r2token,
-    );
+    Map<String, dynamic> resp;
+    try {
+      resp = await api.getVoiceToken(
+        cyclingGroupId: '$_groupID',
+        apiToken: r2token,
+      );
+    } catch (e) {
+      onError?.call('Token request error: $e', IntercomErrorKind.network);
+      return;
+    }
 
     final bool result = (resp['success'] ?? false) == true;
     final int code = resp['code'] is int
@@ -95,15 +170,26 @@ class R2IntercomEngine {
       _rtcToken = data['token'];
       debugPrint('_rtcAppId: $_rtcAppId');
       debugPrint('_rtcToken: $_rtcToken');
+    } else {
+      onError?.call(
+          resp['message']?.toString() ?? 'Invalid token response',
+          code == 401
+              ? IntercomErrorKind.unauthorized
+              : IntercomErrorKind.network);
     }
   }
 
   /*
    * initialize the Agora rtc engine developed by Shengwang
    */
+  @override
   Future<void> initAgora() async {
-    // get the microphone permission
-    await [Permission.microphone].request();
+    final status = await Permission.microphone.request();
+    if (!status.isGranted) {
+      onError?.call(
+          'Microphone permission denied', IntercomErrorKind.permission);
+      return;
+    }
 
     // check if swAppId and swToken are provided, otherwise request from API
     if (swAppId.isNotEmpty && swToken.isNotEmpty) {
@@ -112,17 +198,28 @@ class R2IntercomEngine {
       debugPrint('Using hardcoded swAppId: $_rtcAppId');
       debugPrint('Using hardcoded swToken: $_rtcToken');
     } else {
-      // request appid and token for RTC from API
       await _requestRTCToken();
     }
 
+    if (_rtcAppId == null ||
+        _rtcToken == null ||
+        _rtcAppId!.isEmpty ||
+        _rtcToken!.isEmpty) {
+      onError?.call('RTC credentials missing', IntercomErrorKind.token);
+      return;
+    }
+
     // create and instance of rtc engine
-    _engine = createAgoraRtcEngine();
-    // initialize RtcEngine for live broadcasting
-    await _engine.initialize(RtcEngineContext(
-      appId: _rtcAppId!,
-      channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
-    ));
+    try {
+      _engine = createAgoraRtcEngine();
+      await _engine.initialize(RtcEngineContext(
+        appId: _rtcAppId!,
+        channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
+      ));
+    } catch (e) {
+      onError?.call('Engine init error: $e', IntercomErrorKind.engine);
+      return;
+    }
 
     // register an event handler to handle the group action
     _engine.registerEventHandler(
@@ -159,7 +256,8 @@ class R2IntercomEngine {
             clientRoleType: ClientRoleType.clientRoleBroadcaster),
       );
     } catch (e) {
-      debugPrint('$runtimeType : $e');
+      onError?.call('Join error: $e', IntercomErrorKind.engine);
+      return;
     }
 
     // mute mic input initially
@@ -169,16 +267,26 @@ class R2IntercomEngine {
   /*
    *
    */
+  @override
   Future<void> pauseSpeak(bool mute) async {
-    _engine.muteLocalAudioStream(mute);
+    try {
+      _engine.muteLocalAudioStream(mute);
+    } catch (e) {
+      onError?.call('Mute error: $e', IntercomErrorKind.engine);
+    }
   }
 
   /*
    * stop intercom
    */
+  @override
   Future<void> stopIntercom() async {
     debugPrint('$runtimeType: stop intercom');
-    await _engine.leaveChannel();
-    await _engine.release();
+    try {
+      await _engine.leaveChannel();
+      await _engine.release();
+    } catch (e) {
+      onError?.call('Stop error: $e', IntercomErrorKind.engine);
+    }
   }
 }

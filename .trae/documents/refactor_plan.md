@@ -38,8 +38,6 @@
 
 * Impacted files: `lib/intercom/*`, `lib/group/group_intercom_screen.dart`
 
-* Acceptance: Mockable engine for tests; graceful failure states
-
 ## 5. Configuration Management
 
 * Outcome: Strongly-typed config model; validate `appInit` payload; staged rollout flags
