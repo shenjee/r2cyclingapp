@@ -4,7 +4,7 @@
 - [x] T001 Remove sensitive logging in `lib/login/user_login_screen.dart`; add lint checks.
 - [x] T002 Abstract network layer: typed requests/responses, retry/backoff/timeouts; route all HTTP via `lib/openapi/api_client.dart` and `lib/openapi/common_api.dart`.
 - [x] T003 Align with OpenAPI: eliminate ad-hoc `http` usage; add wrapper smoke tests.
-- [ ] T004 Isolate authentication into `AuthService`: login, token storage, renewal; document JWT lifecycle.
+- [x] T004 Isolate authentication into `AuthService`: login, token storage, renewal; document JWT lifecycle.
 - [ ] T005 Decouple Intercom engine behind interface; add error handling and mockable engine; update `lib/group/group_intercom_screen.dart`.
 - [ ] T006 Configuration management: introduce typed `ConfigService`; validate `appInit` payload and staged flags.
 - [ ] T007 Storage & privacy: evaluate `sid` sensitivity; move to secure storage if needed; clear data on logout.

@@ -14,14 +14,11 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
 
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
-import 'package:r2cyclingapp/connection/http/openapi/common_api.dart';
-import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
+import 'package:r2cyclingapp/auth/auth_service.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/constants.dart';
 
@@ -69,26 +66,9 @@ class VerificationScreenState extends LoginBaseScreenState {
       // loading indicator for v-code request
       R2LoadingIndicator.show(context);
 
-      // get uuid as session id
-      final prefs = await SharedPreferences.getInstance();
-      String? sid = prefs.getString('sessionId');
-      if (null == sid) {
-        var uuid = const Uuid();
-        sid = uuid.v4();
-        await prefs.setString('sessionId', sid);
-      }
-
       final String userMobile = phoneController.text;
-      final commonApi = CommonApi.defaultClient();
-      Map<String, dynamic> resp = {};
-      try {
-        resp = await commonApi.sendAuthCode(
-          sid: sid,
-          userMobile: userMobile,
-        );
-      } catch (e) {
-        debugPrint('$runtimeType : Failed to request verification code: $e');
-      }
+      final auth = AuthService();
+      final resp = await auth.sendAuthCode(phone: userMobile);
 
       // start 60s countdown
       _secondsRemaining = 60;
@@ -99,13 +79,13 @@ class VerificationScreenState extends LoginBaseScreenState {
         R2LoadingIndicator.stop(context);
       }
 
-      if ((resp['success'] ?? false) == true) {
+      if (resp.success) {
         debugPrint('$runtimeType : Verification code sent successfully');
       } else {
         if (mounted) {
           R2Flash.showBasicFlash(
             context: context,
-            message: (resp['message'] ?? 'Request failed').toString(),
+            message: (resp.message ?? 'Request failed').toString(),
           );
         }
       }
@@ -130,48 +110,25 @@ class VerificationScreenState extends LoginBaseScreenState {
       // start loading indicator for token request
       R2LoadingIndicator.show(context);
 
-      // get uuid
-      final prefs = await SharedPreferences.getInstance();
-      String? sid = prefs.getString('sessionId');
-      if (null == sid) {
-        var uuid = const Uuid();
-        sid = uuid.v4();
-        await prefs.setString('sessionId', sid);
-      }
       // get phone number and v-code
       final String phonenumber = phoneController.text;
       final String vcode = vcodeController.text;
-      final commonApi = CommonApi.defaultClient();
-      Map<String, dynamic> resp = {};
-      try {
-        resp = await commonApi.mobileLogin(
-          sid: sid,
-          userMobile: phonenumber,
-          validateCode: vcode,
-        );
-      } catch (e) {
-        debugPrint('$runtimeType : Failed to request token: $e');
-      }
+      final auth = AuthService();
+      final resp = await auth.loginWithCode(phone: phonenumber, code: vcode);
 
       //stop indicator
       if (mounted) {
         R2LoadingIndicator.stop(context);
       }
 
-      if ((resp['success'] ?? false) == true &&
-          (resp['result'] ?? '').toString().isNotEmpty) {
-        final String token = (resp['result'] ?? '').toString();
-        debugPrint('$runtimeType : Token received');
-        final manager = R2UserManager();
-        // Save the token
-        manager.saveToken(token);
-
+      if (resp.success && (resp.result ?? '').isNotEmpty) {
+        final String token = resp.result!;
         onTokenRetrieved(token);
       } else {
         if (mounted) {
           R2Flash.showBasicFlash(
               context: context,
-              message: (resp['message'] ?? 'Request failed').toString(),
+              message: (resp.message ?? 'Request failed').toString(),
               duration: const Duration(seconds: 3));
         }
       }

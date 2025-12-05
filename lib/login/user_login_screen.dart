@@ -12,13 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:convert';
 import 'dart:core';
-import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
@@ -27,7 +23,7 @@ import 'package:r2cyclingapp/login/password_recover_screen.dart';
 import 'package:r2cyclingapp/r2controls/r2_user_text_field.dart';
 import 'package:r2cyclingapp/r2controls/r2_flash.dart';
 import 'package:r2cyclingapp/r2controls/r2_loading_indicator.dart';
-import 'package:r2cyclingapp/connection/http/openapi/common_api.dart';
+import 'package:r2cyclingapp/auth/auth_service.dart';
 import 'package:r2cyclingapp/usermanager/r2_user_manager.dart';
 import 'package:r2cyclingapp/l10n/app_localizations.dart';
 import 'package:r2cyclingapp/constants.dart';
@@ -87,12 +83,6 @@ class _UserLoginScreenState extends LoginBaseScreenState {
     return passwordPattern.hasMatch(input);
   }
 
-  String _hashPassword(String password) {
-    var bytes = utf8.encode(password);
-    var digest = sha512.convert(bytes);
-    return digest.toString();
-  }
-
   Future<void> _requestLogin() async {
     final isValidNumber = _isValidPhoneNumber(_phoneController.text);
     final isValidPasswd = _isValidPassword(_passwordController.text);
@@ -101,48 +91,19 @@ class _UserLoginScreenState extends LoginBaseScreenState {
       // show the loading indicator
       R2LoadingIndicator.show(context);
 
-      // get uuid as session id
-      final prefs = await SharedPreferences.getInstance();
-      String? sid = prefs.getString('sessionId');
-      if (null == sid) {
-        var uuid = const Uuid();
-        sid = uuid.v4();
-        await prefs.setString('sessionId', sid);
-      }
-
       final String phonenumber = _phoneController.text;
       final String password = _passwordController.text;
-
-      String? combined;
-      String? hashedCombined;
-      combined = '$phonenumber$password';
-      hashedCombined = _hashPassword(combined);
-
-      final commonApi = CommonApi.defaultClient();
-      Map<String, dynamic> resp = {};
-      try {
-        resp = await commonApi.passwordLogin(
-          loginId: phonenumber,
-          sid: sid,
-          userPsw: hashedCombined,
-          validateCode: '',
-        );
-      } catch (e) {
-        debugPrint('Failed to request login: $e');
-      }
+      final auth = AuthService();
+      final resp =
+          await auth.loginWithPassword(phone: phonenumber, password: password);
 
       // stop loading indicator
       if (mounted) {
         R2LoadingIndicator.stop(context);
       }
 
-      if ((resp['success'] ?? false) == true &&
-          (resp['result'] ?? '').toString().isNotEmpty) {
-        final String token = (resp['result'] ?? '').toString();
-
-        // retrieve the token and password-setting indicator
+      if (resp.success && (resp.result ?? '').isNotEmpty) {
         final manager = R2UserManager();
-        await manager.saveToken(token);
         await manager.requestUserProfile();
 
         if (mounted) {
@@ -153,7 +114,7 @@ class _UserLoginScreenState extends LoginBaseScreenState {
           );
         }
       } else {
-        String warning = (resp['message'] ?? 'Login failed').toString();
+        String warning = (resp.message ?? 'Login failed').toString();
         if (mounted) {
           R2Flash.showBasicFlash(
               context: context,
