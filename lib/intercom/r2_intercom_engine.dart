@@ -64,8 +64,8 @@ class R2IntercomEngine implements IntercomEngine {
   })  : _groupID = groupID,
         _userID = userID;
 
-  static IntercomEngine? _instance;
-  static IntercomEngine Function({
+  static R2IntercomEngine? _instance;
+  static R2IntercomEngine Function({
     required int groupID,
     required int userID,
     IntercomCallback? onLocalJoined,
@@ -93,7 +93,7 @@ class R2IntercomEngine implements IntercomEngine {
       );
 
   // Singleton factory method
-  static IntercomEngine? getInstance({
+  static R2IntercomEngine? getInstance({
     int? groupID,
     int? userID,
     IntercomCallback? onLocalJoined,
@@ -120,7 +120,7 @@ class R2IntercomEngine implements IntercomEngine {
   }
 
   static void setFactory(
-      IntercomEngine Function({
+      R2IntercomEngine Function({
         required int groupID,
         required int userID,
         IntercomCallback? onLocalJoined,

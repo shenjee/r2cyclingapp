@@ -35,7 +35,7 @@ class _GroupIntercomScreenState extends State<GroupIntercomScreen> {
   String? _groupCode;
   final List<R2Account> _members = [];
   bool _isPressed = false;
-  IntercomEngine? _r2intercom;
+  R2IntercomEngine? _r2intercom;
   final _manager = R2UserManager();
 
   @override
