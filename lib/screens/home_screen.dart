@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:r2cyclingapp/auth/auth_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 
@@ -104,9 +105,10 @@ class _HomeScreenState extends State<HomeScreen> {
    */
   Future<void> _checkLoginStatus() async {
     final manager = R2UserManager();
-    final token = await manager.readToken();
+    final auth = AuthService();
+    final token = await auth.readToken();
     final account = await manager.localAccount();
-    final isExpired = manager.expiredToken(token: token);
+    final isExpired = auth.expiredToken(token: token);
     debugPrint(
         '$runtimeType : check login token?${null != token} account?${null != account} expired?$isExpired');
     if (token == null || account == null || true == isExpired) {

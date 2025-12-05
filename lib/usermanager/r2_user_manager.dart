@@ -30,30 +30,6 @@ import 'package:path/path.dart' as p;
 class R2UserManager {
   final _db = R2DBHelper();
 
-  // private method
-  int _tokenExp(String token) {
-    // 拆分 JWT 为三部分
-    final parts = token.split('.');
-
-    if (parts.length != 3) {
-      debugPrint('Invalid token');
-      return 0;
-    }
-
-    // the second part of the token
-    final payload = parts[1];
-    final normalized = base64Url.normalize(payload);
-    final decodedPayload = utf8.decode(base64Url.decode(normalized));
-
-    debugPrint('$runtimeType : Decoded Payload: $decodedPayload');
-
-    // analyze JSON and fetch data
-    final payloadMap = jsonDecode(decodedPayload);
-    final intDate = payloadMap['exp'];
-
-    return intDate;
-  }
-
   Map<String, dynamic> _decodeToken(String token) {
     // 拆分 JWT 为三部分
     final parts = token.split('.');
@@ -83,35 +59,6 @@ class R2UserManager {
 
   Future<String?> readToken() async {
     return await R2Storage.read('authtoken');
-  }
-
-  /*
-   * expired token returns ture, else false.
-   * a token is valid within 30 days.
-   */
-  bool expiredToken({String? token}) {
-    bool isExpired = false;
-
-    if (token != null) {
-      final expiredDate = _tokenExp(token);
-
-      if (expiredDate > 0) {
-        // Convert Unix timestamp to DateTime (in milliseconds)
-        DateTime timestampDate =
-            DateTime.fromMillisecondsSinceEpoch(expiredDate * 1000);
-
-        // Get the current local date and time
-        DateTime currentTime = DateTime.now();
-
-        // Compare the two dates
-        if (currentTime.isAfter(timestampDate)) {
-          isExpired = true;
-        } else {
-          isExpired = false;
-        }
-      }
-    }
-    return isExpired;
   }
 
   Future<void> deleteToken() async {
