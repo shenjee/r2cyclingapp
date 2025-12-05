@@ -27,8 +27,9 @@ Flutter mobile app for smart helmet users on Android and iOS. Provides Bluetooth
 - Acceptance:
   - Request and validate 6-digit code; error on invalid/expired.
   - Password login validates credentials; displays errors on failure.
-  - Token stored in secure storage; profile fetched and cached.
-  - References: `lib/login/verification_screen.dart:65-91,129-175,317-323`, `lib/login/user_login_screen.dart:96-160,345-358`, `lib/usermanager/r2_user_manager.dart:237-250,342-391`.
+  - Token stored in secure storage via `AuthService`; profile fetched and cached.
+  - Home guard checks token on launch; redirects to registration when missing/expired.
+  - References: `lib/auth/auth_service.dart`, `lib/login/verification_screen.dart`, `lib/login/user_login_screen.dart`, `lib/screens/home_screen.dart:105-115`, `lib/usermanager/r2_user_manager.dart`.
 
 ### 2. Smart Helmet Pairing & Device Management
 - Two-stage pairing: BLE discovery, then Classic BT pairing for audio profiles.
@@ -101,6 +102,7 @@ Flutter mobile app for smart helmet users on Android and iOS. Provides Bluetooth
 
 ## API Integration
 - OpenAPI reference: `config/openapi.yaml`.
+- HTTP client layering: `ApiClient` (transport, typed responses) and `CommonApi` (endpoint wrappers).
 - RTC tokens: server-backed; support hardcoded credentials for testing in `lib/intercom/r2_intercom_engine.dart:10-11`.
 
 ## Testing Strategy

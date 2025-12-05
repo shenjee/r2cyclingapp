@@ -1,48 +1,50 @@
 # Authentication — Flows and Mechanics
 
 ## Password Login
-- Input validation for phone and password in `lib/login/user_login_screen.dart:68-73,81-88`
-- `sid` (session ID) persisted via `SharedPreferences` UUID `lib/login/user_login_screen.dart:104-112`
-- Hash `phone+password` using SHA-512 `lib/login/user_login_screen.dart:90-94`
-- Request `POST common/passwordLogin` using `R2HttpRequest.postRequest` `lib/login/user_login_screen.dart:124-133`, client impl `lib/connection/http/r2_http_request.dart:24-74`
-- On success, save JWT via `R2UserManager.saveToken` `lib/usermanager/r2_user_manager.dart:80-86` and fetch profile `GET member/getMember` `lib/usermanager/r2_user_manager.dart:164-176`
+- Input validation for phone and password in `lib/login/user_login_screen.dart`.
+- `sid` UUID persisted via `SharedPreferences` handled inside `lib/auth/auth_service.dart`.
+- Hash `phone+password` using SHA-512 inside `AuthService`.
+- Request `POST common/passwordLogin` via `CommonApi.passwordLogin` and `ApiClient`.
+- On success, `AuthService.saveToken` persists JWT; screen then fetches profile via `R2UserManager.requestUserProfile()`.
 
 ## Verification-Code Login
-- Request SMS code `POST common/sendAuthCode` `lib/login/verification_screen.dart:65-91`
-- Exchange code for token `POST common/mobileLogin` `lib/login/verification_screen.dart:149-156`
-- Save token and navigate through `onTokenRetrieved` `lib/login/verification_screen.dart:169-175,277-279`
+- Request SMS code via `CommonApi.sendAuthCode` using `AuthService.sendAuthCode` from the screen.
+- Exchange code for token via `CommonApi.mobileLogin` using `AuthService.loginWithCode`.
+- `AuthService.saveToken` persists the token; screen navigates via its existing callback.
 
 ## Token Handling
-- JWT stored in secure storage (`authtoken`) `lib/database/r2_storage.dart:32-42`
-- Decode and read `exp` and `data` from JWT `lib/usermanager/r2_user_manager.dart:34-55,57-78`
-- Expiry check `lib/usermanager/r2_user_manager.dart:92-115`
--
+- JWT stored in secure storage (`authtoken`) in `lib/database/r2_storage.dart` through `AuthService`.
+- Decode `exp` and check expiry in `lib/auth/auth_service.dart:120-132`.
+- Home guard: `lib/screens/home_screen.dart:105-115` uses `AuthService.readToken` and `expiredToken` to redirect to registration when missing or expired.
+
 ## Profile & Local Cache
-- `GET member/getMember` yields account, group and device info, saved to local DB `lib/usermanager/r2_user_manager.dart:176-221`
-- Avatar download path constructed from `fileDomain` and saved filename `lib/usermanager/r2_user_manager.dart:274-321`
+- `GET member/getMember` via `CommonApi` populates account, group and device info; saved to local DB in `lib/usermanager/r2_user_manager.dart`.
+- Avatars downloaded via `CommonApi.getImageBytes` and cached in `R2UserManager`.
 
 ## Request Conventions
-- Headers: `Content-Type: application/x-www-form-urlencoded`; `apiToken` when authenticated `lib/connection/http/r2_http_request.dart:29-36,86-88`
-- Response wrapper returns `{success,message,code,result}` `lib/connection/http/r2_http_response.dart:57-67`
+- Headers: `Content-Type: application/x-www-form-urlencoded`; `apiToken` when authenticated, handled by `ApiClient`.
+- Typed response wrapper: `R2HttpResponse<T>` with `success`, `code`, `message`, `result` `lib/connection/http/openapi/api_client.dart:243-268`.
 
 ## Sequence — Password Login
 ```mermaid
 sequenceDiagram
   participant U as User
   participant UI as UserLoginScreen
-  participant HTTP as R2HttpRequest
+  participant A as AuthService
+  participant C as CommonApi
   participant S as R2Cloud API
   participant M as R2UserManager
   U->>UI: Enter phone & password
-  UI->>UI: Validate & Hash(phone+password)
-  UI->>HTTP: POST common/passwordLogin (sid, loginId, userPsw)
-  HTTP->>S: x-www-form-urlencoded
-  S-->>HTTP: {success, result=JWT}
-  HTTP-->>UI: R2HttpResponse
-  UI->>M: saveToken(JWT)
-  M->>HTTP: GET member/getMember (apiToken)
-  HTTP->>S: apiToken header
-  S-->>HTTP: Profile JSON
+  UI->>A: loginWithPassword(phone, password)
+  A->>A: sid + SHA-512(phone+password)
+  A->>C: passwordLogin(sid, loginId, userPsw)
+  C->>S: x-www-form-urlencoded
+  S-->>C: {success, result=JWT}
+  C-->>A: Map
+  A->>A: saveToken(JWT)
+  UI->>M: requestUserProfile()
+  M->>C: getMember(apiToken)
+  C-->>M: Profile JSON
   M-->>UI: Save to DB
   UI->>UI: Navigate to Home
 ```
@@ -52,17 +54,19 @@ sequenceDiagram
 sequenceDiagram
   participant U as User
   participant UI as VerificationScreen
-  participant HTTP as R2HttpRequest
+  participant A as AuthService
+  participant C as CommonApi
   participant S as R2Cloud API
-  participant M as R2UserManager
   U->>UI: Request SMS code
-  UI->>HTTP: POST common/sendAuthCode (sid, userMobile)
-  HTTP->>S: x-www-form-urlencoded
-  S-->>HTTP: {success}
+  UI->>A: sendAuthCode(phone)
+  A->>C: sendAuthCode(sid, userMobile)
+  C->>S: x-www-form-urlencoded
+  S-->>C: {success}
   U->>UI: Enter 6-digit code
-  UI->>HTTP: POST common/mobileLogin (sid, userMobile, validateCode)
-  S-->>HTTP: {success, result=JWT}
-  HTTP-->>UI: R2HttpResponse
-  UI->>M: saveToken(JWT)
+  UI->>A: loginWithCode(phone, code)
+  A->>C: mobileLogin(sid, userMobile, validateCode)
+  S-->>C: {success, result=JWT}
+  C-->>A: Map
+  A->>A: saveToken(JWT)
   UI->>UI: Navigate per onTokenRetrieved
 ```

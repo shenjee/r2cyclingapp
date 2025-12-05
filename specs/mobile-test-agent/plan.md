@@ -9,13 +9,14 @@
 - Flutter as the only UI framework; native code limited to platform channels.
 - Modules organized under `lib/` by responsibility; UI is declarative, business logic in services/managers.
 - Networking follows OpenAPI spec; client layer centralized in `lib/connection/http/openapi/`.
-- HTTP headers: `Content-Type: application/x-www-form-urlencoded`; authenticated requests include `apiToken` `lib/connection/http/openapi/api_client.dart:30-36`.
-- JWT tokens stored in secure storage; managers read expiry and enforce re-auth `lib/database/r2_storage.dart:32-42`, `lib/usermanager/r2_user_manager.dart:92-115`.
+- HTTP headers: `Content-Type: application/x-www-form-urlencoded`; authenticated requests include `apiToken` handled by `ApiClient`.
+- JWT tokens stored in secure storage; `AuthService` reads expiry and UI enforces re-auth (`HomeScreen`).
 - Errors surfaced via structured responses; avoid throwing raw exceptions in UI; map to user messages.
 
 ## Module Design (UML)
 - Core modules:
   - `Screens`: top-level routes and UI.
+  - `AuthService`: login flows, sid generation, hashing, token lifecycle.
   - `UserManager`: account, group, profile state.
   - `DeviceManager`: helmet pairing and device control.
   - `IntercomEngine`: Agora RTC orchestration.
@@ -30,6 +31,12 @@ classDiagram
     +DevicePairingScreen
     +GroupIntercomScreen
     +EmergencyContactScreen
+  }
+  class AuthService {
+    +loginWithPassword()
+    +loginWithCode()
+    +sendAuthCode()
+    +expiredToken()
   }
   class UserManager {
     +login()
@@ -59,12 +66,15 @@ classDiagram
     +Preferences
   }
 
+  Screens --> AuthService
   Screens --> UserManager
   Screens --> DeviceManager
   Screens --> IntercomEngine
+  AuthService --> OpenApi
   UserManager --> OpenApi
   DeviceManager --> OpenApi
   IntercomEngine --> OpenApi
+  AuthService --> Storage
   UserManager --> Storage
   DeviceManager --> Storage
 ```
@@ -78,7 +88,7 @@ classDiagram
 
 ## OpenAPI for HTTP Requests
 - Source of truth: `config/openapi.yaml`.
-- Client implementation: `lib/openapi/api_client.dart` and `lib/openapi/common_api.dart` provide typed wrappers that match the OpenAPI spec.
+- Client implementation: `lib/connection/http/openapi/api_client.dart` and `lib/connection/http/openapi/common_api.dart` provide typed wrappers that match the OpenAPI spec.
 - Rules:
   - Add or change endpoints only after updating `config/openapi.yaml`.
   - Mirror changes in `CommonApi` with method names reflecting server paths.
@@ -127,10 +137,10 @@ flowchart TD
 - Handle mic permissions and engine lifecycle events `lib/intercom/r2_intercom_engine.dart:103-147`.
 
 ### Authentication
-- Password login: validate inputs, generate `sid` UUID, SHA-512 hash `phone+password`, call `passwordLogin` `lib/login/user_login_screen.dart:68-94,104-133`.
-- Verification-code login: request SMS code then exchange for token `lib/login/verification_screen.dart:65-91,149-156`.
-- On success, save JWT and fetch profile; navigate to Home `lib/usermanager/r2_user_manager.dart:80-86,164-176`.
-- Token storage and expiry enforcement `lib/database/r2_storage.dart:32-42`, `lib/usermanager/r2_user_manager.dart:34-78,92-115`.
+- Screens call `AuthService` methods for password and code login; `AuthService` generates `sid`, hashes credentials, calls `CommonApi`, and persists token.
+- Request SMS code via `AuthService.sendAuthCode`; exchange via `AuthService.loginWithCode`.
+- On success, fetch profile and navigate to Home.
+- Token storage via `R2Storage` and expiry enforcement via `AuthService.expiredToken`; `HomeScreen` guards on startup.
 
 ### Emergency
 - Toggle `SOS` enabled; prompt add contact when empty; limit to 3 contacts `lib/emergency/emergency_contact_screen.dart:59-71,229-258`.
