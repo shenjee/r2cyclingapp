@@ -8,8 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 ### Fixed
-- [ ] Synchronization of avatar between mobile app and helmet
 - [ ] Display member status during voice intercom, avatar and speaking indicator
+
+---
+
+## [1.2.0] - 2025-12-12
+### Changed
+- Refactor OpenAPI: unified `ApiClient`/`CommonApi`, typed responses and retry
+- Refactor auth module: centralized into `AuthService` with token handling
+
+### Added
+- Spec-driven workflow assets: templates and scripts to standardize delivery
+- Avatar upload: Synchronization of avatar between mobile app and helmet
 
 ---
 
